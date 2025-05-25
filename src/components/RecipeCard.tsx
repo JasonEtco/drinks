@@ -26,7 +26,14 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
   return (
     <Card className="h-full flex flex-col hover:border-primary/50 transition-colors duration-200">
       <CardHeader className="pb-2">
-        <CardTitle className="text-xl md:text-2xl">{recipe.name}</CardTitle>
+        <div className="flex justify-between items-start">
+          <CardTitle className="text-xl md:text-2xl">{recipe.name}</CardTitle>
+          {recipe.category && (
+            <Badge variant="secondary" className="ml-2">
+              {recipe.category}
+            </Badge>
+          )}
+        </div>
       </CardHeader>
       
       <CardContent className="flex-1">

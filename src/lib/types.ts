@@ -15,6 +15,7 @@ export interface Recipe {
   updated: string;
   glass?: string;
   garnish?: string;
+  category?: string;
 }
 
 export interface BatchCalculation {

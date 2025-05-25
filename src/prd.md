@@ -39,6 +39,11 @@
    - Adjust clarification percentage
    - Preview expected yields
 
+5. **Recipe Categorization**
+   - Assign categories to recipes (e.g., stirred, shaken, highball)
+   - Filter recipes by category
+   - Visual category indicators on recipe cards
+
 ## Design Direction
 
 ### Visual Tone & Identity

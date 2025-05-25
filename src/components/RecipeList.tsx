@@ -3,8 +3,15 @@ import { Recipe } from '../lib/types';
 import RecipeCard from './RecipeCard';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { MagnifyingGlass, SortAscending, SortDescending } from '@phosphor-icons/react';
+import { MagnifyingGlass, SortAscending, SortDescending, FunnelSimple } from '@phosphor-icons/react';
 import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { 
   AlertDialog,
   AlertDialogAction,
@@ -27,6 +34,19 @@ interface RecipeListProps {
 type SortField = 'name' | 'created';
 type SortOrder = 'asc' | 'desc';
 
+// Get unique categories from recipes
+const getUniqueCategories = (recipes: Recipe[]): string[] => {
+  const categories = new Set<string>();
+  
+  recipes.forEach(recipe => {
+    if (recipe.category) {
+      categories.add(recipe.category);
+    }
+  });
+  
+  return Array.from(categories).sort();
+};
+
 const RecipeList: React.FC<RecipeListProps> = ({
   recipes,
   onEditRecipe,
@@ -37,7 +57,10 @@ const RecipeList: React.FC<RecipeListProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [sortField, setSortField] = useState<SortField>('name');
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
+  const [categoryFilter, setCategoryFilter] = useState<string>('');
   const [recipeToDelete, setRecipeToDelete] = useState<Recipe | null>(null);
+
+  const uniqueCategories = getUniqueCategories(recipes);
 
   const handleSortChange = (field: SortField) => {
     if (sortField === field) {
@@ -65,6 +88,11 @@ const RecipeList: React.FC<RecipeListProps> = ({
 
   const filteredRecipes = recipes.filter(recipe => {
     const lowerSearchTerm = searchTerm.toLowerCase();
+    
+    // Apply category filter first
+    if (categoryFilter && recipe.category !== categoryFilter) {
+      return false;
+    }
     
     // Search in recipe name
     if (recipe.name.toLowerCase().includes(lowerSearchTerm)) {
@@ -116,6 +144,26 @@ const RecipeList: React.FC<RecipeListProps> = ({
             </div>
           </div>
           
+          {uniqueCategories.length > 0 && (
+            <div className="w-40 space-y-2">
+              <Label htmlFor="category-filter">Filter by Category</Label>
+              <Select
+                value={categoryFilter}
+                onValueChange={setCategoryFilter}
+              >
+                <SelectTrigger id="category-filter" className="w-full">
+                  <SelectValue placeholder="All Categories" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">All Categories</SelectItem>
+                  {uniqueCategories.map(category => (
+                    <SelectItem key={category} value={category}>{category}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+          
           <div className="flex items-center gap-2">
             <Button
               variant="outline"
@@ -147,11 +195,26 @@ const RecipeList: React.FC<RecipeListProps> = ({
           </div>
         </div>
       </div>
+
+      {categoryFilter && (
+        <div className="flex items-center">
+          <span className="text-sm">Filtering by: </span>
+          <Button
+            variant="secondary"
+            size="sm"
+            className="ml-2 gap-1"
+            onClick={() => setCategoryFilter('')}
+          >
+            {categoryFilter}
+            <X className="h-3 w-3" />
+          </Button>
+        </div>
+      )}
       
       {sortedRecipes.length === 0 ? (
         <div className="text-center py-8">
           <p className="text-muted-foreground">
-            {searchTerm ? 
+            {searchTerm || categoryFilter ? 
               "No recipes found matching your search." : 
               "No recipes available. Create your first recipe!"}
           </p>

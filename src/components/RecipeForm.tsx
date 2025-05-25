@@ -23,6 +23,20 @@ interface RecipeFormProps {
   onCancel: () => void;
 }
 
+// Predefined categories for cocktails
+const RECIPE_CATEGORIES = [
+  "Stirred",
+  "Shaken",
+  "Highball",
+  "Sour",
+  "Tiki",
+  "Martini",
+  "Old Fashioned",
+  "Punch",
+  "Fizz",
+  "Other"
+];
+
 const RecipeForm: React.FC<RecipeFormProps> = ({ initialRecipe, onSubmit, onCancel }) => {
   const { uniqueIngredients } = useRecipes();
   const [name, setName] = useState(initialRecipe?.name || '');
@@ -31,6 +45,7 @@ const RecipeForm: React.FC<RecipeFormProps> = ({ initialRecipe, onSubmit, onCanc
   const [glass, setGlass] = useState(initialRecipe?.glass || '');
   const [garnish, setGarnish] = useState(initialRecipe?.garnish || '');
   const [notes, setNotes] = useState(initialRecipe?.notes || '');
+  const [category, setCategory] = useState(initialRecipe?.category || '');
   
   const [newIngredientName, setNewIngredientName] = useState('');
   const [newIngredientAmount, setNewIngredientAmount] = useState('');
@@ -111,9 +126,10 @@ const RecipeForm: React.FC<RecipeFormProps> = ({ initialRecipe, onSubmit, onCanc
           glass,
           garnish,
           notes,
+          category,
           updated: new Date().toISOString()
         }
-      : createRecipe(name, ingredients, instructions, glass, garnish, notes);
+      : createRecipe(name, ingredients, instructions, glass, garnish, notes, category);
     
     onSubmit(recipe);
   };
@@ -137,6 +153,24 @@ const RecipeForm: React.FC<RecipeFormProps> = ({ initialRecipe, onSubmit, onCanc
               onChange={e => setName(e.target.value)}
               placeholder="Manhattan, Negroni, etc."
             />
+          </div>
+          
+          {/* Recipe Category */}
+          <div className="space-y-2">
+            <Label htmlFor="category">Recipe Category</Label>
+            <Select
+              value={category}
+              onValueChange={setCategory}
+            >
+              <SelectTrigger id="category">
+                <SelectValue placeholder="Select a category" />
+              </SelectTrigger>
+              <SelectContent>
+                {RECIPE_CATEGORIES.map((cat) => (
+                  <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           
           {/* Ingredients */}
