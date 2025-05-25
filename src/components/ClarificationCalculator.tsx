@@ -99,9 +99,7 @@ const ClarificationCalculator: React.FC<ClarificationCalculatorProps> = ({
                   <div className="bg-muted p-3 rounded-md space-y-2">
                     <h3 className="font-medium">Clarification Process:</h3>
                     <ol className="list-decimal list-inside space-y-2 text-sm">
-                      <li>Heat {calculation.milkAmount.toFixed(2)} oz of whole milk to about 180°F.</li>
-                      <li>Let the milk cool to room temperature.</li>
-                      <li>Slowly add the cocktail mixture into the milk while gently stirring.</li>
+                      <li>Slowly add the cocktail mixture into {calculation.milkAmount.toFixed(2)} oz of cold milk while gently stirring.</li>
                       <li>Allow the mixture to curdle for at least 30 minutes.</li>
                       <li>Strain through a coffee filter or cheesecloth several times.</li>
                       <li>Store the clarified cocktail in a sealed container in the refrigerator.</li>
