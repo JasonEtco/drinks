@@ -57,7 +57,7 @@ const RecipeList: React.FC<RecipeListProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
   const [sortField, setSortField] = useState<SortField>('name');
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
-  const [categoryFilter, setCategoryFilter] = useState<string>('');
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [recipeToDelete, setRecipeToDelete] = useState<Recipe | null>(null);
 
   const uniqueCategories = getUniqueCategories(recipes);
@@ -90,7 +90,7 @@ const RecipeList: React.FC<RecipeListProps> = ({
     const lowerSearchTerm = searchTerm.toLowerCase();
     
     // Apply category filter first
-    if (categoryFilter && recipe.category !== categoryFilter) {
+    if (categoryFilter && categoryFilter !== "all" && recipe.category !== categoryFilter) {
       return false;
     }
     
@@ -148,14 +148,14 @@ const RecipeList: React.FC<RecipeListProps> = ({
             <div className="w-40 space-y-2">
               <Label htmlFor="category-filter">Filter by Category</Label>
               <Select
-                value={categoryFilter}
+                value={categoryFilter || "all"}
                 onValueChange={setCategoryFilter}
               >
                 <SelectTrigger id="category-filter" className="w-full">
                   <SelectValue placeholder="All Categories" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Categories</SelectItem>
+                  <SelectItem value="all">All Categories</SelectItem>
                   {uniqueCategories.map(category => (
                     <SelectItem key={category} value={category}>{category}</SelectItem>
                   ))}
@@ -196,14 +196,14 @@ const RecipeList: React.FC<RecipeListProps> = ({
         </div>
       </div>
 
-      {categoryFilter && (
+      {categoryFilter && categoryFilter !== "all" && (
         <div className="flex items-center">
           <span className="text-sm">Filtering by: </span>
           <Button
             variant="secondary"
             size="sm"
             className="ml-2 gap-1"
-            onClick={() => setCategoryFilter('')}
+            onClick={() => setCategoryFilter("all")}
           >
             {categoryFilter}
             <X className="h-3 w-3" />
@@ -214,7 +214,7 @@ const RecipeList: React.FC<RecipeListProps> = ({
       {sortedRecipes.length === 0 ? (
         <div className="text-center py-8">
           <p className="text-muted-foreground">
-            {searchTerm || categoryFilter ? 
+            {searchTerm || (categoryFilter && categoryFilter !== "all") ? 
               "No recipes found matching your search." : 
               "No recipes available. Create your first recipe!"}
           </p>

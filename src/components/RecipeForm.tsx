@@ -167,7 +167,7 @@ const RecipeForm: React.FC<RecipeFormProps> = ({ initialRecipe, onSubmit, onCanc
           <div className="space-y-2">
             <Label htmlFor="category">Recipe Category</Label>
             <Select
-              value={category}
+              value={category || ""}
               onValueChange={setCategory}
             >
               <SelectTrigger id="category">
@@ -286,7 +286,7 @@ const RecipeForm: React.FC<RecipeFormProps> = ({ initialRecipe, onSubmit, onCanc
             <div className="space-y-2">
               <Label htmlFor="glass">Glass Type</Label>
               <Select
-                value={glass}
+                value={glass || ""}
                 onValueChange={handleGlassChange}
               >
                 <SelectTrigger id="glass" className="w-full">
