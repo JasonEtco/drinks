@@ -87,7 +87,6 @@ const AppContent = () => {
           Create, store, and scale your favorite cocktail recipes
         </p>
       </header>
-
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-semibold">
@@ -95,7 +94,9 @@ const AppContent = () => {
           </h2>
           
           {activeTab === 'recipes' && (
-            <Button onClick={handleCreateRecipe}>
+            <Button
+              onClick={handleCreateRecipe}
+              className="inline-flex items-center justify-center gap- whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-primary text-primary-foreground shadow-xs hover:bg-primary/80 h-9 px-4 py-2 has-[>svg]:px-3">
               <Plus className="mr-2 h-4 w-4" />
               New Recipe
             </Button>
@@ -122,7 +123,6 @@ const AppContent = () => {
           </div>
         )}
       </div>
-      
       {batchRecipe && (
         <BatchCalculator
           recipe={batchRecipe}
@@ -130,7 +130,6 @@ const AppContent = () => {
           onClose={() => setBatchRecipeId(null)}
         />
       )}
-      
       {clarifyRecipe && (
         <ClarificationCalculator
           recipe={clarifyRecipe}
@@ -138,7 +137,6 @@ const AppContent = () => {
           onClose={() => setClarifyRecipeId(null)}
         />
       )}
-      
       <Toaster position="bottom-right" />
     </>
   );
