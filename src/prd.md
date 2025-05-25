@@ -96,8 +96,8 @@
   - Dialogs for detailed recipe view
   - Forms for recipe creation
   - Sliders for adjusting batch sizes and percentages
-  - Tabs for navigating between main features
-- **Component Customization**: Rounded corners on cards, custom form styling
+  - Simple view switching between recipe list and edit/create forms
+- **Component Customization**: Rounded corners on cards, custom form styling, cursor: pointer on all clickable elements
 - **Component States**: Hover effects on recipe cards, active state for current calculator
 - **Icon Selection**: Glass icons, measurement icons, mixing tools
 - **Component Hierarchy**: Primary actions (create recipe) most prominent, secondary (search) easily accessible

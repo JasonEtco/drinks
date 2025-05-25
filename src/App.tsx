@@ -7,7 +7,6 @@ import RecipeForm from './components/RecipeForm';
 import BatchCalculator from './components/BatchCalculator';
 import ClarificationCalculator from './components/ClarificationCalculator';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, ArrowCircleUp, ArrowCircleDown } from '@phosphor-icons/react';
 import { Toaster } from 'sonner';
 import { toast } from 'sonner';
@@ -135,14 +134,11 @@ const AppContent = () => {
         </p>
       </header>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+      <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <TabsList>
-            <TabsTrigger value="recipes">Recipes</TabsTrigger>
-            <TabsTrigger value="edit" disabled={!isCreating && !editingRecipeId}>
-              {isCreating ? 'Create Recipe' : 'Edit Recipe'}
-            </TabsTrigger>
-          </TabsList>
+          <h2 className="text-2xl font-semibold">
+            {activeTab === 'edit' ? (isCreating ? 'Create Recipe' : 'Edit Recipe') : 'Recipes'}
+          </h2>
           
           {activeTab === 'recipes' && (
             <Button onClick={handleCreateRecipe}>
@@ -152,24 +148,26 @@ const AppContent = () => {
           )}
         </div>
         
-        <TabsContent value="recipes" className="space-y-4 mt-4">
-          <RecipeList
-            recipes={recipes}
-            onEditRecipe={handleEditRecipe}
-            onDeleteRecipe={handleDeleteRecipe}
-            onBatchCalculate={handleBatchCalculate}
-            onClarify={handleClarify}
-          />
-        </TabsContent>
-        
-        <TabsContent value="edit" className="mt-4">
-          <RecipeForm
-            initialRecipe={editingRecipe}
-            onSubmit={handleRecipeSubmit}
-            onCancel={handleCancelEdit}
-          />
-        </TabsContent>
-      </Tabs>
+        {activeTab === 'recipes' ? (
+          <div className="space-y-4 mt-4">
+            <RecipeList
+              recipes={recipes}
+              onEditRecipe={handleEditRecipe}
+              onDeleteRecipe={handleDeleteRecipe}
+              onBatchCalculate={handleBatchCalculate}
+              onClarify={handleClarify}
+            />
+          </div>
+        ) : (
+          <div className="mt-4">
+            <RecipeForm
+              initialRecipe={editingRecipe}
+              onSubmit={handleRecipeSubmit}
+              onCancel={handleCancelEdit}
+            />
+          </div>
+        )}
+      </div>
       
       {batchRecipe && (
         <BatchCalculator
