@@ -18,6 +18,16 @@ No problem! If you were just checking things out and don’t need to keep this c
 - Simply delete your Spark.
 - Everything will be cleaned up — no traces left behind.
 
+🐳 Docker Container
+
+This repository includes a Dockerfile and GitHub Actions workflow for containerization:
+
+- **Docker Hub**: The app is automatically built and published as a Docker container
+- **Registry**: Available on GitHub Container Registry (`ghcr.io`)
+- **Usage**: `docker run -p 80:80 ghcr.io/jasonetco/mixmaster-cocktail-r:latest`
+
+The container serves the Mixmaster Cocktail application using nginx and is automatically built on pushes to the `main` branch.
+
 📄 License For Spark Template Resources 
 
 The Spark Template files and resources from GitHub are licensed under the terms of the MIT license, Copyright GitHub, Inc.
