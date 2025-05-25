@@ -1,0 +1,192 @@
+import React, { useState } from 'react';
+import { Recipe } from '../lib/types';
+import RecipeCard from './RecipeCard';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { MagnifyingGlass, SortAscending, SortDescending } from '@phosphor-icons/react';
+import { Label } from '@/components/ui/label';
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+
+interface RecipeListProps {
+  recipes: Recipe[];
+  onEditRecipe: (recipeId: string) => void;
+  onDeleteRecipe: (recipeId: string) => void;
+  onBatchCalculate: (recipeId: string) => void;
+  onClarify: (recipeId: string) => void;
+}
+
+type SortField = 'name' | 'created';
+type SortOrder = 'asc' | 'desc';
+
+const RecipeList: React.FC<RecipeListProps> = ({
+  recipes,
+  onEditRecipe,
+  onDeleteRecipe,
+  onBatchCalculate,
+  onClarify,
+}) => {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [sortField, setSortField] = useState<SortField>('name');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
+  const [recipeToDelete, setRecipeToDelete] = useState<Recipe | null>(null);
+
+  const handleSortChange = (field: SortField) => {
+    if (sortField === field) {
+      setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortOrder('asc');
+    }
+  };
+  
+  const handleDeleteClick = (recipe: Recipe) => {
+    setRecipeToDelete(recipe);
+  };
+  
+  const confirmDelete = () => {
+    if (recipeToDelete) {
+      onDeleteRecipe(recipeToDelete.id);
+      setRecipeToDelete(null);
+    }
+  };
+  
+  const cancelDelete = () => {
+    setRecipeToDelete(null);
+  };
+
+  const filteredRecipes = recipes.filter(recipe => {
+    const lowerSearchTerm = searchTerm.toLowerCase();
+    
+    // Search in recipe name
+    if (recipe.name.toLowerCase().includes(lowerSearchTerm)) {
+      return true;
+    }
+    
+    // Search in ingredients
+    if (recipe.ingredients.some(ing => 
+      ing.name.toLowerCase().includes(lowerSearchTerm)
+    )) {
+      return true;
+    }
+    
+    // Search in glass type
+    if (recipe.glass && recipe.glass.toLowerCase().includes(lowerSearchTerm)) {
+      return true;
+    }
+    
+    return false;
+  });
+  
+  const sortedRecipes = [...filteredRecipes].sort((a, b) => {
+    if (sortField === 'name') {
+      return sortOrder === 'asc'
+        ? a.name.localeCompare(b.name)
+        : b.name.localeCompare(a.name);
+    } else {
+      const dateA = new Date(a.created).getTime();
+      const dateB = new Date(b.created).getTime();
+      return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+    }
+  });
+
+  return (
+    <div className="space-y-6">
+      <div className="space-y-4">
+        <div className="flex flex-wrap gap-4 items-end">
+          <div className="flex-1 space-y-2">
+            <Label htmlFor="search">Search Recipes</Label>
+            <div className="relative">
+              <MagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+              <Input
+                id="search"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search by name, ingredient, or glass..."
+                className="pl-9"
+              />
+            </div>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleSortChange('name')}
+              className={sortField === 'name' ? 'border-primary' : ''}
+            >
+              Name
+              {sortField === 'name' && (
+                sortOrder === 'asc' ? 
+                <SortAscending className="ml-1 h-4 w-4" /> : 
+                <SortDescending className="ml-1 h-4 w-4" />
+              )}
+            </Button>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleSortChange('created')}
+              className={sortField === 'created' ? 'border-primary' : ''}
+            >
+              Date
+              {sortField === 'created' && (
+                sortOrder === 'asc' ? 
+                <SortAscending className="ml-1 h-4 w-4" /> : 
+                <SortDescending className="ml-1 h-4 w-4" />
+              )}
+            </Button>
+          </div>
+        </div>
+      </div>
+      
+      {sortedRecipes.length === 0 ? (
+        <div className="text-center py-8">
+          <p className="text-muted-foreground">
+            {searchTerm ? 
+              "No recipes found matching your search." : 
+              "No recipes available. Create your first recipe!"}
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {sortedRecipes.map((recipe) => (
+            <RecipeCard
+              key={recipe.id}
+              recipe={recipe}
+              onEdit={() => onEditRecipe(recipe.id)}
+              onDelete={() => handleDeleteClick(recipe)}
+              onBatchCalculate={() => onBatchCalculate(recipe.id)}
+              onClarify={() => onClarify(recipe.id)}
+            />
+          ))}
+        </div>
+      )}
+      
+      <AlertDialog open={!!recipeToDelete} onOpenChange={cancelDelete}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Recipe</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{recipeToDelete?.name}"? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction variant="destructive" onClick={confirmDelete}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </div>
+  );
+};
+
+export default RecipeList;
