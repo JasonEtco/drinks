@@ -2,7 +2,7 @@ import React from 'react';
 import { Recipe } from '../lib/types';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Pencil, Calculator, Trash, GlassHalf } from '@phosphor-icons/react';
+import { Pencil, Calculator, Trash, PintGlass } from '@phosphor-icons/react';
 import { calculateTotalVolume } from '../lib/recipe-utils';
 import { Badge } from '@/components/ui/badge';
 import { GlassIcon } from '../lib/glass-icons';
@@ -89,7 +89,7 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
             Batch
           </Button>
           <Button variant="outline" size="sm" onClick={onClarify}>
-            <GlassHalf className="h-4 w-4 mr-1" />
+            <PintGlass className="h-4 w-4 mr-1" />
             Clarify
           </Button>
         </div>

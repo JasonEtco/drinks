@@ -2,10 +2,8 @@ import React from 'react';
 import {
   Wine,
   BeerBottle,
-  GlassHalf,
-  CoffeeCup,
-  Cup,
-  Glass
+  PintGlass,
+  Coffee
 } from '@phosphor-icons/react';
 import { GlassType } from './types';
 
@@ -19,10 +17,10 @@ export const GlassIcon: React.FC<GlassIconProps> = ({ glassType, className = "h-
     case GlassType.COUPE:
       return <Wine weight="fill" className={className} />;
     case GlassType.MARTINI:
-      return <Cup weight="fill" className={className} />;
+      return <PintGlass weight="fill" className={className} />;
     case GlassType.ROCKS:
     case GlassType.DOUBLE_ROCKS:
-      return <Glass weight="fill" className={className} />;
+      return <PintGlass weight="fill" className={className} />;
     case GlassType.COLLINS:
     case GlassType.HIGHBALL:
       return <BeerBottle weight="fill" className={className} />;
@@ -31,17 +29,17 @@ export const GlassIcon: React.FC<GlassIconProps> = ({ glassType, className = "h-
     case GlassType.WINE:
       return <Wine weight="fill" className={className} />;
     case GlassType.FLUTE:
-      return <Cup weight="fill" className={className} />;
+      return <Wine weight="fill" className={className} />;
     case GlassType.HURRICANE:
     case GlassType.TIKI:
-      return <CoffeeCup weight="fill" className={className} />;
+      return <Coffee weight="fill" className={className} />;
     case GlassType.COPPER_MUG:
-      return <CoffeeCup weight="fill" className={className} />;
+      return <Coffee weight="fill" className={className} />;
     case GlassType.JULEP:
-      return <CoffeeCup weight="fill" className={className} />;
+      return <Coffee weight="fill" className={className} />;
     case GlassType.OTHER:
     default:
-      return <GlassHalf weight="fill" className={className} />;
+      return <PintGlass weight="fill" className={className} />;
   }
 };
 
