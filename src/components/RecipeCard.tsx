@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Pencil, Calculator, Trash, GlassHalf } from '@phosphor-icons/react';
 import { calculateTotalVolume } from '../lib/recipe-utils';
 import { Badge } from '@/components/ui/badge';
+import { GlassIcon } from '../lib/glass-icons';
 
 interface RecipeCardProps {
   recipe: Recipe;
@@ -56,9 +57,10 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
           </div>
           
           {recipe.glass && (
-            <div className="text-sm">
+            <div className="flex items-center text-sm">
+              <GlassIcon glassType={recipe.glass} className="mr-2 h-5 w-5 text-primary" />
               <span className="text-muted-foreground">Glass: </span>
-              {recipe.glass}
+              <span className="ml-1">{recipe.glass}</span>
             </div>
           )}
           

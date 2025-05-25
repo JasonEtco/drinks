@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Recipe, Ingredient } from '../lib/types';
+import { Recipe, Ingredient, GlassType } from '../lib/types';
 import { useRecipes } from '../contexts/RecipeContext';
 import { createRecipe, createIngredient } from '../lib/recipe-utils';
 import { Button } from '@/components/ui/button';
@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { toast } from 'sonner';
+import { GlassIcon } from '../lib/glass-icons';
 
 interface RecipeFormProps {
   initialRecipe?: Recipe;
@@ -37,12 +38,15 @@ const RECIPE_CATEGORIES = [
   "Other"
 ];
 
+// Get all glass types from the enum
+const GLASS_TYPES = Object.values(GlassType);
+
 const RecipeForm: React.FC<RecipeFormProps> = ({ initialRecipe, onSubmit, onCancel }) => {
   const { uniqueIngredients } = useRecipes();
   const [name, setName] = useState(initialRecipe?.name || '');
   const [ingredients, setIngredients] = useState<Ingredient[]>(initialRecipe?.ingredients || []);
   const [instructions, setInstructions] = useState(initialRecipe?.instructions || '');
-  const [glass, setGlass] = useState(initialRecipe?.glass || '');
+  const [glass, setGlass] = useState<GlassType | undefined>(initialRecipe?.glass || undefined);
   const [garnish, setGarnish] = useState(initialRecipe?.garnish || '');
   const [notes, setNotes] = useState(initialRecipe?.notes || '');
   const [category, setCategory] = useState(initialRecipe?.category || '');
@@ -97,6 +101,10 @@ const RecipeForm: React.FC<RecipeFormProps> = ({ initialRecipe, onSubmit, onCanc
   const handleSelectIngredient = (ingredient: string) => {
     setNewIngredientName(ingredient);
     setShowIngredientSuggestions(false);
+  };
+  
+  const handleGlassChange = (value: string) => {
+    setGlass(value as GlassType);
   };
   
   const handleSubmit = (e: React.FormEvent) => {
@@ -277,12 +285,31 @@ const RecipeForm: React.FC<RecipeFormProps> = ({ initialRecipe, onSubmit, onCanc
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="glass">Glass Type</Label>
-              <Input
-                id="glass"
+              <Select
                 value={glass}
-                onChange={e => setGlass(e.target.value)}
-                placeholder="Coupe, rocks, etc."
-              />
+                onValueChange={handleGlassChange}
+              >
+                <SelectTrigger id="glass" className="w-full">
+                  <SelectValue placeholder="Select a glass type">
+                    {glass && (
+                      <div className="flex items-center">
+                        <GlassIcon glassType={glass as GlassType} className="mr-2 h-4 w-4" />
+                        <span>{glass}</span>
+                      </div>
+                    )}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {GLASS_TYPES.map((glassType) => (
+                    <SelectItem key={glassType} value={glassType}>
+                      <div className="flex items-center">
+                        <GlassIcon glassType={glassType as GlassType} className="mr-2 h-4 w-4" />
+                        <span>{glassType}</span>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             
             <div className="space-y-2">

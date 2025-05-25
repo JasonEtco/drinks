@@ -5,6 +5,23 @@ export interface Ingredient {
   unit: string;
 }
 
+export enum GlassType {
+  COUPE = "Coupe",
+  MARTINI = "Martini",
+  ROCKS = "Rocks",
+  DOUBLE_ROCKS = "Double Rocks",
+  COLLINS = "Collins",
+  HIGHBALL = "Highball",
+  NICK_AND_NORA = "Nick and Nora",
+  WINE = "Wine",
+  FLUTE = "Flute",
+  HURRICANE = "Hurricane",
+  TIKI = "Tiki",
+  COPPER_MUG = "Copper Mug",
+  JULEP = "Julep",
+  OTHER = "Other"
+}
+
 export interface Recipe {
   id: string;
   name: string;
@@ -13,7 +30,7 @@ export interface Recipe {
   notes?: string;
   created: string;
   updated: string;
-  glass?: string;
+  glass?: GlassType;
   garnish?: string;
   category?: string;
 }

@@ -1,4 +1,4 @@
-import { Recipe, BatchCalculation, MilkClarificationCalculation, Ingredient } from './types';
+import { Recipe, BatchCalculation, MilkClarificationCalculation, Ingredient, GlassType } from './types';
 
 // Generate a unique ID
 export const generateId = (): string => {
@@ -95,7 +95,7 @@ export const createRecipe = (
   name: string,
   ingredients: Ingredient[],
   instructions: string,
-  glass?: string,
+  glass?: GlassType,
   garnish?: string,
   notes?: string,
   category?: string

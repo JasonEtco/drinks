@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import { Recipe } from './lib/types';
 import { RecipeProvider, useRecipes } from './contexts/RecipeContext';
-import { exportRecipes, importRecipes } from './lib/storage';
 import RecipeList from './components/RecipeList';
 import RecipeForm from './components/RecipeForm';
 import BatchCalculator from './components/BatchCalculator';
 import ClarificationCalculator from './components/ClarificationCalculator';
 import { Button } from '@/components/ui/button';
-import { Plus, ArrowCircleUp, ArrowCircleDown } from '@phosphor-icons/react';
+import { Plus } from '@phosphor-icons/react';
 import { Toaster } from 'sonner';
 import { toast } from 'sonner';
 
@@ -67,22 +66,6 @@ const AppContent = () => {
     setActiveTab('recipes');
   };
   
-  const handleImportRecipes = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-    
-    const file = files[0];
-    importRecipes(file)
-      .then(() => {
-        toast.success('Recipes imported successfully!');
-        // Reset the file input so the same file can be imported again if needed
-        e.target.value = '';
-      })
-      .catch(error => {
-        toast.error(`Error importing recipes: ${error.message}`);
-      });
-  };
-  
   if (isLoading) {
     return (
       <div className="flex justify-center items-center min-h-[300px]">
@@ -96,37 +79,8 @@ const AppContent = () => {
   return (
     <>
       <header className="mb-8">
-        <div className="flex justify-between items-center mb-6">
+        <div className="mb-6">
           <h1 className="text-3xl md:text-4xl font-bold">Mixologist</h1>
-          
-          <div className="flex items-center gap-4">
-            <div>
-              <input
-                type="file"
-                id="import-recipes"
-                accept=".json"
-                onChange={handleImportRecipes}
-                className="hidden"
-              />
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => document.getElementById('import-recipes')?.click()}
-              >
-                <ArrowCircleDown className="mr-2 h-4 w-4" />
-                Import
-              </Button>
-            </div>
-            
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={exportRecipes}
-            >
-              <ArrowCircleUp className="mr-2 h-4 w-4" />
-              Export
-            </Button>
-          </div>
         </div>
         
         <p className="text-muted-foreground">
