@@ -68,6 +68,10 @@ export default defineConfig({
       // Any new endpoints defined in the backend server need to be added here
       // as vite serves the frontend during local development and in the live preview,
       // and needs to know to proxy the endpoints to the backend server.
+      "/api": {
+        target: "http://localhost:8000",
+        changeOrigin: true,
+      },
       "/_spark/kv": {
         target: "http://localhost:8000",
         changeOrigin: true,

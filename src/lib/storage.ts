@@ -1,21 +1,40 @@
 import { Recipe } from './types';
 
-const RECIPES_KEY = 'cocktail-recipes';
+const API_BASE_URL = '/api';
 
-// Save recipes to localStorage
-export const saveRecipes = (recipes: Recipe[]): void => {
+// Helper function to handle API requests
+const apiRequest = async (url: string, options: RequestInit = {}): Promise<any> => {
   try {
-    localStorage.setItem(RECIPES_KEY, JSON.stringify(recipes));
+    const response = await fetch(`${API_BASE_URL}${url}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...options.headers,
+      },
+      ...options,
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    return await response.json();
   } catch (error) {
-    console.error('Error saving recipes:', error);
+    console.error('API request failed:', error);
+    throw error;
   }
 };
 
-// Load recipes from localStorage
-export const loadRecipes = (): Recipe[] => {
+// Save recipes (not used directly anymore, but kept for compatibility)
+export const saveRecipes = async (recipes: Recipe[]): Promise<void> => {
+  // This function is now handled by individual add/update operations
+  console.warn('saveRecipes is deprecated, use individual operations instead');
+};
+
+// Load recipes from API
+export const loadRecipes = async (): Promise<Recipe[]> => {
   try {
-    const recipes = localStorage.getItem(RECIPES_KEY);
-    return recipes ? JSON.parse(recipes) : [];
+    const recipes = await apiRequest('/recipes');
+    return recipes || [];
   } catch (error) {
     console.error('Error loading recipes:', error);
     return [];
@@ -23,11 +42,12 @@ export const loadRecipes = (): Recipe[] => {
 };
 
 // Add a new recipe
-export const addRecipe = (recipe: Recipe): boolean => {
+export const addRecipe = async (recipe: Recipe): Promise<boolean> => {
   try {
-    const recipes = loadRecipes();
-    recipes.push(recipe);
-    saveRecipes(recipes);
+    await apiRequest('/recipes', {
+      method: 'POST',
+      body: JSON.stringify(recipe),
+    });
     return true;
   } catch (error) {
     console.error('Error adding recipe:', error);
@@ -36,19 +56,17 @@ export const addRecipe = (recipe: Recipe): boolean => {
 };
 
 // Update an existing recipe
-export const updateRecipe = (updatedRecipe: Recipe): boolean => {
+export const updateRecipe = async (updatedRecipe: Recipe): Promise<boolean> => {
   try {
-    const recipes = loadRecipes();
-    const index = recipes.findIndex(recipe => recipe.id === updatedRecipe.id);
-    
-    if (index === -1) return false;
-    
-    recipes[index] = {
+    const recipeWithTimestamp = {
       ...updatedRecipe,
       updated: new Date().toISOString()
     };
     
-    saveRecipes(recipes);
+    await apiRequest(`/recipes/${updatedRecipe.id}`, {
+      method: 'PUT',
+      body: JSON.stringify(recipeWithTimestamp),
+    });
     return true;
   } catch (error) {
     console.error('Error updating recipe:', error);
@@ -57,16 +75,11 @@ export const updateRecipe = (updatedRecipe: Recipe): boolean => {
 };
 
 // Delete a recipe
-export const deleteRecipe = (recipeId: string): boolean => {
+export const deleteRecipe = async (recipeId: string): Promise<boolean> => {
   try {
-    let recipes = loadRecipes();
-    const initialLength = recipes.length;
-    
-    recipes = recipes.filter(recipe => recipe.id !== recipeId);
-    
-    if (recipes.length === initialLength) return false;
-    
-    saveRecipes(recipes);
+    await apiRequest(`/recipes/${recipeId}`, {
+      method: 'DELETE',
+    });
     return true;
   } catch (error) {
     console.error('Error deleting recipe:', error);
@@ -75,10 +88,10 @@ export const deleteRecipe = (recipeId: string): boolean => {
 };
 
 // Get a recipe by ID
-export const getRecipeById = (recipeId: string): Recipe | null => {
+export const getRecipeById = async (recipeId: string): Promise<Recipe | null> => {
   try {
-    const recipes = loadRecipes();
-    return recipes.find(recipe => recipe.id === recipeId) || null;
+    const recipe = await apiRequest(`/recipes/${recipeId}`);
+    return recipe;
   } catch (error) {
     console.error('Error getting recipe:', error);
     return null;
@@ -86,9 +99,9 @@ export const getRecipeById = (recipeId: string): Recipe | null => {
 };
 
 // Export recipes to JSON file
-export const exportRecipes = (): void => {
+export const exportRecipes = async (): Promise<void> => {
   try {
-    const recipes = loadRecipes();
+    const recipes = await loadRecipes();
     const dataStr = JSON.stringify(recipes, null, 2);
     const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
     
@@ -109,7 +122,7 @@ export const importRecipes = (file: File): Promise<boolean> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     
-    reader.onload = (event) => {
+    reader.onload = async (event) => {
       try {
         const result = event.target?.result;
         if (typeof result !== 'string') {
@@ -118,17 +131,13 @@ export const importRecipes = (file: File): Promise<boolean> => {
         }
         
         const importedRecipes = JSON.parse(result) as Recipe[];
-        const currentRecipes = loadRecipes();
         
-        // Merge recipes, avoiding duplicates by ID
-        const mergedRecipes = [
-          ...currentRecipes,
-          ...importedRecipes.filter(
-            imported => !currentRecipes.some(current => current.id === imported.id)
-          )
-        ];
+        // Use the import API endpoint
+        await apiRequest('/recipes/import', {
+          method: 'POST',
+          body: JSON.stringify({ recipes: importedRecipes }),
+        });
         
-        saveRecipes(mergedRecipes);
         resolve(true);
       } catch (error) {
         console.error('Error parsing imported recipes:', error);

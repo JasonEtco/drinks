@@ -41,23 +41,31 @@ const AppContent = () => {
     setClarifyRecipeId(recipeId);
   };
   
-  const handleDeleteRecipe = (recipeId: string) => {
-    removeRecipe(recipeId);
-    toast.success('Recipe successfully deleted.');
+  const handleDeleteRecipe = async (recipeId: string) => {
+    try {
+      await removeRecipe(recipeId);
+      toast.success('Recipe successfully deleted.');
+    } catch (error) {
+      toast.error('Failed to delete recipe.');
+    }
   };
   
-  const handleRecipeSubmit = (recipe: Recipe) => {
-    if (editingRecipeId) {
-      updateExistingRecipe(recipe);
-      setEditingRecipeId(null);
-      toast.success('Recipe updated successfully!');
-    } else {
-      addNewRecipe(recipe);
-      toast.success('Recipe created successfully!');
+  const handleRecipeSubmit = async (recipe: Recipe) => {
+    try {
+      if (editingRecipeId) {
+        await updateExistingRecipe(recipe);
+        setEditingRecipeId(null);
+        toast.success('Recipe updated successfully!');
+      } else {
+        await addNewRecipe(recipe);
+        toast.success('Recipe created successfully!');
+      }
+      
+      setIsCreating(false);
+      setActiveTab('recipes');
+    } catch (error) {
+      toast.error('Failed to save recipe.');
     }
-    
-    setIsCreating(false);
-    setActiveTab('recipes');
   };
   
   const handleCancelEdit = () => {

@@ -5,9 +5,9 @@ import { getUniqueIngredients } from '../lib/recipe-utils';
 
 interface RecipeContextType {
   recipes: Recipe[];
-  addNewRecipe: (recipe: Recipe) => void;
-  updateExistingRecipe: (recipe: Recipe) => void;
-  removeRecipe: (recipeId: string) => void;
+  addNewRecipe: (recipe: Recipe) => Promise<void>;
+  updateExistingRecipe: (recipe: Recipe) => Promise<void>;
+  removeRecipe: (recipeId: string) => Promise<void>;
   getRecipe: (recipeId: string) => Recipe | undefined;
   uniqueIngredients: string[];
   isLoading: boolean;
@@ -22,40 +22,66 @@ export const RecipeProvider: React.FC<{ children: ReactNode }> = ({ children }) 
 
   // Load recipes on mount
   useEffect(() => {
-    const loadInitialRecipes = () => {
+    const loadInitialRecipes = async () => {
       setIsLoading(true);
-      const loadedRecipes = loadRecipes();
-      setRecipes(loadedRecipes);
-      setUniqueIngredients(getUniqueIngredients(loadedRecipes));
-      setIsLoading(false);
+      try {
+        const loadedRecipes = await loadRecipes();
+        setRecipes(loadedRecipes);
+        setUniqueIngredients(getUniqueIngredients(loadedRecipes));
+      } catch (error) {
+        console.error('Failed to load recipes:', error);
+      } finally {
+        setIsLoading(false);
+      }
     };
     
     loadInitialRecipes();
   }, []);
   
-  const addNewRecipe = (recipe: Recipe) => {
-    addRecipe(recipe);
-    setRecipes(prevRecipes => [...prevRecipes, recipe]);
-    setUniqueIngredients(getUniqueIngredients([...recipes, recipe]));
+  const addNewRecipe = async (recipe: Recipe) => {
+    try {
+      const success = await addRecipe(recipe);
+      if (success) {
+        setRecipes(prevRecipes => [...prevRecipes, recipe]);
+        setUniqueIngredients(getUniqueIngredients([...recipes, recipe]));
+      }
+    } catch (error) {
+      console.error('Failed to add recipe:', error);
+      throw error;
+    }
   };
   
-  const updateExistingRecipe = (recipe: Recipe) => {
-    updateRecipe(recipe);
-    setRecipes(prevRecipes => 
-      prevRecipes.map(r => r.id === recipe.id ? recipe : r)
-    );
-    setUniqueIngredients(getUniqueIngredients([
-      ...recipes.filter(r => r.id !== recipe.id),
-      recipe
-    ]));
+  const updateExistingRecipe = async (recipe: Recipe) => {
+    try {
+      const success = await updateRecipe(recipe);
+      if (success) {
+        setRecipes(prevRecipes => 
+          prevRecipes.map(r => r.id === recipe.id ? recipe : r)
+        );
+        setUniqueIngredients(getUniqueIngredients([
+          ...recipes.filter(r => r.id !== recipe.id),
+          recipe
+        ]));
+      }
+    } catch (error) {
+      console.error('Failed to update recipe:', error);
+      throw error;
+    }
   };
   
-  const removeRecipe = (recipeId: string) => {
-    deleteRecipe(recipeId);
-    setRecipes(prevRecipes => prevRecipes.filter(r => r.id !== recipeId));
-    setUniqueIngredients(getUniqueIngredients(
-      recipes.filter(r => r.id !== recipeId)
-    ));
+  const removeRecipe = async (recipeId: string) => {
+    try {
+      const success = await deleteRecipe(recipeId);
+      if (success) {
+        setRecipes(prevRecipes => prevRecipes.filter(r => r.id !== recipeId));
+        setUniqueIngredients(getUniqueIngredients(
+          recipes.filter(r => r.id !== recipeId)
+        ));
+      }
+    } catch (error) {
+      console.error('Failed to remove recipe:', error);
+      throw error;
+    }
   };
   
   const getRecipe = (recipeId: string) => {
