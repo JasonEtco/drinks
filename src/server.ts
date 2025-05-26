@@ -128,6 +128,7 @@ app.get('/api/health', async (req: Request, res: Response) => {
 
 // Serve static files from the dist directory
 app.use(express.static(path.join(__dirname, '../dist')));
+app.use(express.static(path.join(__dirname, '../public')));
 
 // Catch-all handler: send back React's index.html file for client-side routing
 app.get('*splat', (_: Request, res: Response) => {

@@ -42,18 +42,34 @@ else
     echo -e "${GREEN}Using existing Docker image${NC}"
 fi
 
-# Ensure recipes.db exists (create empty one if it doesn't)
-if [[ ! -f "./recipes.db" ]]; then
-    echo -e "${YELLOW}Creating empty recipes.db file...${NC}"
-    touch ./recipes.db
+# Create data directory for mounting
+DATA_DIR="$(pwd)/data"
+mkdir -p "$DATA_DIR"
+
+# Migrate existing recipes.db to data directory if it exists
+if [[ -f "./recipes.db" && ! -f "$DATA_DIR/recipes.db" ]]; then
+    echo -e "${YELLOW}Migrating existing recipes.db to data directory...${NC}"
+    cp "./recipes.db" "$DATA_DIR/recipes.db"
 fi
+
+# Ensure recipes.db exists in the data directory
+if [[ ! -f "$DATA_DIR/recipes.db" ]]; then
+    echo -e "${YELLOW}Creating empty recipes.db file in data directory...${NC}"
+    touch "$DATA_DIR/recipes.db"
+fi
+
+# Set proper permissions for the data directory and database file
+echo -e "${YELLOW}Setting data directory permissions...${NC}"
+chmod 755 "$DATA_DIR"
+chmod 666 "$DATA_DIR/recipes.db"
 
 # Run the container
 echo -e "${BLUE}Starting container...${NC}"
 docker run -d \
     --name ${CONTAINER_NAME} \
     -p ${PORT}:3000 \
-    -v "$(pwd)/recipes.db:/app/recipes.db" \
+    -e DATABASE_PATH=/app/data/recipes.db \
+    -v "$DATA_DIR:/app/data" \
     ${IMAGE_NAME}:${TAG}
 
 echo -e "${GREEN}✅ Container started successfully!${NC}"
@@ -62,12 +78,12 @@ echo -e "${BLUE}Container Info:${NC}"
 echo "  Name: ${CONTAINER_NAME}"
 echo "  Image: ${IMAGE_NAME}:${TAG}"
 echo "  Port: http://localhost:${PORT}"
-echo "  Database: ./recipes.db (mounted)"
+echo "  Database: ./data/recipes.db (mounted directory)"
 echo ""
 echo -e "${BLUE}Useful commands:${NC}"
 echo "  View logs:    docker logs -f ${CONTAINER_NAME}"
 echo "  Stop:         docker stop ${CONTAINER_NAME}"
 echo "  Remove:       docker rm ${CONTAINER_NAME}"
-echo "  Rebuild:      ./scripts/docker-run.sh --rebuild"
+echo "  Rebuild:      ./script/docker-run.sh --rebuild"
 echo ""
 echo -e "${GREEN}🚀 App is running at http://localhost:${PORT}${NC}"
