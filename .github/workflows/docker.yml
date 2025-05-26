@@ -18,7 +18,7 @@ jobs:
     permissions:
       contents: read
       packages: write
-      
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -57,7 +57,7 @@ jobs:
 
       - name: Generate deployment summary
         run: |
-          echo "## 🍹 Mixmaster Cocktail Container" >> $GITHUB_STEP_SUMMARY
+          echo "## 🍹 Drinks Container" >> $GITHUB_STEP_SUMMARY
           echo "Successfully built and published Docker container!" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 📦 Container Details" >> $GITHUB_STEP_SUMMARY

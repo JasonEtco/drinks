@@ -11,8 +11,8 @@ BLUE='\033[0;34m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-echo -e "${BLUE}🍹 Mixmaster Database Seeder${NC}"
-echo "============================"
+echo -e "${BLUE}🍹 Drinks Database Seeder${NC}"
+echo "========================"
 
 # Get the script directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

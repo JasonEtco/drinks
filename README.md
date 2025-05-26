@@ -1,4 +1,4 @@
-# 🍹 Mixmaster Cocktail Recipe Manager
+# 🍹 Drinks
 
 A full-stack cocktail recipe management application built with React, TypeScript, Express.js, and SQLite.
 
@@ -42,7 +42,7 @@ This application is containerized and automatically published to GitHub Containe
 ### Basic Usage
 ```bash
 # Run with ephemeral storage
-docker run -p 3000:3000 ghcr.io/jasonetco/mixmaster-cocktail-r:latest
+docker run -p 3000:3000 ghcr.io/jasonetco/drinks:latest
 ```
 
 ### With Persistent Database (Recommended)
@@ -50,7 +50,7 @@ docker run -p 3000:3000 ghcr.io/jasonetco/mixmaster-cocktail-r:latest
 # Mount the recipes.db file directly
 docker run -p 3000:3000 \
   -v $(pwd)/recipes.db:/app/recipes.db \
-  ghcr.io/jasonetco/mixmaster-cocktail-r:latest
+  ghcr.io/jasonetco/drinks:latest
 ```
 
 ### Environment Variables
@@ -117,9 +117,9 @@ This repository includes a Dockerfile and GitHub Actions workflow for containeri
 
 - **Docker Hub**: The app is automatically built and published as a Docker container
 - **Registry**: Available on GitHub Container Registry (`ghcr.io`)
-- **Usage**: `docker run -p 80:80 ghcr.io/jasonetco/mixmaster-cocktail-r:latest`
+- **Usage**: `docker run -p 80:80 ghcr.io/jasonetco/drinks:latest`
 
-The container serves the Mixmaster Cocktail application using nginx and is automatically built on pushes to the `main` branch.
+The container serves the Drinks application using nginx and is automatically built on pushes to the `main` branch.
 
 📄 License For Spark Template Resources 
 

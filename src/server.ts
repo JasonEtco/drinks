@@ -142,7 +142,7 @@ app.use((err: any, req: any, res: any, next: NextFunction) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`🍸 Mixmaster server running on port ${PORT}`);
+  console.log(`🍸 Drinks server running on port ${PORT}`);
   console.log(`📡 API endpoints available at http://localhost:${PORT}/api`);
   console.log(`🌐 Frontend served at http://localhost:${PORT}`);
 });

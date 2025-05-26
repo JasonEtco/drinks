@@ -1,4 +1,4 @@
-# Multi-stage build for Mixmaster Cocktail Recipe Manager
+# Multi-stage build for Drinks Cocktail Recipe Manager
 # Stage 1: Build the application
 FROM node:24-alpine AS builder
 
@@ -28,7 +28,7 @@ WORKDIR /app
 
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs && \
-  adduser -S mixmaster -u 1001
+  adduser -S drinks -u 1001
 
 # Copy package files
 COPY package*.json ./
@@ -41,10 +41,10 @@ COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/dist-server ./dist-server
 
 # Create data directory for SQLite database
-RUN mkdir -p /app/data && chown -R mixmaster:nodejs /app/data
+RUN mkdir -p /app/data && chown -R drinks:nodejs /app/data
 
 # Switch to non-root user
-USER mixmaster
+USER drinks
 
 # Expose port
 EXPOSE 3000

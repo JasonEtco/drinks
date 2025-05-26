@@ -1,13 +1,13 @@
 #!/bin/bash
 
-# Build and run the Mixmaster Cocktail app in Docker locally
+# Build and run the Drinks app in Docker locally
 # Usage: ./scripts/docker-run.sh [--rebuild]
 
 set -e
 
-IMAGE_NAME="mixmaster-cocktail"
+IMAGE_NAME="drinks"
 TAG="local"
-CONTAINER_NAME="mixmaster-local"
+CONTAINER_NAME="drinks-local"
 PORT=3000
 
 # Colors for output
@@ -16,7 +16,7 @@ BLUE='\033[0;34m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
-echo -e "${BLUE}🍹 Mixmaster Cocktail Docker Runner${NC}"
+echo -e "${BLUE}🍹 Drinks Docker Runner${NC}"
 echo "=================================="
 
 # Check if --rebuild flag is passed

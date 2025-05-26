@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-// Seed script for Mixmaster Cocktail Database
+// Seed script for Drinks Database
 // Usage: node script/seed-db [database-path]
 
 import sqlite3 from 'sqlite3';
@@ -466,8 +466,8 @@ class DatabaseSeeder {
 }
 
 async function main() {
-  log(colors.bright + colors.magenta, '🍹 Mixmaster Database Seeder');
-  log(colors.bright + colors.magenta, '============================');
+  log(colors.bright + colors.magenta, '🍹 Drinks Database Seeder');
+  log(colors.bright + colors.magenta, '========================');
   
   const seeder = new DatabaseSeeder(DB_PATH);
   

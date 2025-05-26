@@ -1,4 +1,4 @@
-# Mixmaster Cocktail Recipe Manager
+# Drinks
 
 A modern cocktail recipe management application with a React frontend and Express.js backend.
 
