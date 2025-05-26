@@ -47,25 +47,9 @@ docker run -p 3000:3000 ghcr.io/jasonetco/mixmaster-cocktail-r:latest
 
 ### With Persistent Database (Recommended)
 ```bash
-# Create a named volume for the database
-docker volume create mixmaster-data
-
-# Run with persistent storage
+# Mount the recipes.db file directly
 docker run -p 3000:3000 \
-  -v mixmaster-data:/app/data \
-  -e DATABASE_PATH=/app/data/recipes.db \
-  ghcr.io/jasonetco/mixmaster-cocktail-r:latest
-```
-
-### Using Host Directory Mount
-```bash
-# Create local data directory
-mkdir -p ./data
-
-# Run with host directory mount
-docker run -p 3000:3000 \
-  -v $(pwd)/data:/app/data \
-  -e DATABASE_PATH=/app/data/recipes.db \
+  -v $(pwd)/recipes.db:/app/recipes.db \
   ghcr.io/jasonetco/mixmaster-cocktail-r:latest
 ```
 
@@ -76,11 +60,12 @@ docker run -p 3000:3000 \
 
 ### Database Backup and Restore
 ```bash
-# Backup database from running container
-docker cp mixmaster-container:/app/data/recipes.db ./backup-recipes.db
+# The database file is directly mounted, so it's automatically persistent
+# To backup, simply copy the local recipes.db file
+cp recipes.db backup-recipes.db
 
-# Restore database to container
-docker cp ./backup-recipes.db mixmaster-container:/app/data/recipes.db
+# To restore, copy your backup back
+cp backup-recipes.db recipes.db
 ```
 
 ## 📡 API Endpoints

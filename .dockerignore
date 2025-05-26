@@ -73,6 +73,5 @@ LICENSE
 .azcopy
 
 # Package manager locks (keep package.json but ignore locks for Docker builds)
-package-lock.json
 yarn.lock
 pnpm-lock.yaml

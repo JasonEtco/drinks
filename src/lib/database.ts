@@ -1,5 +1,5 @@
 import sqlite3 from 'sqlite3';
-import { GlassType, Recipe } from './types';
+import { GlassType, Recipe } from './types.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 

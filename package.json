@@ -9,7 +9,7 @@
         "dev:server": "tsx watch src/server.ts",
         "build": "npm run build:client && npm run build:server",
         "build:client": "tsc -b --noCheck && vite build",
-        "build:server": "tsc src/server.ts --outDir dist-server --module ESNext --target ES2022 --moduleResolution node --allowSyntheticDefaultImports --esModuleInterop",
+        "build:server": "tsc src/server.ts src/lib/database.ts src/lib/types.ts --outDir dist-server --module ESNext --target ES2022 --moduleResolution node --allowSyntheticDefaultImports --esModuleInterop --declaration false",
         "start": "node dist-server/server.js",
         "kill": "fuser -k 5000/tcp",
         "lint": "eslint .",
