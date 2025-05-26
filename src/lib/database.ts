@@ -6,8 +6,8 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Database path (in the root of the project)
-const DB_PATH = path.join(__dirname, '../../recipes.db');
+// Database path (configurable via environment variable for Docker)
+const DB_PATH = process.env.DATABASE_PATH || path.join(__dirname, '../../recipes.db');
 
 class Database {
   private db: sqlite3.Database;

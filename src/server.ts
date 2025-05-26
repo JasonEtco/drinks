@@ -130,9 +130,9 @@ app.get('/api/health', async (req: Request, res: Response) => {
 app.use(express.static(path.join(__dirname, '../dist')));
 
 // Catch-all handler: send back React's index.html file for client-side routing
-// app.get('*', (req: Request, res: Response) => {
-//   res.sendFile(path.join(__dirname, '../dist/index.html'));
-// });
+app.get('*splat', (_: Request, res: Response) => {
+  res.sendFile(path.join(__dirname, '../index.html'));
+});
 
 // Error handling middleware
 app.use((err: any, req: any, res: any, next: NextFunction) => {
