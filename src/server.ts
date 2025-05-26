@@ -1,10 +1,8 @@
 import express, { Request, Response, NextFunction } from 'express';
-import cors from 'cors';
-import helmet from 'helmet';
 import morgan from 'morgan';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { GlassType, Recipe } from './lib/types';
+import { database } from './lib/database';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -12,134 +10,121 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Middleware
-app.use(helmet({
-  contentSecurityPolicy: false, // Disable for development, enable in production with proper config
-}));
-app.use(cors());
 app.use(morgan('combined'));
 app.use(express.json());
-
-// In-memory storage for development (replace with database in production)
-let recipes: Recipe[] = [
-  {
-    id: '1',
-    name: 'Classic Margarita',
-    category: 'cocktail',
-    glass: GlassType.ROCKS,
-    garnish: 'Lime wheel',
-    instructions: 'Shake all ingredients with ice and strain over fresh ice.',
-    ingredients: [
-      { name: 'Tequila', amount: 2, unit: 'oz' },
-      { name: 'Cointreau', amount: 1, unit: 'oz' },
-      { name: 'Fresh lime juice', amount: 1, unit: 'oz' }
-    ],
-    tags: ['classic', 'citrus'],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  },
-  {
-    id: '2',
-    name: 'Old Fashioned',
-    category: 'cocktail',
-    glass: GlassType.ROCKS,
-    garnish: 'Orange peel',
-    instructions: 'Muddle sugar with bitters, add whiskey and ice, stir.',
-    ingredients: [
-      { name: 'Bourbon whiskey', amount: 2, unit: 'oz' },
-      { name: 'Simple syrup', amount: 0.25, unit: 'oz' },
-      { name: 'Angostura bitters', amount: 2, unit: 'dashes' }
-    ],
-    tags: ['classic', 'whiskey'],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  }
-];
 
 // API Routes
 
 // Get all recipes
-app.get('/api/recipes', (req, res) => {
-  res.json(recipes);
+app.get('/api/recipes', async (req: Request, res: Response) => {
+  try {
+    const recipes = await database.getAllRecipes();
+    res.json(recipes);
+  } catch (error) {
+    console.error('Error fetching recipes:', error);
+    res.status(500).json({ error: 'Failed to fetch recipes' });
+  }
 });
 
 // Get recipe by ID
-app.get('/api/recipes/:id', (req: any, res: any) => {
-  const recipe = recipes.find(r => r.id === req.params.id);
-  if (!recipe) {
-    return res.status(404).json({ error: 'Recipe not found' });
+app.get('/api/recipes/:recipeId', async (req: Request, res: Response) => {
+  try {
+    const recipe = await database.getRecipeById(req.params.recipeId);
+    if (!recipe) {
+      res.status(404).json({ error: 'Recipe not found' });
+      return
+    }
+    res.json(recipe);
+  } catch (error) {
+    console.error('Error fetching recipe:', error);
+    res.status(500).json({ error: 'Failed to fetch recipe' });
   }
-  res.json(recipe);
 });
 
 // Create new recipe
-app.post('/api/recipes', (req: any, res: any) => {
-  const recipe: Recipe = {
-    ...req.body,
-    id: Date.now().toString(),
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  };
-  recipes.push(recipe);
-  res.status(201).json(recipe);
+app.post('/api/recipes', async (req: Request, res: Response) => {
+  try {
+    const recipe = await database.createRecipe(req.body);
+    res.status(201).json(recipe);
+  } catch (error) {
+    console.error('Error creating recipe:', error);
+    res.status(500).json({ error: 'Failed to create recipe' });
+  }
 });
 
 // Update recipe
-app.put('/api/recipes/:id', (req: any, res: any) => {
-  const index = recipes.findIndex(r => r.id === req.params.id);
-  if (index === -1) {
-    return res.status(404).json({ error: 'Recipe not found' });
+app.put('/api/recipes/:recipeId', async (req: Request, res: Response) => {
+  try {
+    const updatedRecipe = await database.updateRecipe(req.params.recipeId, req.body);
+    if (!updatedRecipe) {
+      res.status(404).json({ error: 'Recipe not found' });
+      return
+    }
+    res.json(updatedRecipe);
+  } catch (error) {
+    console.error('Error updating recipe:', error);
+    res.status(500).json({ error: 'Failed to update recipe' });
   }
-  
-  recipes[index] = {
-    ...recipes[index],
-    ...req.body,
-    id: req.params.id,
-    updatedAt: new Date().toISOString()
-  };
-  res.json(recipes[index]);
 });
 
 // Delete recipe
-app.delete('/api/recipes/:id', (req: any, res: any) => {
-  const index = recipes.findIndex(r => r.id === req.params.id);
-  if (index === -1) {
-    return res.status(404).json({ error: 'Recipe not found' });
+app.delete('/api/recipes/:recipeId', async (req: Request, res: Response) => {
+  try {
+    const deletedRecipe = await database.deleteRecipe(req.params.recipeId);
+    if (!deletedRecipe) {
+      res.status(404).json({ error: 'Recipe not found' });
+      return
+    }
+    res.json(deletedRecipe);
+  } catch (error) {
+    console.error('Error deleting recipe:', error);
+    res.status(500).json({ error: 'Failed to delete recipe' });
   }
-  
-  const deletedRecipe = recipes.splice(index, 1)[0];
-  res.json(deletedRecipe);
 });
 
 // Search recipes
-app.get('/api/recipes/search/:query', (req: any, res: any) => {
-  const query = req.params.query.toLowerCase();
-  const filteredRecipes = recipes.filter(recipe =>
-    recipe.name.toLowerCase().includes(query) ||
-    recipe.tags?.some(tag => tag.toLowerCase().includes(query)) ||
-    recipe.category?.toLowerCase().includes(query) ||
-    recipe.ingredients.some(ingredient => 
-      ingredient.name.toLowerCase().includes(query)
-    )
-  );
-  res.json(filteredRecipes);
+app.get('/api/recipes/search', async (req: Request, res: Response) => {
+  try {
+    if (!req.query.q) {
+      res.status(400).json({ error: 'Query parameter is required' });
+      return
+    }
+    const filteredRecipes = await database.searchRecipes(req.query.q.toString());
+    res.json(filteredRecipes);
+  } catch (error) {
+    console.error('Error searching recipes:', error);
+    res.status(500).json({ error: 'Failed to search recipes' });
+  }
 });
 
 // Get recipes by category
-app.get('/api/recipes/category/:category', (req: any, res: any) => {
-  const filteredRecipes = recipes.filter(recipe => 
-    recipe.category === req.params.category
-  );
-  res.json(filteredRecipes);
+app.get('/api/recipes/category/:category', async (req: Request, res: Response) => {
+  try {
+    const filteredRecipes = await database.getRecipesByCategory(req.params.category);
+    res.json(filteredRecipes);
+  } catch (error) {
+    console.error('Error fetching recipes by category:', error);
+    res.status(500).json({ error: 'Failed to fetch recipes by category' });
+  }
 });
 
 // Health check endpoint
-app.get('/api/health', (req: any, res: any) => {
-  res.json({ 
-    status: 'ok', 
-    timestamp: new Date().toISOString(),
-    recipesCount: recipes.length 
-  });
+app.get('/api/health', async (req: Request, res: Response) => {
+  try {
+    const recipesCount = await database.getRecipeCount();
+    res.json({ 
+      status: 'ok', 
+      timestamp: new Date().toISOString(),
+      recipesCount 
+    });
+  } catch (error) {
+    console.error('Error getting recipe count:', error);
+    res.json({ 
+      status: 'ok', 
+      timestamp: new Date().toISOString(),
+      recipesCount: 0 
+    });
+  }
 });
 
 // Serve static files from the dist directory
@@ -160,4 +145,17 @@ app.listen(PORT, () => {
   console.log(`🍸 Mixmaster server running on port ${PORT}`);
   console.log(`📡 API endpoints available at http://localhost:${PORT}/api`);
   console.log(`🌐 Frontend served at http://localhost:${PORT}`);
+});
+
+// Graceful shutdown
+process.on('SIGINT', () => {
+  console.log('\n🛑 Received SIGINT. Graceful shutdown...');
+  database.close();
+  process.exit(0);
+});
+
+process.on('SIGTERM', () => {
+  console.log('\n🛑 Received SIGTERM. Graceful shutdown...');
+  database.close();
+  process.exit(0);
 });
