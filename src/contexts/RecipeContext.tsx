@@ -33,7 +33,7 @@ export const RecipeProvider: React.FC<{ children: ReactNode }> = ({
     const loadInitialRecipes = async () => {
       setIsLoading(true);
       try {
-        const loadedRecipes = await ApiService.getAllRecipes();
+        const loadedRecipes = await ApiService.listRecipes();
         setRecipes(loadedRecipes);
         setUniqueIngredients(getUniqueIngredients(loadedRecipes));
       } catch (error) {

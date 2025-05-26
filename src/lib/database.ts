@@ -137,7 +137,7 @@ class Database {
   }
 
   // Get all recipes
-  async getAllRecipes(): Promise<Recipe[]> {
+  async listRecipes(): Promise<Recipe[]> {
     return new Promise((resolve, reject) => {
       this.db.all('SELECT * FROM recipes ORDER BY createdAt DESC', (err, rows) => {
         if (err) {

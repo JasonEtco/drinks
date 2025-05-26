@@ -28,7 +28,7 @@ export class ApiService {
   }
 
   // Get all recipes
-  static async getAllRecipes(): Promise<Recipe[]> {
+  static async listRecipes(): Promise<Recipe[]> {
     return this.request<Recipe[]>('/recipes');
   }
 
@@ -62,7 +62,7 @@ export class ApiService {
 
   // Search recipes
   static async searchRecipes(query: string): Promise<Recipe[]> {
-    return this.request<Recipe[]>(`/recipes/search/${encodeURIComponent(query)}`);
+    return this.request<Recipe[]>(`/recipes/search?q=${encodeURIComponent(query)}`);
   }
 
   // Get recipes by category

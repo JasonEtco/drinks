@@ -13,12 +13,10 @@ const PORT = process.env.PORT || 3000;
 app.use(morgan('combined'));
 app.use(express.json());
 
-// API Routes
-
 // Get all recipes
-app.get('/api/recipes', async (req: Request, res: Response) => {
+app.get('/api/recipes', async (_: Request, res: Response) => {
   try {
-    const recipes = await database.getAllRecipes();
+    const recipes = await database.listRecipes();
     res.json(recipes);
   } catch (error) {
     console.error('Error fetching recipes:', error);
@@ -26,7 +24,44 @@ app.get('/api/recipes', async (req: Request, res: Response) => {
   }
 });
 
-// Get recipe by ID
+// Search recipes (must come before /:recipeId route)
+app.get('/api/recipes/search', async (req: Request, res: Response) => {
+  try {
+    if (!req.query.q) {
+      res.status(400).json({ error: 'Query parameter is required' });
+      return
+    }
+    const filteredRecipes = await database.searchRecipes(req.query.q.toString());
+    res.json(filteredRecipes);
+  } catch (error) {
+    console.error('Error searching recipes:', error);
+    res.status(500).json({ error: 'Failed to search recipes' });
+  }
+});
+
+// Get recipes by category (must come before /:recipeId route)
+app.get('/api/recipes/category/:category', async (req: Request, res: Response) => {
+  try {
+    const filteredRecipes = await database.getRecipesByCategory(req.params.category);
+    res.json(filteredRecipes);
+  } catch (error) {
+    console.error('Error fetching recipes by category:', error);
+    res.status(500).json({ error: 'Failed to fetch recipes by category' });
+  }
+});
+
+// Create new recipe
+app.post('/api/recipes', async (req: Request, res: Response) => {
+  try {
+    const recipe = await database.createRecipe(req.body);
+    res.status(201).json(recipe);
+  } catch (error) {
+    console.error('Error creating recipe:', error);
+    res.status(500).json({ error: 'Failed to create recipe' });
+  }
+});
+
+// Get recipe by ID (must come after specific routes)
 app.get('/api/recipes/:recipeId', async (req: Request, res: Response) => {
   try {
     const recipe = await database.getRecipeById(req.params.recipeId);
@@ -41,16 +76,6 @@ app.get('/api/recipes/:recipeId', async (req: Request, res: Response) => {
   }
 });
 
-// Create new recipe
-app.post('/api/recipes', async (req: Request, res: Response) => {
-  try {
-    const recipe = await database.createRecipe(req.body);
-    res.status(201).json(recipe);
-  } catch (error) {
-    console.error('Error creating recipe:', error);
-    res.status(500).json({ error: 'Failed to create recipe' });
-  }
-});
 
 // Update recipe
 app.put('/api/recipes/:recipeId', async (req: Request, res: Response) => {
@@ -79,32 +104,6 @@ app.delete('/api/recipes/:recipeId', async (req: Request, res: Response) => {
   } catch (error) {
     console.error('Error deleting recipe:', error);
     res.status(500).json({ error: 'Failed to delete recipe' });
-  }
-});
-
-// Search recipes
-app.get('/api/recipes/search', async (req: Request, res: Response) => {
-  try {
-    if (!req.query.q) {
-      res.status(400).json({ error: 'Query parameter is required' });
-      return
-    }
-    const filteredRecipes = await database.searchRecipes(req.query.q.toString());
-    res.json(filteredRecipes);
-  } catch (error) {
-    console.error('Error searching recipes:', error);
-    res.status(500).json({ error: 'Failed to search recipes' });
-  }
-});
-
-// Get recipes by category
-app.get('/api/recipes/category/:category', async (req: Request, res: Response) => {
-  try {
-    const filteredRecipes = await database.getRecipesByCategory(req.params.category);
-    res.json(filteredRecipes);
-  } catch (error) {
-    console.error('Error fetching recipes by category:', error);
-    res.status(500).json({ error: 'Failed to fetch recipes by category' });
   }
 });
 
