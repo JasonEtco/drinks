@@ -16,6 +16,9 @@ dist
 .env.test.local
 .env.production.local
 
+# Database files (will be created in container)
+*.db
+
 # IDE and editor files
 .vscode
 .idea

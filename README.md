@@ -1,4 +1,112 @@
-# ✨ Welcome to Your Spark Template!
+# 🍹 Mixmaster Cocktail Recipe Manager
+
+A full-stack cocktail recipe management application built with React, TypeScript, Express.js, and SQLite.
+
+## ✨ Features
+
+- **Recipe Management**: Create, edit, and organize cocktail recipes with precision
+- **Batch Calculator**: Scale recipes for events and large parties  
+- **Clarification Tools**: Professional clarification calculations for crystal-clear cocktails
+- **Search & Filter**: Find recipes by name, ingredient, category, or glass type
+- **Persistent Storage**: SQLite database for reliable data persistence
+- **REST API**: Full backend API for recipe operations
+
+## 🚀 Quick Start
+
+### Development
+```bash
+# Install dependencies
+npm install
+
+# Start both frontend and backend in development mode
+npm run dev
+
+# Or start individually:
+npm run dev:client  # Frontend only (Vite dev server)
+npm run dev:server  # Backend only (Express server)
+```
+
+### Production
+```bash
+# Build the application
+npm run build
+
+# Start production server
+npm start
+```
+
+## 🐳 Docker Container
+
+This application is containerized and automatically published to GitHub Container Registry.
+
+### Basic Usage
+```bash
+# Run with ephemeral storage
+docker run -p 3000:3000 ghcr.io/jasonetco/mixmaster-cocktail-r:latest
+```
+
+### With Persistent Database (Recommended)
+```bash
+# Create a named volume for the database
+docker volume create mixmaster-data
+
+# Run with persistent storage
+docker run -p 3000:3000 \
+  -v mixmaster-data:/app/data \
+  -e DATABASE_PATH=/app/data/recipes.db \
+  ghcr.io/jasonetco/mixmaster-cocktail-r:latest
+```
+
+### Using Host Directory Mount
+```bash
+# Create local data directory
+mkdir -p ./data
+
+# Run with host directory mount
+docker run -p 3000:3000 \
+  -v $(pwd)/data:/app/data \
+  -e DATABASE_PATH=/app/data/recipes.db \
+  ghcr.io/jasonetco/mixmaster-cocktail-r:latest
+```
+
+### Environment Variables
+- `DATABASE_PATH`: Path to SQLite database file (default: `./recipes.db`)
+- `PORT`: Server port (default: `3000`)
+- `NODE_ENV`: Environment mode (`development` or `production`)
+
+### Database Backup and Restore
+```bash
+# Backup database from running container
+docker cp mixmaster-container:/app/data/recipes.db ./backup-recipes.db
+
+# Restore database to container
+docker cp ./backup-recipes.db mixmaster-container:/app/data/recipes.db
+```
+
+## 📡 API Endpoints
+
+The server provides a REST API at `/api`:
+
+- `GET /api/recipes` - Get all recipes
+- `GET /api/recipes/:id` - Get recipe by ID
+- `POST /api/recipes` - Create new recipe
+- `PUT /api/recipes/:id` - Update recipe
+- `DELETE /api/recipes/:id` - Delete recipe
+- `GET /api/recipes/search?q=query` - Search recipes
+- `GET /api/recipes/category/:category` - Get recipes by category
+- `GET /api/health` - Health check
+
+## 🛠 Technology Stack
+
+- **Frontend**: React 19, TypeScript, Tailwind CSS, Radix UI
+- **Backend**: Express.js, Node.js
+- **Database**: SQLite3
+- **Build**: Vite, TSX
+- **Container**: Docker, Multi-stage build
+
+## 📄 License
+
+MIT License - see LICENSE file for details.
 You've just launched your brand-new Spark Template Codespace — everything’s fired up and ready for you to explore, build, and create with Spark!
 
 This template is your blank canvas. It comes with a minimal setup to help you get started quickly with Spark development.
