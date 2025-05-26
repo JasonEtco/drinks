@@ -3,7 +3,7 @@ import { Recipe } from '../lib/types';
 import RecipeCard from './RecipeCard';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { MagnifyingGlass, SortAscending, SortDescending, FunnelSimple } from '@phosphor-icons/react';
+import { MagnifyingGlass, SortAscending, SortDescending, FunnelSimple, X } from '@phosphor-icons/react';
 import { Label } from '@/components/ui/label';
 import {
   Select,
