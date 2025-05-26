@@ -5,11 +5,16 @@ import RecipeList from "../components/RecipeList";
 import BatchCalculator from "../components/BatchCalculator";
 import ClarificationCalculator from "../components/ClarificationCalculator";
 import { Button } from "@/components/ui/button";
-import { Plus } from "@phosphor-icons/react";
+import { Toggle } from "@/components/ui/toggle";
+import { Plus, DeviceMobile } from "@phosphor-icons/react";
 import { toast } from "sonner";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { useWakeLock } from "@/hooks/use-wake-lock";
 
 const HomePage = React.memo(() => {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
+  const wakeLock = useWakeLock();
   const {
     recipes,
     removeRecipe,
@@ -36,6 +41,21 @@ const HomePage = React.memo(() => {
     navigate("/recipes/new");
   }, [navigate]);
 
+  const handleWakeLockToggle = useCallback(async (pressed: boolean) => {
+    try {
+      if (pressed) {
+        await wakeLock.request();
+        toast.success("Screen will stay awake");
+      } else {
+        await wakeLock.release();
+        toast.success("Screen can now sleep normally");
+      }
+    } catch (error) {
+      toast.error("Failed to toggle screen wake lock");
+      console.error("Wake lock toggle error:", error);
+    }
+  }, [wakeLock]);
+  
   const handleEditRecipe = useCallback((recipeId: string) => {
     navigate(`/recipes/${recipeId}/edit`);
   }, [navigate]);
@@ -69,8 +89,25 @@ const HomePage = React.memo(() => {
   return (
     <>
       <header className="mb-8">
-        <div className="mb-6">
+        <div className="mb-6 flex items-center justify-between">
           <h1 className="text-3xl md:text-4xl font-bold">Drinks</h1>
+          
+          {/* Mobile sleep prevention toggle - only show on mobile devices */}
+          {isMobile && wakeLock.isSupported && (
+            <div className="flex items-center gap-2">
+              <Toggle
+                pressed={wakeLock.isActive}
+                onPressedChange={handleWakeLockToggle}
+                variant="outline"
+                size="sm"
+                aria-label="Keep screen awake"
+                className="text-xs"
+              >
+                <DeviceMobile className="h-3 w-3 mr-1" />
+                {wakeLock.isActive ? "Awake" : "Sleep"}
+              </Toggle>
+            </div>
+          )}
         </div>
 
         <p className="text-muted-foreground">
