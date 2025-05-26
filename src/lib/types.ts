@@ -1,5 +1,4 @@
 export interface Ingredient {
-  id: string;
   name: string;
   amount: number;
   unit: string;
@@ -27,12 +26,12 @@ export interface Recipe {
   name: string;
   ingredients: Ingredient[];
   instructions: string;
-  notes?: string;
-  created: string;
-  updated: string;
   glass?: GlassType;
   garnish?: string;
   category?: string;
+  tags: string[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface BatchCalculation {
