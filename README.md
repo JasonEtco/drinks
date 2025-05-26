@@ -10,6 +10,7 @@ A full-stack cocktail recipe management application built with React, TypeScript
 - **Search & Filter**: Find recipes by name, ingredient, category, or glass type
 - **Persistent Storage**: SQLite database for reliable data persistence
 - **REST API**: Full backend API for recipe operations
+- **Mobile Sleep Prevention**: Toggle to keep mobile screens awake while viewing recipes
 
 ## 🚀 Quick Start
 
@@ -67,6 +68,35 @@ cp recipes.db backup-recipes.db
 # To restore, copy your backup back
 cp backup-recipes.db recipes.db
 ```
+
+## 📱 Mobile Sleep Prevention
+
+The application includes a mobile sleep prevention feature that uses the Screen Wake Lock API to keep your device's screen active while viewing recipes.
+
+### Usage
+
+- **Availability**: The toggle appears automatically on mobile devices that support the Wake Lock API
+- **Location**: Found in the top-right corner of the homepage header on mobile
+- **Default State**: Off (allows normal screen sleep behavior)
+- **Toggle States**: 
+  - "Sleep" (default) - Screen can go to sleep normally
+  - "Awake" - Screen stays active and won't go to sleep
+
+### Browser Compatibility
+
+The feature works on modern mobile browsers that support the Screen Wake Lock API, including:
+- Chrome for Android (84+)
+- Edge Mobile (84+)
+- Safari iOS (16.4+)
+
+For unsupported browsers, the toggle will not appear and the app functions normally.
+
+### Technical Details
+
+- Uses the native `navigator.wakeLock` API
+- Automatically releases wake lock when switching tabs or minimizing the app
+- Re-acquires wake lock when returning to the app (if previously enabled)
+- Graceful degradation for unsupported browsers
 
 ## 📡 API Endpoints
 
