@@ -4,6 +4,8 @@ import React, {
   useEffect,
   useContext,
   ReactNode,
+  useCallback,
+  useMemo,
 } from "react";
 import { Recipe, Ingredient } from "../lib/types";
 import { ApiService } from "../lib/api";
@@ -46,57 +48,52 @@ export const RecipeProvider: React.FC<{ children: ReactNode }> = ({
     loadInitialRecipes();
   }, []);
 
-  const addNewRecipe = async (
+  // Memoize unique ingredients calculation
+  useEffect(() => {
+    setUniqueIngredients(getUniqueIngredients(recipes));
+  }, [recipes]);
+
+  const addNewRecipe = useCallback(async (
     recipe: Omit<Recipe, "id" | "createdAt" | "updatedAt">
   ) => {
     try {
       const newRecipe = await ApiService.createRecipe(recipe);
       setRecipes((prevRecipes) => [...prevRecipes, newRecipe]);
-      setUniqueIngredients(getUniqueIngredients([...recipes, newRecipe]));
       return newRecipe;
     } catch (error) {
       console.error("Error adding recipe:", error);
       throw error;
     }
-  };
+  }, []);
 
-  const updateExistingRecipe = async (recipe: Recipe) => {
+  const updateExistingRecipe = useCallback(async (recipe: Recipe) => {
     try {
       const updatedRecipe = await ApiService.updateRecipe(recipe.id, recipe);
       setRecipes((prevRecipes) =>
         prevRecipes.map((r) => (r.id === recipe.id ? updatedRecipe : r))
-      );
-      setUniqueIngredients(
-        getUniqueIngredients([
-          ...recipes.filter((r) => r.id !== recipe.id),
-          updatedRecipe,
-        ])
       );
       return updatedRecipe;
     } catch (error) {
       console.error("Error updating recipe:", error);
       throw error;
     }
-  };
+  }, []);
 
-  const removeRecipe = async (recipeId: string) => {
+  const removeRecipe = useCallback(async (recipeId: string) => {
     try {
       await ApiService.deleteRecipe(recipeId);
       setRecipes((prevRecipes) => prevRecipes.filter((r) => r.id !== recipeId));
-      setUniqueIngredients(
-        getUniqueIngredients(recipes.filter((r) => r.id !== recipeId))
-      );
     } catch (error) {
       console.error("Error deleting recipe:", error);
       throw error;
     }
-  };
+  }, []);
 
-  const getRecipe = (recipeId: string) => {
+  const getRecipe = useCallback((recipeId: string) => {
     return recipes.find((r) => r.id === recipeId);
-  };
+  }, [recipes]);
 
-  const value = {
+  const value = useMemo(() => ({
     recipes,
     addNewRecipe,
     updateExistingRecipe,
@@ -104,7 +101,15 @@ export const RecipeProvider: React.FC<{ children: ReactNode }> = ({
     getRecipe,
     uniqueIngredients,
     isLoading,
-  };
+  }), [
+    recipes,
+    addNewRecipe,
+    updateExistingRecipe,
+    removeRecipe,
+    getRecipe,
+    uniqueIngredients,
+    isLoading,
+  ]);
 
   return (
     <RecipeContext.Provider value={value}>{children}</RecipeContext.Provider>

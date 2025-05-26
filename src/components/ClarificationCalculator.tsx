@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Recipe } from '../lib/types';
 import { calculateMilkClarification, calculateTotalVolume } from '../lib/recipe-utils';
 import {
@@ -21,22 +21,21 @@ interface ClarificationCalculatorProps {
   onClose: () => void;
 }
 
-const ClarificationCalculator: React.FC<ClarificationCalculatorProps> = ({
+const ClarificationCalculator: React.FC<ClarificationCalculatorProps> = React.memo(({
   recipe,
   open,
   onClose
 }) => {
   const [clarificationPercentage, setClarificationPercentage] = useState(25);
-  const [calculation, setCalculation] = useState(calculateMilkClarification(recipe, clarificationPercentage));
-  const totalVolume = calculateTotalVolume(recipe);
   
-  useEffect(() => {
-    setCalculation(calculateMilkClarification(recipe, clarificationPercentage));
-  }, [recipe, clarificationPercentage]);
+  // Memoize expensive calculations
+  const totalVolume = useMemo(() => calculateTotalVolume(recipe), [recipe]);
+  const calculation = useMemo(() => calculateMilkClarification(recipe, clarificationPercentage), [recipe, clarificationPercentage]);
   
-  const handleClarificationChange = (value: number[]) => {
+  // Memoize event handlers
+  const handleClarificationChange = useCallback((value: number[]) => {
     setClarificationPercentage(value[0]);
-  };
+  }, []);
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -132,6 +131,6 @@ const ClarificationCalculator: React.FC<ClarificationCalculatorProps> = ({
       </DialogContent>
     </Dialog>
   );
-};
+});
 
 export default ClarificationCalculator;

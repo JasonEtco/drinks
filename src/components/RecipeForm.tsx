@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Recipe, Ingredient, GlassType } from '../lib/types';
 import { useRecipes } from '../contexts/RecipeContext';
 import { createRecipe, createIngredient } from '../lib/recipe-utils';
@@ -41,7 +41,7 @@ const RECIPE_CATEGORIES = [
 // Get all glass types from the enum
 const GLASS_TYPES = Object.values(GlassType);
 
-const RecipeForm: React.FC<RecipeFormProps> = ({ initialRecipe, onSubmit, onCancel }) => {
+const RecipeForm: React.FC<RecipeFormProps> = React.memo(({ initialRecipe, onSubmit, onCancel }) => {
   const { uniqueIngredients } = useRecipes();
   const [name, setName] = useState(initialRecipe?.name || '');
   const [ingredients, setIngredients] = useState<Ingredient[]>(initialRecipe?.ingredients || []);
@@ -54,23 +54,19 @@ const RecipeForm: React.FC<RecipeFormProps> = ({ initialRecipe, onSubmit, onCanc
   const [newIngredientName, setNewIngredientName] = useState('');
   const [newIngredientAmount, setNewIngredientAmount] = useState('');
   const [newIngredientUnit, setNewIngredientUnit] = useState('oz');
-  const [filteredIngredients, setFilteredIngredients] = useState<string[]>([]);
-  const [showIngredientSuggestions, setShowIngredientSuggestions] = useState(false);
   
-  useEffect(() => {
-    if (newIngredientName) {
-      const filtered = uniqueIngredients.filter(ingredient =>
-        ingredient.toLowerCase().includes(newIngredientName.toLowerCase())
-      );
-      setFilteredIngredients(filtered);
-      setShowIngredientSuggestions(filtered.length > 0);
-    } else {
-      setFilteredIngredients([]);
-      setShowIngredientSuggestions(false);
-    }
+  // Memoize filtered ingredients to avoid recalculating on every render
+  const filteredIngredients = useMemo(() => {
+    if (!newIngredientName) return [];
+    return uniqueIngredients.filter(ingredient =>
+      ingredient.toLowerCase().includes(newIngredientName.toLowerCase())
+    );
   }, [newIngredientName, uniqueIngredients]);
   
-  const handleAddIngredient = () => {
+  const showIngredientSuggestions = filteredIngredients.length > 0 && newIngredientName.length > 0;
+  
+  // Memoize event handlers
+  const handleAddIngredient = useCallback(() => {
     if (!newIngredientName || !newIngredientAmount) {
       toast.error('Please enter both name and amount for the ingredient');
       return;
@@ -88,26 +84,25 @@ const RecipeForm: React.FC<RecipeFormProps> = ({ initialRecipe, onSubmit, onCanc
       newIngredientUnit
     );
     
-    setIngredients([...ingredients, newIngredient]);
+    setIngredients(prev => prev.concat(newIngredient));
     setNewIngredientName('');
     setNewIngredientAmount('');
     setNewIngredientUnit('oz');
-  };
+  }, [newIngredientName, newIngredientAmount, newIngredientUnit]);
   
-  const handleRemoveIngredient = (id: string) => {
-    setIngredients(ingredients.filter(i => i.id !== id));
-  };
+  const handleRemoveIngredient = useCallback((id: string) => {
+    setIngredients(prev => prev.filter(i => i.id !== id));
+  }, []);
   
-  const handleSelectIngredient = (ingredient: string) => {
+  const handleSelectIngredient = useCallback((ingredient: string) => {
     setNewIngredientName(ingredient);
-    setShowIngredientSuggestions(false);
-  };
+  }, []);
   
-  const handleGlassChange = (value: string) => {
+  const handleGlassChange = useCallback((value: string) => {
     setGlass(value as GlassType);
-  };
+  }, []);
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     
     if (!name) {
@@ -140,7 +135,7 @@ const RecipeForm: React.FC<RecipeFormProps> = ({ initialRecipe, onSubmit, onCanc
       : createRecipe(name, ingredients, instructions, glass, garnish, notes, category);
     
     onSubmit(recipe);
-  };
+  }, [name, ingredients, instructions, glass, garnish, notes, category, initialRecipe, onSubmit]);
   
   return (
     <Card className="w-full max-w-3xl">
@@ -348,6 +343,6 @@ const RecipeForm: React.FC<RecipeFormProps> = ({ initialRecipe, onSubmit, onCanc
       </form>
     </Card>
   );
-};
+});
 
 export default RecipeForm;

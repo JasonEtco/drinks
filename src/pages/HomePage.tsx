@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useRecipes } from "../contexts/RecipeContext";
 import RecipeList from "../components/RecipeList";
@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useWakeLock } from "@/hooks/use-wake-lock";
 
-const HomePage = () => {
+const HomePage = React.memo(() => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const wakeLock = useWakeLock();
@@ -25,16 +25,23 @@ const HomePage = () => {
   const [batchRecipeId, setBatchRecipeId] = useState<string | null>(null);
   const [clarifyRecipeId, setClarifyRecipeId] = useState<string | null>(null);
 
-  const batchRecipe = batchRecipeId ? getRecipe(batchRecipeId) : undefined;
-  const clarifyRecipe = clarifyRecipeId
-    ? getRecipe(clarifyRecipeId)
-    : undefined;
+  // Memoize recipe lookups
+  const batchRecipe = useMemo(() => 
+    batchRecipeId ? getRecipe(batchRecipeId) : undefined,
+    [batchRecipeId, getRecipe]
+  );
+  
+  const clarifyRecipe = useMemo(() =>
+    clarifyRecipeId ? getRecipe(clarifyRecipeId) : undefined,
+    [clarifyRecipeId, getRecipe]
+  );
 
-  const handleCreateRecipe = () => {
+  // Memoize event handlers
+  const handleCreateRecipe = useCallback(() => {
     navigate("/recipes/new");
-  };
+  }, [navigate]);
 
-  const handleWakeLockToggle = async (pressed: boolean) => {
+  const handleWakeLockToggle = useCallback(async (pressed: boolean) => {
     try {
       if (pressed) {
         await wakeLock.request();
@@ -47,24 +54,27 @@ const HomePage = () => {
       toast.error("Failed to toggle screen wake lock");
       console.error("Wake lock toggle error:", error);
     }
-  };
-
-  const handleEditRecipe = (recipeId: string) => {
+  }, [wakeLock]);
+  
+  const handleEditRecipe = useCallback((recipeId: string) => {
     navigate(`/recipes/${recipeId}/edit`);
-  };
+  }, [navigate]);
 
-  const handleBatchCalculate = (recipeId: string) => {
+  const handleBatchCalculate = useCallback((recipeId: string) => {
     setBatchRecipeId(recipeId);
-  };
+  }, []);
 
-  const handleClarify = (recipeId: string) => {
+  const handleClarify = useCallback((recipeId: string) => {
     setClarifyRecipeId(recipeId);
-  };
+  }, []);
 
-  const handleDeleteRecipe = (recipeId: string) => {
+  const handleDeleteRecipe = useCallback((recipeId: string) => {
     removeRecipe(recipeId);
     toast.success("Recipe successfully deleted.");
-  };
+  }, [removeRecipe]);
+
+  const handleCloseBatch = useCallback(() => setBatchRecipeId(null), []);
+  const handleCloseClarify = useCallback(() => setClarifyRecipeId(null), []);
 
   if (isLoading) {
     return (
@@ -131,18 +141,18 @@ const HomePage = () => {
         <BatchCalculator
           recipe={batchRecipe}
           open={!!batchRecipeId}
-          onClose={() => setBatchRecipeId(null)}
+          onClose={handleCloseBatch}
         />
       )}
       {clarifyRecipe && (
         <ClarificationCalculator
           recipe={clarifyRecipe}
           open={!!clarifyRecipeId}
-          onClose={() => setClarifyRecipeId(null)}
+          onClose={handleCloseClarify}
         />
       )}
     </>
   );
-};
+});
 
 export default HomePage;

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { Recipe } from "../lib/types";
 import {
   Card,
@@ -26,14 +26,15 @@ interface RecipeCardProps {
   onClarify: () => void;
 }
 
-const RecipeCard: React.FC<RecipeCardProps> = ({
+const RecipeCard: React.FC<RecipeCardProps> = React.memo(({
   recipe,
   onEdit,
   onDelete,
   onBatchCalculate,
   onClarify,
 }) => {
-  const totalVolume = calculateTotalVolume(recipe);
+  // Memoize expensive calculation
+  const totalVolume = useMemo(() => calculateTotalVolume(recipe), [recipe]);
 
   return (
     <Card className="h-full flex flex-col hover:border-primary/50 transition-colors duration-200">
@@ -112,6 +113,6 @@ const RecipeCard: React.FC<RecipeCardProps> = ({
       </CardFooter>
     </Card>
   );
-};
+});
 
 export default RecipeCard;

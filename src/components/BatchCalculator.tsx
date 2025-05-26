@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { Recipe } from '../lib/types';
 import { calculateBatch } from '../lib/recipe-utils';
 import {
@@ -21,29 +21,28 @@ interface BatchCalculatorProps {
   onClose: () => void;
 }
 
-const BatchCalculator: React.FC<BatchCalculatorProps> = ({
+const BatchCalculator: React.FC<BatchCalculatorProps> = React.memo(({
   recipe,
   open,
   onClose
 }) => {
   const [servings, setServings] = useState(8);
   const [dilutionPercentage, setDilutionPercentage] = useState(20);
-  const [calculation, setCalculation] = useState(calculateBatch(recipe, servings, dilutionPercentage));
   
-  useEffect(() => {
-    setCalculation(calculateBatch(recipe, servings, dilutionPercentage));
-  }, [recipe, servings, dilutionPercentage]);
+  // Memoize expensive calculation
+  const calculation = useMemo(() => calculateBatch(recipe, servings, dilutionPercentage), [recipe, servings, dilutionPercentage]);
   
-  const handleServingsChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Memoize event handlers
+  const handleServingsChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const value = parseInt(e.target.value);
     if (!isNaN(value) && value > 0) {
       setServings(value);
     }
-  };
+  }, []);
   
-  const handleDilutionChange = (value: number[]) => {
+  const handleDilutionChange = useCallback((value: number[]) => {
     setDilutionPercentage(value[0]);
-  };
+  }, []);
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -126,6 +125,6 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = ({
       </DialogContent>
     </Dialog>
   );
-};
+});
 
 export default BatchCalculator;

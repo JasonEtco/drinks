@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { Recipe } from '../lib/types';
 import RecipeCard from './RecipeCard';
 import { Input } from '@/components/ui/input';
@@ -34,7 +34,7 @@ interface RecipeListProps {
 type SortField = 'name' | 'created';
 type SortOrder = 'asc' | 'desc';
 
-// Get unique categories from recipes
+// Get unique categories from recipes - memoized version
 const getUniqueCategories = (recipes: Recipe[]): string[] => {
   const categories = new Set<string>();
   
@@ -47,7 +47,7 @@ const getUniqueCategories = (recipes: Recipe[]): string[] => {
   return Array.from(categories).sort();
 };
 
-const RecipeList: React.FC<RecipeListProps> = ({
+const RecipeList: React.FC<RecipeListProps> = React.memo(({
   recipes,
   onEditRecipe,
   onDeleteRecipe,
@@ -60,71 +60,76 @@ const RecipeList: React.FC<RecipeListProps> = ({
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [recipeToDelete, setRecipeToDelete] = useState<Recipe | null>(null);
 
-  const uniqueCategories = getUniqueCategories(recipes);
+  // Memoize expensive calculations
+  const uniqueCategories = useMemo(() => getUniqueCategories(recipes), [recipes]);
 
-  const handleSortChange = (field: SortField) => {
+  // Memoize event handlers
+  const handleSortChange = useCallback((field: SortField) => {
     if (sortField === field) {
       setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
     } else {
       setSortField(field);
       setSortOrder('asc');
     }
-  };
+  }, [sortField, sortOrder]);
   
-  const handleDeleteClick = (recipe: Recipe) => {
+  const handleDeleteClick = useCallback((recipe: Recipe) => {
     setRecipeToDelete(recipe);
-  };
+  }, []);
   
-  const confirmDelete = () => {
+  const confirmDelete = useCallback(() => {
     if (recipeToDelete) {
       onDeleteRecipe(recipeToDelete.id);
       setRecipeToDelete(null);
     }
-  };
+  }, [recipeToDelete, onDeleteRecipe]);
   
-  const cancelDelete = () => {
+  const cancelDelete = useCallback(() => {
     setRecipeToDelete(null);
-  };
+  }, []);
 
-  const filteredRecipes = recipes.filter(recipe => {
-    const lowerSearchTerm = searchTerm.toLowerCase();
-    
-    // Apply category filter first
-    if (categoryFilter && categoryFilter !== "all" && recipe.category !== categoryFilter) {
+  // Memoize filtered and sorted recipes
+  const sortedRecipes = useMemo(() => {
+    const filteredRecipes = recipes.filter(recipe => {
+      const lowerSearchTerm = searchTerm.toLowerCase();
+      
+      // Apply category filter first
+      if (categoryFilter && categoryFilter !== "all" && recipe.category !== categoryFilter) {
+        return false;
+      }
+      
+      // Search in recipe name
+      if (recipe.name.toLowerCase().includes(lowerSearchTerm)) {
+        return true;
+      }
+      
+      // Search in ingredients
+      if (recipe.ingredients.some(ing => 
+        ing.name.toLowerCase().includes(lowerSearchTerm)
+      )) {
+        return true;
+      }
+      
+      // Search in glass type
+      if (recipe.glass && recipe.glass.toLowerCase().includes(lowerSearchTerm)) {
+        return true;
+      }
+      
       return false;
-    }
+    });
     
-    // Search in recipe name
-    if (recipe.name.toLowerCase().includes(lowerSearchTerm)) {
-      return true;
-    }
-    
-    // Search in ingredients
-    if (recipe.ingredients.some(ing => 
-      ing.name.toLowerCase().includes(lowerSearchTerm)
-    )) {
-      return true;
-    }
-    
-    // Search in glass type
-    if (recipe.glass && recipe.glass.toLowerCase().includes(lowerSearchTerm)) {
-      return true;
-    }
-    
-    return false;
-  });
-  
-  const sortedRecipes = [...filteredRecipes].sort((a, b) => {
-    if (sortField === 'name') {
-      return sortOrder === 'asc'
-        ? a.name.localeCompare(b.name)
-        : b.name.localeCompare(a.name);
-    } else {
-      const dateA = new Date(a.created).getTime();
-      const dateB = new Date(b.created).getTime();
-      return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
-    }
-  });
+    return filteredRecipes.sort((a, b) => {
+      if (sortField === 'name') {
+        return sortOrder === 'asc'
+          ? a.name.localeCompare(b.name)
+          : b.name.localeCompare(a.name);
+      } else {
+        const dateA = new Date(a.created).getTime();
+        const dateB = new Date(b.created).getTime();
+        return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+      }
+    });
+  }, [recipes, searchTerm, categoryFilter, sortField, sortOrder]);
 
   return (
     <div className="space-y-6">
@@ -250,6 +255,6 @@ const RecipeList: React.FC<RecipeListProps> = ({
       </AlertDialog>
     </div>
   );
-};
+});
 
 export default RecipeList;
