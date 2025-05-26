@@ -118,7 +118,7 @@ const RecipeList: React.FC<RecipeListProps> = React.memo(({
       return false;
     });
     
-    return [...filteredRecipes].sort((a, b) => {
+    return filteredRecipes.sort((a, b) => {
       if (sortField === 'name') {
         return sortOrder === 'asc'
           ? a.name.localeCompare(b.name)

@@ -63,10 +63,7 @@ const RecipeForm: React.FC<RecipeFormProps> = React.memo(({ initialRecipe, onSub
     );
   }, [newIngredientName, uniqueIngredients]);
   
-  const showIngredientSuggestions = useMemo(() => 
-    filteredIngredients.length > 0 && newIngredientName.length > 0, 
-    [filteredIngredients.length, newIngredientName.length]
-  );
+  const showIngredientSuggestions = filteredIngredients.length > 0 && newIngredientName.length > 0;
   
   // Memoize event handlers
   const handleAddIngredient = useCallback(() => {
@@ -87,7 +84,7 @@ const RecipeForm: React.FC<RecipeFormProps> = React.memo(({ initialRecipe, onSub
       newIngredientUnit
     );
     
-    setIngredients(prev => [...prev, newIngredient]);
+    setIngredients(prev => prev.concat(newIngredient));
     setNewIngredientName('');
     setNewIngredientAmount('');
     setNewIngredientUnit('oz');
