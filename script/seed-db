@@ -1,0 +1,492 @@
+#!/usr/bin/env node
+
+// Seed script for Mixmaster Cocktail Database
+// Usage: node script/seed-db [database-path]
+
+import sqlite3 from 'sqlite3';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Get database path from command line argument or use default
+const DB_PATH = process.argv[2] || path.join(__dirname, '../data/recipes.db');
+
+// Colors for console output
+const colors = {
+  reset: '\x1b[0m',
+  bright: '\x1b[1m',
+  red: '\x1b[31m',
+  green: '\x1b[32m',
+  yellow: '\x1b[33m',
+  blue: '\x1b[34m',
+  magenta: '\x1b[35m',
+  cyan: '\x1b[36m'
+};
+
+const log = (color, message) => {
+  console.log(`${color}${message}${colors.reset}`);
+};
+
+// Glass types enum matching the application
+const GlassType = {
+  COUPE: "Coupe",
+  MARTINI: "Martini",
+  ROCKS: "Rocks",
+  DOUBLE_ROCKS: "Double Rocks",
+  COLLINS: "Collins",
+  HIGHBALL: "Highball",
+  NICK_AND_NORA: "Nick and Nora",
+  WINE: "Wine",
+  FLUTE: "Flute",
+  HURRICANE: "Hurricane",
+  TIKI: "Tiki",
+  COPPER_MUG: "Copper Mug",
+  JULEP: "Julep",
+  OTHER: "Other"
+};
+
+// Comprehensive seed data with classic cocktails
+const seedRecipes = [
+  {
+    name: 'Classic Margarita',
+    category: 'Cocktail',
+    glass: GlassType.COUPE,
+    garnish: 'Lime wheel and salt rim',
+    instructions: 'Salt the rim of a coupe glass. Shake all ingredients with ice and double strain into the glass.',
+    ingredients: [
+      { name: 'Blanco Tequila', amount: 2, unit: 'oz' },
+      { name: 'Cointreau', amount: 1, unit: 'oz' },
+      { name: 'Fresh lime juice', amount: 1, unit: 'oz' }
+    ],
+    tags: ['classic', 'citrus', 'tequila', 'sour']
+  },
+  {
+    name: 'Old Fashioned',
+    category: 'Cocktail',
+    glass: GlassType.ROCKS,
+    garnish: 'Orange peel',
+    instructions: 'Add sugar and bitters to a rocks glass, muddle. Add whiskey and ice, stir until chilled. Express orange peel over drink.',
+    ingredients: [
+      { name: 'Bourbon whiskey', amount: 2, unit: 'oz' },
+      { name: 'Simple syrup', amount: 0.25, unit: 'oz' },
+      { name: 'Angostura bitters', amount: 2, unit: 'dashes' }
+    ],
+    tags: ['classic', 'whiskey', 'stirred', 'spirit-forward']
+  },
+  {
+    name: 'Manhattan',
+    category: 'Cocktail',
+    glass: GlassType.COUPE,
+    garnish: 'Maraschino cherry',
+    instructions: 'Stir all ingredients with ice in a mixing glass. Strain into a chilled coupe glass.',
+    ingredients: [
+      { name: 'Rye whiskey', amount: 2, unit: 'oz' },
+      { name: 'Sweet vermouth', amount: 1, unit: 'oz' },
+      { name: 'Angostura bitters', amount: 2, unit: 'dashes' }
+    ],
+    tags: ['classic', 'whiskey', 'stirred', 'spirit-forward']
+  },
+  {
+    name: 'Negroni',
+    category: 'Cocktail',
+    glass: GlassType.ROCKS,
+    garnish: 'Orange peel',
+    instructions: 'Build all ingredients in a rocks glass over ice. Stir gently. Express orange peel over drink.',
+    ingredients: [
+      { name: 'Gin', amount: 1, unit: 'oz' },
+      { name: 'Campari', amount: 1, unit: 'oz' },
+      { name: 'Sweet vermouth', amount: 1, unit: 'oz' }
+    ],
+    tags: ['classic', 'gin', 'bitter', 'aperitif', 'stirred']
+  },
+  {
+    name: 'Daiquiri',
+    category: 'Cocktail',
+    glass: GlassType.COUPE,
+    garnish: 'Lime wheel',
+    instructions: 'Shake all ingredients with ice and double strain into a chilled coupe glass.',
+    ingredients: [
+      { name: 'White rum', amount: 2, unit: 'oz' },
+      { name: 'Fresh lime juice', amount: 1, unit: 'oz' },
+      { name: 'Simple syrup', amount: 0.75, unit: 'oz' }
+    ],
+    tags: ['classic', 'rum', 'citrus', 'sour', 'tropical']
+  },
+  {
+    name: 'Whiskey Sour',
+    category: 'Cocktail',
+    glass: GlassType.COUPE,
+    garnish: 'Lemon wheel and cherry',
+    instructions: 'Dry shake all ingredients, then shake with ice. Double strain into a coupe glass.',
+    ingredients: [
+      { name: 'Bourbon whiskey', amount: 2, unit: 'oz' },
+      { name: 'Fresh lemon juice', amount: 1, unit: 'oz' },
+      { name: 'Simple syrup', amount: 0.75, unit: 'oz' },
+      { name: 'Egg white', amount: 1, unit: 'whole' }
+    ],
+    tags: ['classic', 'whiskey', 'citrus', 'sour', 'egg white']
+  },
+  {
+    name: 'Martini',
+    category: 'Cocktail',
+    glass: GlassType.MARTINI,
+    garnish: 'Olive or lemon twist',
+    instructions: 'Stir gin and vermouth with ice in a mixing glass. Strain into a chilled martini glass.',
+    ingredients: [
+      { name: 'Gin', amount: 2.5, unit: 'oz' },
+      { name: 'Dry vermouth', amount: 0.5, unit: 'oz' }
+    ],
+    tags: ['classic', 'gin', 'stirred', 'spirit-forward', 'dry']
+  },
+  {
+    name: 'Cosmopolitan',
+    category: 'Cocktail',
+    glass: GlassType.MARTINI,
+    garnish: 'Lime wheel',
+    instructions: 'Shake all ingredients with ice and double strain into a chilled martini glass.',
+    ingredients: [
+      { name: 'Vodka', amount: 2, unit: 'oz' },
+      { name: 'Cointreau', amount: 0.5, unit: 'oz' },
+      { name: 'Cranberry juice', amount: 0.5, unit: 'oz' },
+      { name: 'Fresh lime juice', amount: 0.5, unit: 'oz' }
+    ],
+    tags: ['modern classic', 'vodka', 'citrus', 'cranberry']
+  },
+  {
+    name: 'Mojito',
+    category: 'Cocktail',
+    glass: GlassType.COLLINS,
+    garnish: 'Fresh mint sprig',
+    instructions: 'Gently muddle mint leaves with lime juice and simple syrup. Add rum and ice, top with soda water. Stir gently.',
+    ingredients: [
+      { name: 'White rum', amount: 2, unit: 'oz' },
+      { name: 'Fresh lime juice', amount: 1, unit: 'oz' },
+      { name: 'Simple syrup', amount: 0.75, unit: 'oz' },
+      { name: 'Fresh mint leaves', amount: 8, unit: 'leaves' },
+      { name: 'Soda water', amount: 2, unit: 'oz' }
+    ],
+    tags: ['classic', 'rum', 'mint', 'refreshing', 'tropical']
+  },
+  {
+    name: 'Moscow Mule',
+    category: 'Cocktail',
+    glass: GlassType.COPPER_MUG,
+    garnish: 'Lime wheel and mint sprig',
+    instructions: 'Build in a copper mug over ice. Add vodka and lime juice, top with ginger beer. Stir gently.',
+    ingredients: [
+      { name: 'Vodka', amount: 2, unit: 'oz' },
+      { name: 'Fresh lime juice', amount: 0.5, unit: 'oz' },
+      { name: 'Ginger beer', amount: 4, unit: 'oz' }
+    ],
+    tags: ['modern classic', 'vodka', 'ginger', 'refreshing', 'spicy']
+  },
+  {
+    name: 'Espresso Martini',
+    category: 'Cocktail',
+    glass: GlassType.MARTINI,
+    garnish: 'Three coffee beans',
+    instructions: 'Shake all ingredients vigorously with ice and double strain into a chilled martini glass.',
+    ingredients: [
+      { name: 'Vodka', amount: 2, unit: 'oz' },
+      { name: 'Coffee liqueur', amount: 0.5, unit: 'oz' },
+      { name: 'Fresh espresso', amount: 1, unit: 'oz' },
+      { name: 'Simple syrup', amount: 0.25, unit: 'oz' }
+    ],
+    tags: ['modern classic', 'vodka', 'coffee', 'dessert']
+  },
+  {
+    name: 'Aperol Spritz',
+    category: 'Aperitif',
+    glass: GlassType.WINE,
+    garnish: 'Orange slice',
+    instructions: 'Build in a wine glass over ice. Add Aperol and Prosecco, top with soda water. Stir gently.',
+    ingredients: [
+      { name: 'Aperol', amount: 3, unit: 'oz' },
+      { name: 'Prosecco', amount: 3, unit: 'oz' },
+      { name: 'Soda water', amount: 1, unit: 'oz' }
+    ],
+    tags: ['aperitif', 'bitter', 'orange', 'refreshing', 'low-abv']
+  },
+  {
+    name: 'Sazerac',
+    category: 'Cocktail',
+    glass: GlassType.ROCKS,
+    garnish: 'Lemon peel',
+    instructions: 'Rinse glass with absinthe. Stir rye, sugar, and bitters with ice. Strain into rinsed glass. Express lemon peel.',
+    ingredients: [
+      { name: 'Rye whiskey', amount: 2, unit: 'oz' },
+      { name: 'Sugar cube', amount: 1, unit: 'cube' },
+      { name: 'Peychauds bitters', amount: 3, unit: 'dashes' },
+      { name: 'Absinthe', amount: 1, unit: 'rinse' }
+    ],
+    tags: ['classic', 'whiskey', 'new orleans', 'spirit-forward']
+  },
+  {
+    name: 'Aviation',
+    category: 'Cocktail',
+    glass: GlassType.COUPE,
+    garnish: 'Maraschino cherry',
+    instructions: 'Shake all ingredients with ice and double strain into a chilled coupe glass.',
+    ingredients: [
+      { name: 'Gin', amount: 2, unit: 'oz' },
+      { name: 'Maraschino liqueur', amount: 0.5, unit: 'oz' },
+      { name: 'Crème de violette', amount: 0.25, unit: 'oz' },
+      { name: 'Fresh lemon juice', amount: 0.5, unit: 'oz' }
+    ],
+    tags: ['classic', 'gin', 'floral', 'citrus', 'complex']
+  },
+  {
+    name: 'Paper Plane',
+    category: 'Cocktail',
+    glass: GlassType.COUPE,
+    garnish: 'None',
+    instructions: 'Shake all ingredients with ice and double strain into a chilled coupe glass.',
+    ingredients: [
+      { name: 'Bourbon whiskey', amount: 0.75, unit: 'oz' },
+      { name: 'Aperol', amount: 0.75, unit: 'oz' },
+      { name: 'Amaro Nonino', amount: 0.75, unit: 'oz' },
+      { name: 'Fresh lemon juice', amount: 0.75, unit: 'oz' }
+    ],
+    tags: ['modern classic', 'whiskey', 'bitter', 'equal parts', 'balanced']
+  },
+  {
+    name: 'Ramos Gin Fizz',
+    category: 'Cocktail',
+    glass: GlassType.COLLINS,
+    garnish: 'None',
+    instructions: 'Dry shake all ingredients except soda for 12 minutes. Add ice and shake briefly. Strain into glass and top with soda.',
+    ingredients: [
+      { name: 'Gin', amount: 2, unit: 'oz' },
+      { name: 'Fresh lemon juice', amount: 0.5, unit: 'oz' },
+      { name: 'Fresh lime juice', amount: 0.5, unit: 'oz' },
+      { name: 'Simple syrup', amount: 0.5, unit: 'oz' },
+      { name: 'Heavy cream', amount: 1, unit: 'oz' },
+      { name: 'Egg white', amount: 1, unit: 'whole' },
+      { name: 'Orange flower water', amount: 3, unit: 'dashes' },
+      { name: 'Soda water', amount: 1, unit: 'splash' }
+    ],
+    tags: ['classic', 'gin', 'fizz', 'cream', 'new orleans', 'labor-intensive']
+  },
+  {
+    name: 'Last Word',
+    category: 'Cocktail',
+    glass: GlassType.COUPE,
+    garnish: 'Lime wheel',
+    instructions: 'Shake all ingredients with ice and double strain into a chilled coupe glass.',
+    ingredients: [
+      { name: 'Gin', amount: 0.75, unit: 'oz' },
+      { name: 'Green Chartreuse', amount: 0.75, unit: 'oz' },
+      { name: 'Maraschino liqueur', amount: 0.75, unit: 'oz' },
+      { name: 'Fresh lime juice', amount: 0.75, unit: 'oz' }
+    ],
+    tags: ['classic', 'gin', 'herbal', 'equal parts', 'prohibition era']
+  },
+  {
+    name: 'Dark n Stormy',
+    category: 'Cocktail',
+    glass: GlassType.HIGHBALL,
+    garnish: 'Lime wheel',
+    instructions: 'Build in a highball glass over ice. Add rum and lime juice, top with ginger beer.',
+    ingredients: [
+      { name: 'Dark rum', amount: 2, unit: 'oz' },
+      { name: 'Fresh lime juice', amount: 0.5, unit: 'oz' },
+      { name: 'Ginger beer', amount: 4, unit: 'oz' }
+    ],
+    tags: ['classic', 'rum', 'ginger', 'refreshing', 'tropical']
+  },
+  {
+    name: 'Vieux Carré',
+    category: 'Cocktail',
+    glass: GlassType.ROCKS,
+    garnish: 'Lemon peel',
+    instructions: 'Stir all ingredients with ice in a mixing glass. Strain over fresh ice in a rocks glass.',
+    ingredients: [
+      { name: 'Rye whiskey', amount: 1, unit: 'oz' },
+      { name: 'Cognac', amount: 1, unit: 'oz' },
+      { name: 'Sweet vermouth', amount: 1, unit: 'oz' },
+      { name: 'Bénédictine', amount: 1, unit: 'barspoon' },
+      { name: 'Peychauds bitters', amount: 2, unit: 'dashes' },
+      { name: 'Angostura bitters', amount: 2, unit: 'dashes' }
+    ],
+    tags: ['classic', 'whiskey', 'cognac', 'new orleans', 'complex']
+  },
+  {
+    name: 'Bee\'s Knees',
+    category: 'Cocktail',
+    glass: GlassType.COUPE,
+    garnish: 'Lemon twist',
+    instructions: 'Shake all ingredients with ice and double strain into a chilled coupe glass.',
+    ingredients: [
+      { name: 'Gin', amount: 2, unit: 'oz' },
+      { name: 'Fresh lemon juice', amount: 0.75, unit: 'oz' },
+      { name: 'Honey syrup', amount: 0.75, unit: 'oz' }
+    ],
+    tags: ['classic', 'gin', 'honey', 'citrus', 'prohibition era']
+  }
+];
+
+class DatabaseSeeder {
+  constructor(dbPath) {
+    this.dbPath = dbPath;
+    this.db = null;
+  }
+
+  async connect() {
+    return new Promise((resolve, reject) => {
+      sqlite3.verbose();
+      this.db = new sqlite3.Database(this.dbPath, (err) => {
+        if (err) {
+          reject(err);
+        } else {
+          log(colors.green, `✅ Connected to database: ${this.dbPath}`);
+          resolve();
+        }
+      });
+    });
+  }
+
+  async initializeDatabase() {
+    return new Promise((resolve, reject) => {
+      const createTableSQL = `
+        CREATE TABLE IF NOT EXISTS recipes (
+          id TEXT PRIMARY KEY,
+          name TEXT NOT NULL,
+          category TEXT,
+          glass TEXT,
+          garnish TEXT,
+          instructions TEXT NOT NULL,
+          ingredients TEXT NOT NULL,
+          tags TEXT,
+          createdAt TEXT NOT NULL,
+          updatedAt TEXT NOT NULL
+        )
+      `;
+
+      this.db.run(createTableSQL, (err) => {
+        if (err) {
+          reject(err);
+        } else {
+          log(colors.blue, '🏗️  Database table initialized');
+          resolve();
+        }
+      });
+    });
+  }
+
+  async clearDatabase() {
+    return new Promise((resolve, reject) => {
+      this.db.run('DELETE FROM recipes', (err) => {
+        if (err) {
+          reject(err);
+        } else {
+          log(colors.yellow, '🧹 Cleared existing recipes');
+          resolve();
+        }
+      });
+    });
+  }
+
+  async seedRecipes() {
+    log(colors.blue, `🌱 Seeding ${seedRecipes.length} recipes...`);
+    
+    for (let i = 0; i < seedRecipes.length; i++) {
+      const recipe = seedRecipes[i];
+      try {
+        await this.insertRecipe(recipe);
+        log(colors.cyan, `   ${i + 1}. ${recipe.name}`);
+      } catch (error) {
+        log(colors.red, `   ❌ Failed to insert ${recipe.name}: ${error.message}`);
+      }
+    }
+  }
+
+  async insertRecipe(recipe) {
+    return new Promise((resolve, reject) => {
+      const now = new Date().toISOString();
+      const recipeData = {
+        id: Date.now().toString() + Math.random().toString(36).substring(2, 9),
+        name: recipe.name,
+        category: recipe.category || null,
+        glass: recipe.glass || null,
+        garnish: recipe.garnish || null,
+        instructions: recipe.instructions,
+        ingredients: JSON.stringify(recipe.ingredients),
+        tags: JSON.stringify(recipe.tags || []),
+        createdAt: now,
+        updatedAt: now
+      };
+
+      const sql = `
+        INSERT INTO recipes (id, name, category, glass, garnish, instructions, ingredients, tags, createdAt, updatedAt)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `;
+
+      this.db.run(sql, [
+        recipeData.id, recipeData.name, recipeData.category, recipeData.glass,
+        recipeData.garnish, recipeData.instructions, recipeData.ingredients,
+        recipeData.tags, recipeData.createdAt, recipeData.updatedAt
+      ], function(err) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
+      });
+    });
+  }
+
+  async getRecipeCount() {
+    return new Promise((resolve, reject) => {
+      this.db.get('SELECT COUNT(*) as count FROM recipes', (err, row) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(row.count);
+        }
+      });
+    });
+  }
+
+  async close() {
+    return new Promise((resolve) => {
+      if (this.db) {
+        this.db.close((err) => {
+          if (err) {
+            log(colors.red, `Error closing database: ${err.message}`);
+          }
+          resolve();
+        });
+      } else {
+        resolve();
+      }
+    });
+  }
+}
+
+async function main() {
+  log(colors.bright + colors.magenta, '🍹 Mixmaster Database Seeder');
+  log(colors.bright + colors.magenta, '============================');
+  
+  const seeder = new DatabaseSeeder(DB_PATH);
+  
+  try {
+    await seeder.connect();
+    await seeder.initializeDatabase();
+    await seeder.clearDatabase();
+    await seeder.seedRecipes();
+    
+    const count = await seeder.getRecipeCount();
+    log(colors.green, `✨ Successfully seeded ${count} recipes!`);
+    
+  } catch (error) {
+    log(colors.red, `❌ Error: ${error.message}`);
+    process.exit(1);
+  } finally {
+    await seeder.close();
+  }
+}
+
+// Run the seeder
+main().catch(console.error);
