@@ -49,7 +49,7 @@ const RecipeForm: React.FC<RecipeFormProps> = React.memo(({ initialRecipe, onSub
   const [instructions, setInstructions] = useState(initialRecipe?.instructions || '');
   const [glass, setGlass] = useState<GlassType | undefined>(initialRecipe?.glass || undefined);
   const [garnish, setGarnish] = useState(initialRecipe?.garnish || '');
-  const [notes, setNotes] = useState(initialRecipe?.notes || '');
+
   const [category, setCategory] = useState(initialRecipe?.category || '');
   
   const [newIngredientName, setNewIngredientName] = useState('');
@@ -129,14 +129,13 @@ const RecipeForm: React.FC<RecipeFormProps> = React.memo(({ initialRecipe, onSub
           instructions,
           glass,
           garnish,
-          notes,
           category,
           updated: new Date().toISOString()
         }
-      : createRecipe(name, ingredients, instructions, glass, garnish, notes, category);
+      : createRecipe(name, ingredients, instructions, glass, garnish, category);
     
     onSubmit(recipe);
-  }, [name, ingredients, instructions, glass, garnish, notes, category, initialRecipe, onSubmit]);
+  }, [name, ingredients, instructions, glass, garnish, category, initialRecipe, onSubmit]);
   
   return (
     <Card className="w-full max-w-3xl">
@@ -319,17 +318,7 @@ const RecipeForm: React.FC<RecipeFormProps> = React.memo(({ initialRecipe, onSub
             </div>
           </div>
           
-          {/* Notes */}
-          <div className="space-y-2">
-            <Label htmlFor="notes">Notes</Label>
-            <Textarea
-              id="notes"
-              value={notes || ''}
-              onChange={e => setNotes(e.target.value)}
-              placeholder="Additional notes about the recipe..."
-              rows={3}
-            />
-          </div>
+
         </CardContent>
         
         <CardFooter className="flex justify-between">
