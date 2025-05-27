@@ -25,11 +25,9 @@ import {
 
 interface RecipeListProps {
   recipes: Recipe[];
-  onEditRecipe: (recipeId: string) => void;
   onDeleteRecipe: (recipeId: string) => void;
   onBatchCalculate: (recipeId: string) => void;
   onClarify: (recipeId: string) => void;
-  onViewRecipe: (recipeId: string) => void;
 }
 
 type SortField = 'name' | 'created';
@@ -50,11 +48,9 @@ const getUniqueCategories = (recipes: Recipe[]): string[] => {
 
 const RecipeList: React.FC<RecipeListProps> = React.memo(({
   recipes,
-  onEditRecipe,
   onDeleteRecipe,
   onBatchCalculate,
   onClarify,
-  onViewRecipe,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortField, setSortField] = useState<SortField>('name');
@@ -232,11 +228,9 @@ const RecipeList: React.FC<RecipeListProps> = React.memo(({
             <RecipeCard
               key={recipe.id}
               recipe={recipe}
-              onEdit={() => onEditRecipe(recipe.id)}
               onDelete={() => handleDeleteClick(recipe)}
               onBatchCalculate={() => onBatchCalculate(recipe.id)}
               onClarify={() => onClarify(recipe.id)}
-              onView={() => onViewRecipe(recipe.id)}
             />
           ))}
         </div>

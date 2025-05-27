@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useRecipes } from "../contexts/RecipeContext";
 import RecipeList from "../components/RecipeList";
 import BatchCalculator from "../components/BatchCalculator";
@@ -12,7 +12,6 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useWakeLock } from "@/hooks/use-wake-lock";
 
 const HomePage = React.memo(() => {
-  const navigate = useNavigate();
   const isMobile = useIsMobile();
   const wakeLock = useWakeLock();
   const {
@@ -37,10 +36,6 @@ const HomePage = React.memo(() => {
   );
 
   // Memoize event handlers
-  const handleCreateRecipe = useCallback(() => {
-    navigate("/recipes/new");
-  }, [navigate]);
-
   const handleWakeLockToggle = useCallback(async (pressed: boolean) => {
     try {
       if (pressed) {
@@ -56,14 +51,6 @@ const HomePage = React.memo(() => {
     }
   }, [wakeLock]);
   
-  const handleEditRecipe = useCallback((recipeId: string) => {
-    navigate(`/recipes/${recipeId}/edit`);
-  }, [navigate]);
-
-  const handleViewRecipe = useCallback((recipeId: string) => {
-    navigate(`/recipes/${recipeId}`);
-  }, [navigate]);
-
   const handleBatchCalculate = useCallback((recipeId: string) => {
     setBatchRecipeId(recipeId);
   }, []);
@@ -122,23 +109,20 @@ const HomePage = React.memo(() => {
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-semibold">Recipes</h2>
 
-          <Button
-            onClick={handleCreateRecipe}
-            className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-primary text-primary-foreground shadow-xs hover:bg-primary/80 h-9 px-4 py-2 has-[>svg]:px-3"
-          >
-            <Plus className="mr-1 h-4 w-4" />
-            New Recipe
+          <Button asChild className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-primary text-primary-foreground shadow-xs hover:bg-primary/80 h-9 px-4 py-2 has-[>svg]:px-3">
+            <Link to="/recipes/new">
+              <Plus className="mr-1 h-4 w-4" />
+              New Recipe
+            </Link>
           </Button>
         </div>
 
         <div className="space-y-4 mt-4">
           <RecipeList
             recipes={recipes}
-            onEditRecipe={handleEditRecipe}
             onDeleteRecipe={handleDeleteRecipe}
             onBatchCalculate={handleBatchCalculate}
             onClarify={handleClarify}
-            onViewRecipe={handleViewRecipe}
           />
         </div>
       </div>

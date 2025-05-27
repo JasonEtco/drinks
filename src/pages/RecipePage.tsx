@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useRecipes } from "../contexts/RecipeContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,21 +8,10 @@ import { GlassIcon } from "../lib/glass-icons";
 import { calculateTotalVolume } from "../lib/recipe-utils";
 
 const RecipePage = () => {
-  const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
   const { getRecipe } = useRecipes();
 
   const recipe = id ? getRecipe(id) : undefined;
-
-  const handleEdit = () => {
-    if (recipe) {
-      navigate(`/recipes/${recipe.id}/edit`);
-    }
-  };
-
-  const handleBack = () => {
-    navigate("/");
-  };
 
   // If recipe doesn't exist, show error message
   if (id && !recipe) {
@@ -45,12 +34,9 @@ const RecipePage = () => {
             <p className="text-muted-foreground">
               The recipe you're looking for doesn't exist.
             </p>
-            <button 
-              onClick={handleBack}
-              className="mt-2 text-primary hover:underline"
-            >
-              Return to recipes
-            </button>
+            <Button asChild className="mt-2" variant="link">
+              <Link to="/">Return to recipes</Link>
+            </Button>
           </div>
         </div>
       </>
@@ -76,17 +62,17 @@ const RecipePage = () => {
 
       <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <Button
-            variant="ghost"
-            onClick={handleBack}
-            className="text-muted-foreground hover:text-foreground"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to recipes
+          <Button asChild variant="ghost" className="text-muted-foreground hover:text-foreground">
+            <Link to="/">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to recipes
+            </Link>
           </Button>
-          <Button onClick={handleEdit}>
-            <PencilIcon className="mr-2 h-4 w-4" />
-            Edit Recipe
+          <Button asChild>
+            <Link to={`/recipes/${recipe.id}/edit`}>
+              <PencilIcon className="mr-2 h-4 w-4" />
+              Edit Recipe
+            </Link>
           </Button>
         </div>
 

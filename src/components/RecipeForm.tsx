@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { Recipe, Ingredient, GlassType } from '../lib/types';
 import { useRecipes } from '../contexts/RecipeContext';
 import { createRecipe, createIngredient } from '../lib/recipe-utils';
@@ -21,7 +22,7 @@ import { GlassIcon } from '../lib/glass-icons';
 interface RecipeFormProps {
   initialRecipe?: Recipe;
   onSubmit: (recipe: Recipe) => void;
-  onCancel: () => void;
+  cancelLinkTo: string;
 }
 
 // Predefined categories for cocktails
@@ -41,7 +42,7 @@ const RECIPE_CATEGORIES = [
 // Get all glass types from the enum
 const GLASS_TYPES = Object.values(GlassType);
 
-const RecipeForm: React.FC<RecipeFormProps> = React.memo(({ initialRecipe, onSubmit, onCancel }) => {
+const RecipeForm: React.FC<RecipeFormProps> = React.memo(({ initialRecipe, onSubmit, cancelLinkTo }) => {
   const { uniqueIngredients } = useRecipes();
   const [name, setName] = useState(initialRecipe?.name || '');
   const [ingredients, setIngredients] = useState<Ingredient[]>(initialRecipe?.ingredients || []);
@@ -332,8 +333,8 @@ const RecipeForm: React.FC<RecipeFormProps> = React.memo(({ initialRecipe, onSub
         </CardContent>
         
         <CardFooter className="flex justify-between">
-          <Button type="button" variant="outline" onClick={onCancel}>
-            Cancel
+          <Button asChild type="button" variant="outline">
+            <Link to={cancelLinkTo}>Cancel</Link>
           </Button>
           <Button type="submit">
             <Check className="mr-2 h-4 w-4" />
