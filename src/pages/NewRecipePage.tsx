@@ -72,10 +72,7 @@ const NewRecipePage = () => {
         </div>
 
         <div className="mt-4">
-          <RecipeForm
-            onSubmit={handleRecipeSubmit}
-            cancelLinkTo="/"
-          />
+          <RecipeForm onSubmit={handleRecipeSubmit} cancelLinkTo="/" />
         </div>
       </div>
     </>

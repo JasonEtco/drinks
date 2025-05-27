@@ -1,14 +1,15 @@
-import sqlite3 from 'sqlite3';
-import { GlassType, Recipe } from './types.js';
-import { generateId } from './recipe-utils.js';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import sqlite3 from "sqlite3";
+import { GlassType, Recipe } from "./types.js";
+import { generateId } from "./recipe-utils.js";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Database path (configurable via environment variable for Docker)
-const DB_PATH = process.env.DATABASE_PATH || path.join(__dirname, '../../recipes.db');
+const DB_PATH =
+  process.env.DATABASE_PATH || path.join(__dirname, "../../recipes.db");
 
 class Database {
   private db: sqlite3.Database;
@@ -16,12 +17,12 @@ class Database {
   constructor() {
     // Enable verbose mode for debugging
     sqlite3.verbose();
-    
+
     this.db = new sqlite3.Database(DB_PATH, (err) => {
       if (err) {
-        console.error('Error opening database:', err.message);
+        console.error("Error opening database:", err.message);
       } else {
-        console.log('Connected to SQLite database at:', DB_PATH);
+        console.log("Connected to SQLite database at:", DB_PATH);
         this.initializeDatabase();
       }
     });
@@ -45,9 +46,9 @@ class Database {
 
     this.db.run(createTableSQL, (err) => {
       if (err) {
-        console.error('Error creating recipes table:', err.message);
+        console.error("Error creating recipes table:", err.message);
       } else {
-        console.log('Recipes table ready');
+        console.log("Recipes table ready");
         this.seedDatabase();
       }
     });
@@ -55,50 +56,72 @@ class Database {
 
   private seedDatabase(): void {
     // Check if we already have recipes
-    this.db.get('SELECT COUNT(*) as count FROM recipes', (err, row: any) => {
+    this.db.get("SELECT COUNT(*) as count FROM recipes", (err, row: any) => {
       if (err) {
-        console.error('Error checking recipe count:', err.message);
+        console.error("Error checking recipe count:", err.message);
         return;
       }
 
       if (row.count === 0) {
-        console.log('Seeding database with initial recipes...');
+        console.log("Seeding database with initial recipes...");
         const initialRecipes: Recipe[] = [
           {
-            id: '1',
-            name: 'Classic Margarita',
-            category: 'cocktail',
+            id: "1",
+            name: "Classic Margarita",
+            category: "cocktail",
             glass: GlassType.COUPE,
-            garnish: 'Lime wheel',
-            instructions: 'Shake all ingredients with ice and strain over fresh ice.',
+            garnish: "Lime wheel",
+            instructions:
+              "Shake all ingredients with ice and strain over fresh ice.",
             ingredients: [
-              { id: generateId(), name: 'Tequila', amount: 2, unit: 'oz' },
-              { id: generateId(), name: 'Cointreau', amount: 1, unit: 'oz' },
-              { id: generateId(), name: 'Fresh lime juice', amount: 1, unit: 'oz' }
+              { id: generateId(), name: "Tequila", amount: 2, unit: "oz" },
+              { id: generateId(), name: "Cointreau", amount: 1, unit: "oz" },
+              {
+                id: generateId(),
+                name: "Fresh lime juice",
+                amount: 1,
+                unit: "oz",
+              },
             ],
-            tags: ['classic', 'citrus'],
+            tags: ["classic", "citrus"],
             createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
+            updatedAt: new Date().toISOString(),
           },
           {
-            id: '2',
-            name: 'Old Fashioned',
-            category: 'cocktail',
+            id: "2",
+            name: "Old Fashioned",
+            category: "cocktail",
             glass: GlassType.ROCKS,
-            garnish: 'Orange peel',
-            instructions: 'Muddle sugar with bitters, add whiskey and ice, stir.',
+            garnish: "Orange peel",
+            instructions:
+              "Muddle sugar with bitters, add whiskey and ice, stir.",
             ingredients: [
-              { id: generateId(), name: 'Bourbon whiskey', amount: 2, unit: 'oz' },
-              { id: generateId(), name: 'Simple syrup', amount: 0.25, unit: 'oz' },
-              { id: generateId(), name: 'Angostura bitters', amount: 2, unit: 'dashes' }
+              {
+                id: generateId(),
+                name: "Bourbon whiskey",
+                amount: 2,
+                unit: "oz",
+              },
+              {
+                id: generateId(),
+                name: "Simple syrup",
+                amount: 0.25,
+                unit: "oz",
+              },
+              {
+                id: generateId(),
+                name: "Angostura bitters",
+                amount: 2,
+                unit: "dashes",
+              },
             ],
-            tags: ['classic', 'whiskey'],
+            tags: ["classic", "whiskey"],
             createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-          }
+            updatedAt: new Date().toISOString(),
+          },
         ];
 
-        initialRecipes.forEach(recipe => {
+        initialRecipes.forEach((recipe) => {
           this.createRecipe(recipe).catch(console.error);
         });
       }
@@ -117,7 +140,7 @@ class Database {
       ingredients: JSON.stringify(recipe.ingredients),
       tags: JSON.stringify(recipe.tags || []),
       createdAt: recipe.createdAt,
-      updatedAt: recipe.updatedAt
+      updatedAt: recipe.updatedAt,
     };
   }
 
@@ -131,29 +154,32 @@ class Database {
       garnish: row.garnish,
       instructions: row.instructions,
       ingredients: JSON.parse(row.ingredients),
-      tags: JSON.parse(row.tags || '[]'),
+      tags: JSON.parse(row.tags || "[]"),
       createdAt: row.createdAt,
-      updatedAt: row.updatedAt
+      updatedAt: row.updatedAt,
     };
   }
 
   // Get all recipes
   async listRecipes(): Promise<Recipe[]> {
     return new Promise((resolve, reject) => {
-      this.db.all('SELECT * FROM recipes ORDER BY createdAt DESC', (err, rows) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(rows.map(row => this.rowToRecipe(row)));
-        }
-      });
+      this.db.all(
+        "SELECT * FROM recipes ORDER BY createdAt DESC",
+        (err, rows) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(rows.map((row) => this.rowToRecipe(row)));
+          }
+        },
+      );
     });
   }
 
   // Get recipe by ID
   async getRecipeById(id: string): Promise<Recipe | null> {
     return new Promise((resolve, reject) => {
-      this.db.get('SELECT * FROM recipes WHERE id = ?', [id], (err, row) => {
+      this.db.get("SELECT * FROM recipes WHERE id = ?", [id], (err, row) => {
         if (err) {
           reject(err);
         } else if (row) {
@@ -166,12 +192,14 @@ class Database {
   }
 
   // Create new recipe
-  async createRecipe(recipe: Omit<Recipe, 'id' | 'createdAt' | 'updatedAt'>): Promise<Recipe> {
+  async createRecipe(
+    recipe: Omit<Recipe, "id" | "createdAt" | "updatedAt">,
+  ): Promise<Recipe> {
     const newRecipe: Recipe = {
       ...recipe,
       id: Date.now().toString(),
       createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     };
 
     return new Promise((resolve, reject) => {
@@ -180,22 +208,37 @@ class Database {
         INSERT INTO recipes (id, name, category, glass, garnish, instructions, ingredients, tags, createdAt, updatedAt)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
-      
-      this.db.run(sql, [
-        row.id, row.name, row.category, row.glass, row.garnish,
-        row.instructions, row.ingredients, row.tags, row.createdAt, row.updatedAt
-      ], function(err) {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(newRecipe);
-        }
-      });
+
+      this.db.run(
+        sql,
+        [
+          row.id,
+          row.name,
+          row.category,
+          row.glass,
+          row.garnish,
+          row.instructions,
+          row.ingredients,
+          row.tags,
+          row.createdAt,
+          row.updatedAt,
+        ],
+        function (err) {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(newRecipe);
+          }
+        },
+      );
     });
   }
 
   // Update recipe
-  async updateRecipe(id: string, updates: Partial<Recipe>): Promise<Recipe | null> {
+  async updateRecipe(
+    id: string,
+    updates: Partial<Recipe>,
+  ): Promise<Recipe | null> {
     const existingRecipe = await this.getRecipeById(id);
     if (!existingRecipe) {
       return null;
@@ -205,7 +248,7 @@ class Database {
       ...existingRecipe,
       ...updates,
       id, // Ensure ID doesn't change
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     };
 
     return new Promise((resolve, reject) => {
@@ -216,17 +259,28 @@ class Database {
             ingredients = ?, tags = ?, updatedAt = ?
         WHERE id = ?
       `;
-      
-      this.db.run(sql, [
-        row.name, row.category, row.glass, row.garnish, row.instructions,
-        row.ingredients, row.tags, row.updatedAt, id
-      ], function(err) {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(updatedRecipe);
-        }
-      });
+
+      this.db.run(
+        sql,
+        [
+          row.name,
+          row.category,
+          row.glass,
+          row.garnish,
+          row.instructions,
+          row.ingredients,
+          row.tags,
+          row.updatedAt,
+          id,
+        ],
+        function (err) {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(updatedRecipe);
+          }
+        },
+      );
     });
   }
 
@@ -238,7 +292,7 @@ class Database {
     }
 
     return new Promise((resolve, reject) => {
-      this.db.run('DELETE FROM recipes WHERE id = ?', [id], function(err) {
+      this.db.run("DELETE FROM recipes WHERE id = ?", [id], function (err) {
         if (err) {
           reject(err);
         } else {
@@ -260,34 +314,42 @@ class Database {
            OR LOWER(tags) LIKE ?
         ORDER BY createdAt DESC
       `;
-      
-      this.db.all(sql, [searchTerm, searchTerm, searchTerm, searchTerm], (err, rows) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(rows.map(row => this.rowToRecipe(row)));
-        }
-      });
+
+      this.db.all(
+        sql,
+        [searchTerm, searchTerm, searchTerm, searchTerm],
+        (err, rows) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(rows.map((row) => this.rowToRecipe(row)));
+          }
+        },
+      );
     });
   }
 
   // Get recipes by category
   async getRecipesByCategory(category: string): Promise<Recipe[]> {
     return new Promise((resolve, reject) => {
-      this.db.all('SELECT * FROM recipes WHERE category = ? ORDER BY createdAt DESC', [category], (err, rows) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(rows.map(row => this.rowToRecipe(row)));
-        }
-      });
+      this.db.all(
+        "SELECT * FROM recipes WHERE category = ? ORDER BY createdAt DESC",
+        [category],
+        (err, rows) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(rows.map((row) => this.rowToRecipe(row)));
+          }
+        },
+      );
     });
   }
 
   // Get recipe count
   async getRecipeCount(): Promise<number> {
     return new Promise((resolve, reject) => {
-      this.db.get('SELECT COUNT(*) as count FROM recipes', (err, row: any) => {
+      this.db.get("SELECT COUNT(*) as count FROM recipes", (err, row: any) => {
         if (err) {
           reject(err);
         } else {
@@ -301,9 +363,9 @@ class Database {
   close(): void {
     this.db.close((err) => {
       if (err) {
-        console.error('Error closing database:', err.message);
+        console.error("Error closing database:", err.message);
       } else {
-        console.log('Database connection closed');
+        console.log("Database connection closed");
       }
     });
   }

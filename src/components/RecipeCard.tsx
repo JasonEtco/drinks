@@ -143,7 +143,7 @@ const RecipeCard: React.FC<RecipeCardProps> = React.memo(
         </Card>
       </Link>
     );
-  }
+  },
 );
 
 export default RecipeCard;

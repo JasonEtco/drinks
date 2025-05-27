@@ -37,7 +37,7 @@ const ClarificationCalculator: React.FC<ClarificationCalculatorProps> =
     const totalVolume = useMemo(() => calculateTotalVolume(recipe), [recipe]);
     const calculation = useMemo(
       () => calculateMilkClarification(recipe, clarificationPercentage),
-      [recipe, clarificationPercentage]
+      [recipe, clarificationPercentage],
     );
 
     // Memoize event handlers

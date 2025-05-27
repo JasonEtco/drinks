@@ -53,24 +53,25 @@ export const RecipeProvider: React.FC<{ children: ReactNode }> = ({
     setUniqueIngredients(getUniqueIngredients(recipes));
   }, [recipes]);
 
-  const addNewRecipe = useCallback(async (
-    recipe: Omit<Recipe, "id" | "createdAt" | "updatedAt">
-  ) => {
-    try {
-      const newRecipe = await ApiService.createRecipe(recipe);
-      setRecipes((prevRecipes) => [...prevRecipes, newRecipe]);
-      return newRecipe;
-    } catch (error) {
-      console.error("Error adding recipe:", error);
-      throw error;
-    }
-  }, []);
+  const addNewRecipe = useCallback(
+    async (recipe: Omit<Recipe, "id" | "createdAt" | "updatedAt">) => {
+      try {
+        const newRecipe = await ApiService.createRecipe(recipe);
+        setRecipes((prevRecipes) => [...prevRecipes, newRecipe]);
+        return newRecipe;
+      } catch (error) {
+        console.error("Error adding recipe:", error);
+        throw error;
+      }
+    },
+    [],
+  );
 
   const updateExistingRecipe = useCallback(async (recipe: Recipe) => {
     try {
       const updatedRecipe = await ApiService.updateRecipe(recipe.id, recipe);
       setRecipes((prevRecipes) =>
-        prevRecipes.map((r) => (r.id === recipe.id ? updatedRecipe : r))
+        prevRecipes.map((r) => (r.id === recipe.id ? updatedRecipe : r)),
       );
       return updatedRecipe;
     } catch (error) {
@@ -89,27 +90,33 @@ export const RecipeProvider: React.FC<{ children: ReactNode }> = ({
     }
   }, []);
 
-  const getRecipe = useCallback((recipeId: string) => {
-    return recipes.find((r) => r.id === recipeId);
-  }, [recipes]);
+  const getRecipe = useCallback(
+    (recipeId: string) => {
+      return recipes.find((r) => r.id === recipeId);
+    },
+    [recipes],
+  );
 
-  const value = useMemo(() => ({
-    recipes,
-    addNewRecipe,
-    updateExistingRecipe,
-    removeRecipe,
-    getRecipe,
-    uniqueIngredients,
-    isLoading,
-  }), [
-    recipes,
-    addNewRecipe,
-    updateExistingRecipe,
-    removeRecipe,
-    getRecipe,
-    uniqueIngredients,
-    isLoading,
-  ]);
+  const value = useMemo(
+    () => ({
+      recipes,
+      addNewRecipe,
+      updateExistingRecipe,
+      removeRecipe,
+      getRecipe,
+      uniqueIngredients,
+      isLoading,
+    }),
+    [
+      recipes,
+      addNewRecipe,
+      updateExistingRecipe,
+      removeRecipe,
+      getRecipe,
+      uniqueIngredients,
+      isLoading,
+    ],
+  );
 
   return (
     <RecipeContext.Provider value={value}>{children}</RecipeContext.Provider>

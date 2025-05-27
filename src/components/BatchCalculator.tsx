@@ -29,7 +29,7 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = React.memo(
     // Memoize expensive calculation
     const calculation = useMemo(
       () => calculateBatch(recipe, servings, dilutionPercentage),
-      [recipe, servings, dilutionPercentage]
+      [recipe, servings, dilutionPercentage],
     );
 
     // Memoize event handlers
@@ -40,7 +40,7 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = React.memo(
           setServings(value);
         }
       },
-      []
+      [],
     );
 
     const handleDilutionChange = useCallback((value: number[]) => {
@@ -138,7 +138,7 @@ const BatchCalculator: React.FC<BatchCalculatorProps> = React.memo(
         </DialogContent>
       </Dialog>
     );
-  }
+  },
 );
 
 export default BatchCalculator;

@@ -19,7 +19,7 @@ export enum GlassType {
   TIKI = "Tiki",
   COPPER_MUG = "Copper Mug",
   JULEP = "Julep",
-  OTHER = "Other"
+  OTHER = "Other",
 }
 
 export interface Recipe {
