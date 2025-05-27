@@ -42,7 +42,7 @@ const RecipeCard: React.FC<RecipeCardProps> = React.memo(({
           <div className="flex justify-between items-start">
             <CardTitle className="text-xl md:text-2xl">{recipe.name}</CardTitle>
             {recipe.category && (
-              <Badge variant="secondary" className="ml-2">
+              <Badge variant="outline" className="ml-2 text-muted-foreground border-muted-foreground/20 bg-muted/20">
                 {recipe.category}
               </Badge>
             )}
