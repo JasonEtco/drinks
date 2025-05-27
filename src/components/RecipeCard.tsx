@@ -1,4 +1,5 @@
 import React, { useMemo } from "react";
+import { Link } from "react-router-dom";
 import { Recipe } from "../lib/types";
 import {
   Card,
@@ -20,39 +21,33 @@ import { GlassIcon } from "../lib/glass-icons";
 
 interface RecipeCardProps {
   recipe: Recipe;
-  onEdit: () => void;
   onDelete: () => void;
   onBatchCalculate: () => void;
   onClarify: () => void;
-  onView: () => void;
 }
 
 const RecipeCard: React.FC<RecipeCardProps> = React.memo(({
   recipe,
-  onEdit,
   onDelete,
   onBatchCalculate,
   onClarify,
-  onView,
 }) => {
   // Memoize expensive calculation
   const totalVolume = useMemo(() => calculateTotalVolume(recipe), [recipe]);
 
   return (
-    <Card 
-      className="h-full flex flex-col hover:border-primary/50 transition-colors duration-200 cursor-pointer"
-      onClick={onView}
-    >
-      <CardHeader className="pb-2">
-        <div className="flex justify-between items-start">
-          <CardTitle className="text-xl md:text-2xl">{recipe.name}</CardTitle>
-          {recipe.category && (
-            <Badge variant="secondary" className="ml-2">
-              {recipe.category}
-            </Badge>
-          )}
-        </div>
-      </CardHeader>
+    <Link to={`/recipes/${recipe.id}`} className="block h-full">
+      <Card className="h-full flex flex-col hover:border-primary/50 transition-colors duration-200 cursor-pointer">
+        <CardHeader className="pb-2">
+          <div className="flex justify-between items-start">
+            <CardTitle className="text-xl md:text-2xl">{recipe.name}</CardTitle>
+            {recipe.category && (
+              <Badge variant="secondary" className="ml-2">
+                {recipe.category}
+              </Badge>
+            )}
+          </div>
+        </CardHeader>
 
       <CardContent className="flex-1">
         <div className="space-y-4">
@@ -98,19 +93,23 @@ const RecipeCard: React.FC<RecipeCardProps> = React.memo(({
       <CardFooter className="pt-2 flex justify-between flex-wrap gap-2">
         <div className="flex gap-2">
           <Button 
+            asChild 
             variant="outline" 
-            size="icon" 
+            size="icon"
             onClick={(e) => {
+              e.preventDefault();
               e.stopPropagation();
-              onEdit();
             }}
           >
-            <PencilIcon className="h-4 w-4" />
+            <Link to={`/recipes/${recipe.id}/edit`}>
+              <PencilIcon className="h-4 w-4" />
+            </Link>
           </Button>
           <Button 
             variant="outline" 
             size="icon" 
             onClick={(e) => {
+              e.preventDefault();
               e.stopPropagation();
               onDelete();
             }}
@@ -124,6 +123,7 @@ const RecipeCard: React.FC<RecipeCardProps> = React.memo(({
             variant="outline" 
             size="sm" 
             onClick={(e) => {
+              e.preventDefault();
               e.stopPropagation();
               onBatchCalculate();
             }}
@@ -135,6 +135,7 @@ const RecipeCard: React.FC<RecipeCardProps> = React.memo(({
             variant="outline" 
             size="sm" 
             onClick={(e) => {
+              e.preventDefault();
               e.stopPropagation();
               onClarify();
             }}
@@ -145,6 +146,7 @@ const RecipeCard: React.FC<RecipeCardProps> = React.memo(({
         </div>
       </CardFooter>
     </Card>
+    </Link>
   );
 });
 
