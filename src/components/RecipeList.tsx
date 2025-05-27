@@ -46,6 +46,19 @@ const getUniqueCategories = (recipes: Recipe[]): string[] => {
   return Array.from(categories).sort();
 };
 
+// Get unique tags from recipes - memoized version
+const getUniqueTags = (recipes: Recipe[]): string[] => {
+  const tags = new Set<string>();
+  
+  recipes.forEach(recipe => {
+    if (recipe.tags && recipe.tags.length > 0) {
+      recipe.tags.forEach(tag => tags.add(tag));
+    }
+  });
+  
+  return Array.from(tags).sort();
+};
+
 const RecipeList: React.FC<RecipeListProps> = React.memo(({
   recipes,
   onDeleteRecipe,
@@ -56,10 +69,12 @@ const RecipeList: React.FC<RecipeListProps> = React.memo(({
   const [sortField, setSortField] = useState<SortField>('name');
   const [sortOrder, setSortOrder] = useState<SortOrder>('asc');
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [tagFilter, setTagFilter] = useState<string>("all");
   const [recipeToDelete, setRecipeToDelete] = useState<Recipe | null>(null);
 
   // Memoize expensive calculations
   const uniqueCategories = useMemo(() => getUniqueCategories(recipes), [recipes]);
+  const uniqueTags = useMemo(() => getUniqueTags(recipes), [recipes]);
 
   // Memoize event handlers
   const handleSortChange = useCallback((field: SortField) => {
@@ -96,6 +111,11 @@ const RecipeList: React.FC<RecipeListProps> = React.memo(({
         return false;
       }
       
+      // Apply tag filter
+      if (tagFilter && tagFilter !== "all" && (!recipe.tags || !recipe.tags.includes(tagFilter))) {
+        return false;
+      }
+      
       // Search in recipe name
       if (recipe.name.toLowerCase().includes(lowerSearchTerm)) {
         return true;
@@ -127,7 +147,7 @@ const RecipeList: React.FC<RecipeListProps> = React.memo(({
         return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
       }
     });
-  }, [recipes, searchTerm, categoryFilter, sortField, sortOrder]);
+  }, [recipes, searchTerm, categoryFilter, tagFilter, sortField, sortOrder]);
 
   return (
     <div className="space-y-6">
@@ -141,7 +161,7 @@ const RecipeList: React.FC<RecipeListProps> = React.memo(({
                 id="search"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search by name, ingredient, or glass..."
+                placeholder="Search by name, ingredient, glass, or tag..."
                 className="pl-9"
               />
             </div>
@@ -161,6 +181,26 @@ const RecipeList: React.FC<RecipeListProps> = React.memo(({
                   <SelectItem value="all">All Categories</SelectItem>
                   {uniqueCategories.map(category => (
                     <SelectItem key={category} value={category}>{category}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+          
+          {uniqueTags.length > 0 && (
+            <div className="w-40 space-y-2">
+              <Label htmlFor="tag-filter">Filter by Tag</Label>
+              <Select
+                value={tagFilter || "all"}
+                onValueChange={setTagFilter}
+              >
+                <SelectTrigger id="tag-filter" className="w-full">
+                  <SelectValue placeholder="All Tags" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Tags</SelectItem>
+                  {uniqueTags.map(tag => (
+                    <SelectItem key={tag} value={tag}>{tag}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -199,25 +239,38 @@ const RecipeList: React.FC<RecipeListProps> = React.memo(({
         </div>
       </div>
 
-      {categoryFilter && categoryFilter !== "all" && (
-        <div className="flex items-center">
+      {(categoryFilter && categoryFilter !== "all") || (tagFilter && tagFilter !== "all") ? (
+        <div className="flex items-center gap-2">
           <span className="text-sm">Filtering by: </span>
-          <Button
-            variant="secondary"
-            size="sm"
-            className="ml-2 gap-1"
-            onClick={() => setCategoryFilter("all")}
-          >
-            {categoryFilter}
-            <X className="h-3 w-3" />
-          </Button>
+          {categoryFilter && categoryFilter !== "all" && (
+            <Button
+              variant="secondary"
+              size="sm"
+              className="gap-1"
+              onClick={() => setCategoryFilter("all")}
+            >
+              {categoryFilter}
+              <X className="h-3 w-3" />
+            </Button>
+          )}
+          {tagFilter && tagFilter !== "all" && (
+            <Button
+              variant="secondary"
+              size="sm"
+              className="gap-1"
+              onClick={() => setTagFilter("all")}
+            >
+              {tagFilter}
+              <X className="h-3 w-3" />
+            </Button>
+          )}
         </div>
-      )}
+      ) : null}
       
       {sortedRecipes.length === 0 ? (
         <div className="text-center py-8">
           <p className="text-muted-foreground">
-            {searchTerm || (categoryFilter && categoryFilter !== "all") ? 
+            {searchTerm || (categoryFilter && categoryFilter !== "all") || (tagFilter && tagFilter !== "all") ? 
               "No recipes found matching your search." : 
               "No recipes available. Create your first recipe!"}
           </p>
