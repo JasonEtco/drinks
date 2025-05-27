@@ -97,7 +97,6 @@ export const createRecipe = (
   instructions: string,
   glass?: GlassType,
   garnish?: string,
-  notes?: string,
   category?: string
 ): Recipe => {
   const now = new Date().toISOString();
@@ -109,9 +108,9 @@ export const createRecipe = (
     instructions,
     glass,
     garnish,
-    notes,
     category,
-    created: now,
-    updated: now
+    tags: [],
+    createdAt: now,
+    updatedAt: now
   };
 };

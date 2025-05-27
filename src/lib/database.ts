@@ -1,5 +1,6 @@
 import sqlite3 from 'sqlite3';
 import { GlassType, Recipe } from './types.js';
+import { generateId } from './recipe-utils.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -71,9 +72,9 @@ class Database {
             garnish: 'Lime wheel',
             instructions: 'Shake all ingredients with ice and strain over fresh ice.',
             ingredients: [
-              { name: 'Tequila', amount: 2, unit: 'oz' },
-              { name: 'Cointreau', amount: 1, unit: 'oz' },
-              { name: 'Fresh lime juice', amount: 1, unit: 'oz' }
+              { id: generateId(), name: 'Tequila', amount: 2, unit: 'oz' },
+              { id: generateId(), name: 'Cointreau', amount: 1, unit: 'oz' },
+              { id: generateId(), name: 'Fresh lime juice', amount: 1, unit: 'oz' }
             ],
             tags: ['classic', 'citrus'],
             createdAt: new Date().toISOString(),
@@ -87,9 +88,9 @@ class Database {
             garnish: 'Orange peel',
             instructions: 'Muddle sugar with bitters, add whiskey and ice, stir.',
             ingredients: [
-              { name: 'Bourbon whiskey', amount: 2, unit: 'oz' },
-              { name: 'Simple syrup', amount: 0.25, unit: 'oz' },
-              { name: 'Angostura bitters', amount: 2, unit: 'dashes' }
+              { id: generateId(), name: 'Bourbon whiskey', amount: 2, unit: 'oz' },
+              { id: generateId(), name: 'Simple syrup', amount: 0.25, unit: 'oz' },
+              { id: generateId(), name: 'Angostura bitters', amount: 2, unit: 'dashes' }
             ],
             tags: ['classic', 'whiskey'],
             createdAt: new Date().toISOString(),
