@@ -3,9 +3,10 @@ import { useParams, Link } from "react-router-dom";
 import { useRecipes } from "../contexts/RecipeContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { PencilIcon, ArrowLeft } from "@phosphor-icons/react";
+import { PencilIcon, ArrowLeftIcon } from "@phosphor-icons/react";
 import { GlassIcon } from "../lib/glass-icons";
 import { calculateTotalVolume } from "../lib/recipe-utils";
+import { CategoryLabel } from "@/components/CategoryLabel";
 
 const RecipePage = () => {
   const { id } = useParams<{ id: string }>();
@@ -62,9 +63,13 @@ const RecipePage = () => {
 
       <div className="space-y-6">
         <div className="flex justify-between items-center">
-          <Button asChild variant="ghost" className="text-muted-foreground hover:text-foreground">
+          <Button
+            asChild
+            variant="ghost"
+            className="text-muted-foreground hover:text-foreground"
+          >
             <Link to="/">
-              <ArrowLeft className="mr-2 h-4 w-4" />
+              <ArrowLeftIcon className="mr-2 h-4 w-4" />
               Back to recipes
             </Link>
           </Button>
@@ -81,11 +86,7 @@ const RecipePage = () => {
             {/* Title and Category */}
             <div className="flex justify-between items-start">
               <h2 className="text-3xl font-bold">{recipe.name}</h2>
-              {recipe.category && (
-                <Badge variant="secondary" className="ml-2">
-                  {recipe.category}
-                </Badge>
-              )}
+              {recipe.category && <CategoryLabel category={recipe.category} />}
             </div>
 
             {/* Tags */}
@@ -109,7 +110,10 @@ const RecipePage = () => {
               </div>
               <ul className="space-y-2">
                 {recipe.ingredients.map((ingredient, index) => (
-                  <li key={index} className="flex justify-between items-center py-2 border-b border-muted">
+                  <li
+                    key={index}
+                    className="flex justify-between items-center py-2 border-b border-muted"
+                  >
                     <span className="font-medium">{ingredient.name}</span>
                     <span className="text-muted-foreground">
                       {ingredient.amount} {ingredient.unit}
