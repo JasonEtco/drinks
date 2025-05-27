@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeftIcon, Info } from "@phosphor-icons/react";
+import { ArrowLeftIcon, InfoIcon } from "@phosphor-icons/react";
 import {
   Tooltip,
   TooltipContent,
@@ -37,7 +37,7 @@ const ClarificationCalculator: React.FC<ClarificationCalculatorProps> =
     const totalVolume = useMemo(() => calculateTotalVolume(recipe), [recipe]);
     const calculation = useMemo(
       () => calculateMilkClarification(recipe, clarificationPercentage),
-      [recipe, clarificationPercentage],
+      [recipe, clarificationPercentage]
     );
 
     // Memoize event handlers
@@ -54,7 +54,7 @@ const ClarificationCalculator: React.FC<ClarificationCalculatorProps> =
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Info className="h-4 w-4 text-muted-foreground cursor-help" />
+                    <InfoIcon className="h-4 w-4 text-muted-foreground cursor-help" />
                   </TooltipTrigger>
                   <TooltipContent className="max-w-[300px]">
                     <p>

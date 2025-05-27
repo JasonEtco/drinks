@@ -4,11 +4,10 @@ import RecipeCard from "./RecipeCard";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
-  MagnifyingGlass,
-  SortAscending,
-  SortDescending,
-  FunnelSimple,
-  X,
+  MagnifyingGlassIcon,
+  XIcon,
+  SortAscendingIcon,
+  SortDescendingIcon,
 } from "@phosphor-icons/react";
 import { Label } from "@/components/ui/label";
 import {
@@ -63,7 +62,7 @@ const RecipeList: React.FC<RecipeListProps> = React.memo(
     // Memoize expensive calculations
     const uniqueCategories = useMemo(
       () => getUniqueCategories(recipes),
-      [recipes],
+      [recipes]
     );
 
     // Memoize event handlers
@@ -76,7 +75,7 @@ const RecipeList: React.FC<RecipeListProps> = React.memo(
           setSortOrder("asc");
         }
       },
-      [sortField, sortOrder],
+      [sortField, sortOrder]
     );
 
     const handleDeleteClick = useCallback((recipe: Recipe) => {
@@ -116,7 +115,7 @@ const RecipeList: React.FC<RecipeListProps> = React.memo(
         // Search in ingredients
         if (
           recipe.ingredients.some((ing) =>
-            ing.name.toLowerCase().includes(lowerSearchTerm),
+            ing.name.toLowerCase().includes(lowerSearchTerm)
           )
         ) {
           return true;
@@ -139,8 +138,8 @@ const RecipeList: React.FC<RecipeListProps> = React.memo(
             ? a.name.localeCompare(b.name)
             : b.name.localeCompare(a.name);
         } else {
-          const dateA = new Date(a.created).getTime();
-          const dateB = new Date(b.created).getTime();
+          const dateA = new Date(a.createdAt).getTime();
+          const dateB = new Date(b.createdAt).getTime();
           return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
         }
       });
@@ -153,7 +152,7 @@ const RecipeList: React.FC<RecipeListProps> = React.memo(
             <div className="flex-1 space-y-2">
               <Label htmlFor="search">Search Recipes</Label>
               <div className="relative">
-                <MagnifyingGlass className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                 <Input
                   id="search"
                   value={searchTerm}
@@ -196,9 +195,9 @@ const RecipeList: React.FC<RecipeListProps> = React.memo(
                 Name
                 {sortField === "name" &&
                   (sortOrder === "asc" ? (
-                    <SortAscending className="ml-1 h-4 w-4" />
+                    <SortAscendingIcon className="ml-1 h-4 w-4" />
                   ) : (
-                    <SortDescending className="ml-1 h-4 w-4" />
+                    <SortDescendingIcon className="ml-1 h-4 w-4" />
                   ))}
               </Button>
 
@@ -211,9 +210,9 @@ const RecipeList: React.FC<RecipeListProps> = React.memo(
                 Date
                 {sortField === "created" &&
                   (sortOrder === "asc" ? (
-                    <SortAscending className="ml-1 h-4 w-4" />
+                    <SortAscendingIcon className="ml-1 h-4 w-4" />
                   ) : (
-                    <SortDescending className="ml-1 h-4 w-4" />
+                    <SortDescendingIcon className="ml-1 h-4 w-4" />
                   ))}
               </Button>
             </div>
@@ -230,7 +229,7 @@ const RecipeList: React.FC<RecipeListProps> = React.memo(
               onClick={() => setCategoryFilter("all")}
             >
               {categoryFilter}
-              <X className="h-3 w-3" />
+              <XIcon className="h-3 w-3" />
             </Button>
           </div>
         )}
@@ -268,7 +267,7 @@ const RecipeList: React.FC<RecipeListProps> = React.memo(
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction variant="destructive" onClick={confirmDelete}>
+              <AlertDialogAction onClick={confirmDelete}>
                 Delete
               </AlertDialogAction>
             </AlertDialogFooter>
@@ -276,7 +275,7 @@ const RecipeList: React.FC<RecipeListProps> = React.memo(
         </AlertDialog>
       </div>
     );
-  },
+  }
 );
 
 export default RecipeList;

@@ -14,7 +14,7 @@ import {
   CardTitle,
   CardFooter,
 } from "@/components/ui/card";
-import { Plus, X, Check } from "@phosphor-icons/react";
+import { PlusIcon, XIcon, CheckIcon } from "@phosphor-icons/react";
 import {
   Select,
   SelectContent,
@@ -53,13 +53,13 @@ const RecipeForm: React.FC<RecipeFormProps> = React.memo(
     const { uniqueIngredients } = useRecipes();
     const [name, setName] = useState(initialRecipe?.name || "");
     const [ingredients, setIngredients] = useState<Ingredient[]>(
-      initialRecipe?.ingredients || [],
+      initialRecipe?.ingredients || []
     );
     const [instructions, setInstructions] = useState(
-      initialRecipe?.instructions || "",
+      initialRecipe?.instructions || ""
     );
     const [glass, setGlass] = useState<GlassType | undefined>(
-      initialRecipe?.glass || undefined,
+      initialRecipe?.glass || undefined
     );
     const [garnish, setGarnish] = useState(initialRecipe?.garnish || "");
 
@@ -73,7 +73,7 @@ const RecipeForm: React.FC<RecipeFormProps> = React.memo(
     const filteredIngredients = useMemo(() => {
       if (!newIngredientName) return [];
       return uniqueIngredients.filter((ingredient) =>
-        ingredient.toLowerCase().includes(newIngredientName.toLowerCase()),
+        ingredient.toLowerCase().includes(newIngredientName.toLowerCase())
       );
     }, [newIngredientName, uniqueIngredients]);
 
@@ -96,7 +96,7 @@ const RecipeForm: React.FC<RecipeFormProps> = React.memo(
       const newIngredient = createIngredient(
         newIngredientName,
         amount,
-        newIngredientUnit,
+        newIngredientUnit
       );
 
       setIngredients((prev) => prev.concat(newIngredient));
@@ -153,7 +153,7 @@ const RecipeForm: React.FC<RecipeFormProps> = React.memo(
               instructions,
               glass,
               garnish,
-              category,
+              category
             );
 
         onSubmit(recipe);
@@ -167,7 +167,7 @@ const RecipeForm: React.FC<RecipeFormProps> = React.memo(
         category,
         initialRecipe,
         onSubmit,
-      ],
+      ]
     );
 
     return (
@@ -225,7 +225,7 @@ const RecipeForm: React.FC<RecipeFormProps> = React.memo(
                         variant="ghost"
                         onClick={() => handleRemoveIngredient(ingredient.id)}
                       >
-                        <X className="h-4 w-4" />
+                        <XIcon className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
@@ -287,7 +287,7 @@ const RecipeForm: React.FC<RecipeFormProps> = React.memo(
                 </div>
 
                 <Button type="button" onClick={handleAddIngredient} size="icon">
-                  <Plus className="h-4 w-4" />
+                  <PlusIcon className="h-4 w-4" />
                 </Button>
               </div>
             </div>
@@ -355,14 +355,14 @@ const RecipeForm: React.FC<RecipeFormProps> = React.memo(
               <Link to={cancelLinkTo}>Cancel</Link>
             </Button>
             <Button type="submit">
-              <Check className="mr-2 h-4 w-4" />
+              <CheckIcon className="h-4 w-4" />
               {initialRecipe ? "Save Changes" : "Create Recipe"}
             </Button>
           </CardFooter>
         </form>
       </Card>
     );
-  },
+  }
 );
 
 export default RecipeForm;

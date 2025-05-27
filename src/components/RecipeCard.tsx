@@ -13,7 +13,7 @@ import {
   PencilIcon,
   CalculatorIcon,
   TrashIcon,
-  AxeIcon,
+  FunnelIcon,
 } from "@phosphor-icons/react";
 import { calculateTotalVolume } from "../lib/recipe-utils";
 import { Badge } from "@/components/ui/badge";
@@ -123,7 +123,7 @@ const RecipeCard: React.FC<RecipeCardProps> = React.memo(
                   onBatchCalculate();
                 }}
               >
-                <CalculatorIcon className="h-4 w-4 mr-1" />
+                <CalculatorIcon className="h-4 w-4" />
                 Batch
               </Button>
               <Button
@@ -135,7 +135,7 @@ const RecipeCard: React.FC<RecipeCardProps> = React.memo(
                   onClarify();
                 }}
               >
-                <AxeIcon className="h-4 w-4 mr-1" />
+                <FunnelIcon className="h-4 w-4" />
                 Clarify
               </Button>
             </div>
@@ -143,7 +143,7 @@ const RecipeCard: React.FC<RecipeCardProps> = React.memo(
         </Card>
       </Link>
     );
-  },
+  }
 );
 
 export default RecipeCard;

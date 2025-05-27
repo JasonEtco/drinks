@@ -52,7 +52,7 @@
   --destructive-foreground: oklch(0.98 0.005 240);
 
   /* Supporting UI colors */
-  --muted: oklch(0.35 0.03 250);
+  --muted: oklch(0.36 0.06 266.19);
   --muted-foreground: oklch(0.8 0.02 240);
 
   --border: oklch(0.3 0.05 265);

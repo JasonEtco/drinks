@@ -6,7 +6,7 @@ import BatchCalculator from "../components/BatchCalculator";
 import ClarificationCalculator from "../components/ClarificationCalculator";
 import { Button } from "@/components/ui/button";
 import { Toggle } from "@/components/ui/toggle";
-import { Plus, DeviceMobile } from "@phosphor-icons/react";
+import { PlusIcon, DeviceMobileIcon } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useWakeLock } from "@/hooks/use-wake-lock";
@@ -22,12 +22,12 @@ const HomePage = React.memo(() => {
   // Memoize recipe lookups
   const batchRecipe = useMemo(
     () => (batchRecipeId ? getRecipe(batchRecipeId) : undefined),
-    [batchRecipeId, getRecipe],
+    [batchRecipeId, getRecipe]
   );
 
   const clarifyRecipe = useMemo(
     () => (clarifyRecipeId ? getRecipe(clarifyRecipeId) : undefined),
-    [clarifyRecipeId, getRecipe],
+    [clarifyRecipeId, getRecipe]
   );
 
   // Memoize event handlers
@@ -46,7 +46,7 @@ const HomePage = React.memo(() => {
         console.error("Wake lock toggle error:", error);
       }
     },
-    [wakeLock],
+    [wakeLock]
   );
 
   const handleBatchCalculate = useCallback((recipeId: string) => {
@@ -62,7 +62,7 @@ const HomePage = React.memo(() => {
       removeRecipe(recipeId);
       toast.success("Recipe successfully deleted.");
     },
-    [removeRecipe],
+    [removeRecipe]
   );
 
   const handleCloseBatch = useCallback(() => setBatchRecipeId(null), []);
@@ -95,7 +95,7 @@ const HomePage = React.memo(() => {
                 aria-label="Keep screen awake"
                 className="text-xs"
               >
-                <DeviceMobile className="h-3 w-3 mr-1" />
+                <DeviceMobileIcon className="h-3 w-3 mr-1" />
                 {wakeLock.isActive ? "Awake" : "Sleep"}
               </Toggle>
             </div>
@@ -115,7 +115,7 @@ const HomePage = React.memo(() => {
             className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-primary text-primary-foreground shadow-xs hover:bg-primary/80 h-9 px-4 py-2 has-[>svg]:px-3"
           >
             <Link to="/recipes/new">
-              <Plus className="mr-1 h-4 w-4" />
+              <PlusIcon className="h-4 w-4" />
               New Recipe
             </Link>
           </Button>

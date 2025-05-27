@@ -75,7 +75,7 @@ const RecipePage = () => {
           </Button>
           <Button asChild>
             <Link to={`/recipes/${recipe.id}/edit`}>
-              <PencilIcon className="mr-2 h-4 w-4" />
+              <PencilIcon className="h-4 w-4" />
               Edit Recipe
             </Link>
           </Button>
