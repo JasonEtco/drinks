@@ -29,6 +29,7 @@ interface RecipeListProps {
   onDeleteRecipe: (recipeId: string) => void;
   onBatchCalculate: (recipeId: string) => void;
   onClarify: (recipeId: string) => void;
+  onViewRecipe: (recipeId: string) => void;
 }
 
 type SortField = 'name' | 'created';
@@ -53,6 +54,7 @@ const RecipeList: React.FC<RecipeListProps> = React.memo(({
   onDeleteRecipe,
   onBatchCalculate,
   onClarify,
+  onViewRecipe,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortField, setSortField] = useState<SortField>('name');
@@ -234,6 +236,7 @@ const RecipeList: React.FC<RecipeListProps> = React.memo(({
               onDelete={() => handleDeleteClick(recipe)}
               onBatchCalculate={() => onBatchCalculate(recipe.id)}
               onClarify={() => onClarify(recipe.id)}
+              onView={() => onViewRecipe(recipe.id)}
             />
           ))}
         </div>

@@ -24,6 +24,7 @@ interface RecipeCardProps {
   onDelete: () => void;
   onBatchCalculate: () => void;
   onClarify: () => void;
+  onView: () => void;
 }
 
 const RecipeCard: React.FC<RecipeCardProps> = React.memo(({
@@ -32,12 +33,16 @@ const RecipeCard: React.FC<RecipeCardProps> = React.memo(({
   onDelete,
   onBatchCalculate,
   onClarify,
+  onView,
 }) => {
   // Memoize expensive calculation
   const totalVolume = useMemo(() => calculateTotalVolume(recipe), [recipe]);
 
   return (
-    <Card className="h-full flex flex-col hover:border-primary/50 transition-colors duration-200">
+    <Card 
+      className="h-full flex flex-col hover:border-primary/50 transition-colors duration-200 cursor-pointer"
+      onClick={onView}
+    >
       <CardHeader className="pb-2">
         <div className="flex justify-between items-start">
           <CardTitle className="text-xl md:text-2xl">{recipe.name}</CardTitle>
@@ -92,20 +97,48 @@ const RecipeCard: React.FC<RecipeCardProps> = React.memo(({
 
       <CardFooter className="pt-2 flex justify-between flex-wrap gap-2">
         <div className="flex gap-2">
-          <Button variant="outline" size="icon" onClick={onEdit}>
+          <Button 
+            variant="outline" 
+            size="icon" 
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit();
+            }}
+          >
             <PencilIcon className="h-4 w-4" />
           </Button>
-          <Button variant="outline" size="icon" onClick={onDelete}>
+          <Button 
+            variant="outline" 
+            size="icon" 
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete();
+            }}
+          >
             <TrashIcon className="h-4 w-4" />
           </Button>
         </div>
 
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={onBatchCalculate}>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={(e) => {
+              e.stopPropagation();
+              onBatchCalculate();
+            }}
+          >
             <CalculatorIcon className="h-4 w-4 mr-1" />
             Batch
           </Button>
-          <Button variant="outline" size="sm" onClick={onClarify}>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={(e) => {
+              e.stopPropagation();
+              onClarify();
+            }}
+          >
             <AxeIcon className="h-4 w-4 mr-1" />
             Clarify
           </Button>

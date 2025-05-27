@@ -4,6 +4,7 @@ import { RecipeProvider } from "./contexts/RecipeContext";
 import HomePage from "./pages/HomePage";
 import NewRecipePage from "./pages/NewRecipePage";
 import EditRecipePage from "./pages/EditRecipePage";
+import RecipePage from "./pages/RecipePage";
 import { Toaster } from "sonner";
 
 function App() {
@@ -14,6 +15,7 @@ function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/recipes/new" element={<NewRecipePage />} />
+            <Route path="/recipes/:id" element={<RecipePage />} />
             <Route path="/recipes/:id/edit" element={<EditRecipePage />} />
           </Routes>
         </div>

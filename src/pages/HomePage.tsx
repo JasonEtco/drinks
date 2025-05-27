@@ -60,6 +60,10 @@ const HomePage = React.memo(() => {
     navigate(`/recipes/${recipeId}/edit`);
   }, [navigate]);
 
+  const handleViewRecipe = useCallback((recipeId: string) => {
+    navigate(`/recipes/${recipeId}`);
+  }, [navigate]);
+
   const handleBatchCalculate = useCallback((recipeId: string) => {
     setBatchRecipeId(recipeId);
   }, []);
@@ -134,6 +138,7 @@ const HomePage = React.memo(() => {
             onDeleteRecipe={handleDeleteRecipe}
             onBatchCalculate={handleBatchCalculate}
             onClarify={handleClarify}
+            onViewRecipe={handleViewRecipe}
           />
         </div>
       </div>
