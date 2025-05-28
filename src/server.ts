@@ -3,6 +3,8 @@ import morgan from "morgan";
 import path from "path";
 import { fileURLToPath } from "url";
 import { database } from "./lib/database.js";
+import { CreateRecipeSchema, UpdateRecipeSchema } from "./lib/validation.js";
+import { Recipe } from "./lib/types.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -60,9 +62,22 @@ app.get(
 // Create new recipe
 app.post("/api/recipes", async (req: Request, res: Response) => {
   try {
-    const recipe = await database.createRecipe(req.body);
+    // Validate input using Zod schema
+    const validatedData = CreateRecipeSchema.parse(req.body);
+    
+    // Cast to expected type for database
+    const recipeData = validatedData as Omit<Recipe, "id" | "createdAt" | "updatedAt">;
+    const recipe = await database.createRecipe(recipeData);
     res.status(201).json(recipe);
   } catch (error) {
+    // Handle Zod validation errors
+    if (error instanceof Error && error.name === "ZodError") {
+      res.status(400).json({ 
+        error: "Validation failed", 
+        details: (error as any).errors 
+      });
+      return;
+    }
     console.error("Error creating recipe:", error);
     res.status(500).json({ error: "Failed to create recipe" });
   }
@@ -86,9 +101,14 @@ app.get("/api/recipes/:recipeId", async (req: Request, res: Response) => {
 // Update recipe
 app.put("/api/recipes/:recipeId", async (req: Request, res: Response) => {
   try {
+    // Validate input using Zod schema
+    const validatedData = UpdateRecipeSchema.parse(req.body);
+    
+    // Cast to expected type for database
+    const updateData = validatedData as Partial<Recipe>;
     const updatedRecipe = await database.updateRecipe(
       req.params.recipeId,
-      req.body,
+      updateData,
     );
     if (!updatedRecipe) {
       res.status(404).json({ error: "Recipe not found" });
@@ -96,6 +116,14 @@ app.put("/api/recipes/:recipeId", async (req: Request, res: Response) => {
     }
     res.json(updatedRecipe);
   } catch (error) {
+    // Handle Zod validation errors
+    if (error instanceof Error && error.name === "ZodError") {
+      res.status(400).json({ 
+        error: "Validation failed", 
+        details: (error as any).errors 
+      });
+      return;
+    }
     console.error("Error updating recipe:", error);
     res.status(500).json({ error: "Failed to update recipe" });
   }
