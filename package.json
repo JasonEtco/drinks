@@ -16,8 +16,7 @@
         "optimize": "vite optimize",
         "preview": "vite preview",
         "test": "vitest run",
-        "test:watch": "vitest",
-        "test:coverage": "vitest run --coverage"
+        "test:watch": "vitest"
     },
     "dependencies": {
         "@phosphor-icons/react": "^2.1.10",
@@ -71,8 +70,7 @@
         "typescript": "~5.8.3",
         "typescript-eslint": "^8.32.1",
         "vite": "^6.3.5",
-        "vitest": "^2.1.8",
-        "@vitest/coverage-v8": "^2.1.8"
+        "vitest": "^2.1.8"
     },
     "workspaces": {
         "packages": [
