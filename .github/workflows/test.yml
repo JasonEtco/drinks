@@ -26,9 +26,6 @@ jobs:
     - name: Run tests
       run: npm test
 
-    - name: Run tests with coverage
-      run: npm run test:coverage
-
     - name: Generate test summary
       if: always()
       run: |
