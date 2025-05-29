@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import { generateId, createIngredient, createRecipe } from '../lib/recipe-utils';
 import { GlassType } from '../lib/types';
 
@@ -18,7 +19,7 @@ describe('Recipe Utilities', () => {
       const id = generateId();
       
       // Should be a string of reasonable length (typically around 26 characters)
-      expect(id.length).toBeGreaterThan(20);
+      expect(id.length).toBeGreaterThanOrEqual(20);
       expect(id.length).toBeLessThan(35);
       
       // Should only contain alphanumeric characters

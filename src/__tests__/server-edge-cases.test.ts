@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import request from 'supertest';
 import express, { Request, Response } from 'express';
 import { GlassType } from '../lib/types';
@@ -171,14 +172,14 @@ describe('Server Edge Cases and Error Handling', () => {
 describe('Recipe API Edge Cases', () => {
   // Mock database for edge case testing
   const mockDb = {
-    listRecipes: jest.fn(),
-    searchRecipes: jest.fn(),
-    getRecipesByCategory: jest.fn(),
-    createRecipe: jest.fn(),
-    getRecipeById: jest.fn(),
-    updateRecipe: jest.fn(),
-    deleteRecipe: jest.fn(),
-    getRecipeCount: jest.fn(),
+    listRecipes: vi.fn(),
+    searchRecipes: vi.fn(),
+    getRecipesByCategory: vi.fn(),
+    createRecipe: vi.fn(),
+    getRecipeById: vi.fn(),
+    updateRecipe: vi.fn(),
+    deleteRecipe: vi.fn(),
+    getRecipeCount: vi.fn(),
   };
 
   const createRecipeApp = () => {
@@ -232,7 +233,7 @@ describe('Recipe API Edge Cases', () => {
 
   beforeEach(() => {
     app = createRecipeApp();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('Search Edge Cases', () => {

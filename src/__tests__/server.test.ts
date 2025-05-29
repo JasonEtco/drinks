@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import request from 'supertest';
 import express, { Request, Response } from 'express';
 import { GlassType } from '../lib/types';
@@ -34,14 +35,14 @@ interface MockDatabase {
 }
 
 const createMockDatabase = (): MockDatabase => ({
-  listRecipes: jest.fn(),
-  searchRecipes: jest.fn(),
-  getRecipesByCategory: jest.fn(),
-  createRecipe: jest.fn(),
-  getRecipeById: jest.fn(),
-  updateRecipe: jest.fn(),
-  deleteRecipe: jest.fn(),
-  getRecipeCount: jest.fn(),
+  listRecipes: vi.fn(),
+  searchRecipes: vi.fn(),
+  getRecipesByCategory: vi.fn(),
+  createRecipe: vi.fn(),
+  getRecipeById: vi.fn(),
+  updateRecipe: vi.fn(),
+  deleteRecipe: vi.fn(),
+  getRecipeCount: vi.fn(),
 });
 
 // Validation schemas (simplified)
@@ -232,7 +233,7 @@ describe('Server API Endpoints', () => {
   beforeEach(() => {
     mockDb = createMockDatabase();
     app = createTestApp(mockDb);
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('GET /api/recipes', () => {
@@ -241,7 +242,7 @@ describe('Server API Endpoints', () => {
         createTestRecipe({ id: '1', name: 'Margarita' }),
         createTestRecipe({ id: '2', name: 'Old Fashioned' }),
       ];
-      (mockDb.listRecipes as jest.Mock).mockResolvedValue(mockRecipes);
+      (mockDb.listRecipes as ReturnType<typeof vi.fn>).mockResolvedValue(mockRecipes);
 
       const response = await request(app).get('/api/recipes');
 
@@ -251,7 +252,7 @@ describe('Server API Endpoints', () => {
     });
 
     it('should return 500 when database fails', async () => {
-      (mockDb.listRecipes as jest.Mock).mockRejectedValue(new Error('Database error'));
+      (mockDb.listRecipes as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('Database error'));
 
       const response = await request(app).get('/api/recipes');
 
@@ -260,7 +261,7 @@ describe('Server API Endpoints', () => {
     });
 
     it('should return empty array when no recipes exist', async () => {
-      (mockDb.listRecipes as jest.Mock).mockResolvedValue([]);
+      (mockDb.listRecipes as ReturnType<typeof vi.fn>).mockResolvedValue([]);
 
       const response = await request(app).get('/api/recipes');
 
@@ -274,7 +275,7 @@ describe('Server API Endpoints', () => {
       const mockRecipes = [
         createTestRecipe({ id: '1', name: 'Margarita' }),
       ];
-      (mockDb.searchRecipes as jest.Mock).mockResolvedValue(mockRecipes);
+      (mockDb.searchRecipes as ReturnType<typeof vi.fn>).mockResolvedValue(mockRecipes);
 
       const response = await request(app)
         .get('/api/recipes/search')
@@ -294,7 +295,7 @@ describe('Server API Endpoints', () => {
     });
 
     it('should return 500 when database search fails', async () => {
-      (mockDb.searchRecipes as jest.Mock).mockRejectedValue(new Error('Search error'));
+      (mockDb.searchRecipes as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('Search error'));
 
       const response = await request(app)
         .get('/api/recipes/search')
@@ -305,7 +306,7 @@ describe('Server API Endpoints', () => {
     });
 
     it('should handle empty search results', async () => {
-      (mockDb.searchRecipes as jest.Mock).mockResolvedValue([]);
+      (mockDb.searchRecipes as ReturnType<typeof vi.fn>).mockResolvedValue([]);
 
       const response = await request(app)
         .get('/api/recipes/search')
@@ -322,7 +323,7 @@ describe('Server API Endpoints', () => {
         createTestRecipe({ id: '1', category: 'cocktail' }),
         createTestRecipe({ id: '2', category: 'cocktail' }),
       ];
-      (mockDb.getRecipesByCategory as jest.Mock).mockResolvedValue(mockRecipes);
+      (mockDb.getRecipesByCategory as ReturnType<typeof vi.fn>).mockResolvedValue(mockRecipes);
 
       const response = await request(app).get('/api/recipes/category/cocktail');
 
@@ -332,7 +333,7 @@ describe('Server API Endpoints', () => {
     });
 
     it('should return 500 when database fails', async () => {
-      (mockDb.getRecipesByCategory as jest.Mock).mockRejectedValue(new Error('Database error'));
+      (mockDb.getRecipesByCategory as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('Database error'));
 
       const response = await request(app).get('/api/recipes/category/cocktail');
 
@@ -341,7 +342,7 @@ describe('Server API Endpoints', () => {
     });
 
     it('should handle empty category results', async () => {
-      (mockDb.getRecipesByCategory as jest.Mock).mockResolvedValue([]);
+      (mockDb.getRecipesByCategory as ReturnType<typeof vi.fn>).mockResolvedValue([]);
 
       const response = await request(app).get('/api/recipes/category/empty');
 
@@ -365,7 +366,7 @@ describe('Server API Endpoints', () => {
 
     it('should create a new recipe successfully', async () => {
       const mockCreatedRecipe = createTestRecipe(validRecipeData);
-      (mockDb.createRecipe as jest.Mock).mockResolvedValue(mockCreatedRecipe);
+      (mockDb.createRecipe as ReturnType<typeof vi.fn>).mockResolvedValue(mockCreatedRecipe);
 
       const response = await request(app)
         .post('/api/recipes')
@@ -423,7 +424,7 @@ describe('Server API Endpoints', () => {
     });
 
     it('should return 500 when database creation fails', async () => {
-      (mockDb.createRecipe as jest.Mock).mockRejectedValue(new Error('Database error'));
+      (mockDb.createRecipe as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('Database error'));
 
       const response = await request(app)
         .post('/api/recipes')
@@ -437,7 +438,7 @@ describe('Server API Endpoints', () => {
   describe('GET /api/recipes/:recipeId', () => {
     it('should return recipe by ID successfully', async () => {
       const mockRecipe = createTestRecipe({ id: 'recipe1' });
-      (mockDb.getRecipeById as jest.Mock).mockResolvedValue(mockRecipe);
+      (mockDb.getRecipeById as ReturnType<typeof vi.fn>).mockResolvedValue(mockRecipe);
 
       const response = await request(app).get('/api/recipes/recipe1');
 
@@ -447,7 +448,7 @@ describe('Server API Endpoints', () => {
     });
 
     it('should return 404 when recipe not found', async () => {
-      (mockDb.getRecipeById as jest.Mock).mockResolvedValue(null);
+      (mockDb.getRecipeById as ReturnType<typeof vi.fn>).mockResolvedValue(null);
 
       const response = await request(app).get('/api/recipes/nonexistent');
 
@@ -456,7 +457,7 @@ describe('Server API Endpoints', () => {
     });
 
     it('should return 500 when database fails', async () => {
-      (mockDb.getRecipeById as jest.Mock).mockRejectedValue(new Error('Database error'));
+      (mockDb.getRecipeById as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('Database error'));
 
       const response = await request(app).get('/api/recipes/recipe1');
 
@@ -476,7 +477,7 @@ describe('Server API Endpoints', () => {
         id: 'recipe1', 
         ...validUpdateData 
       });
-      (mockDb.updateRecipe as jest.Mock).mockResolvedValue(mockUpdatedRecipe);
+      (mockDb.updateRecipe as ReturnType<typeof vi.fn>).mockResolvedValue(mockUpdatedRecipe);
 
       const response = await request(app)
         .put('/api/recipes/recipe1')
@@ -488,7 +489,7 @@ describe('Server API Endpoints', () => {
     });
 
     it('should return 404 when recipe to update not found', async () => {
-      (mockDb.updateRecipe as jest.Mock).mockResolvedValue(null);
+      (mockDb.updateRecipe as ReturnType<typeof vi.fn>).mockResolvedValue(null);
 
       const response = await request(app)
         .put('/api/recipes/nonexistent')
@@ -513,7 +514,7 @@ describe('Server API Endpoints', () => {
     });
 
     it('should return 500 when database update fails', async () => {
-      (mockDb.updateRecipe as jest.Mock).mockRejectedValue(new Error('Database error'));
+      (mockDb.updateRecipe as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('Database error'));
 
       const response = await request(app)
         .put('/api/recipes/recipe1')
@@ -529,7 +530,7 @@ describe('Server API Endpoints', () => {
         id: 'recipe1', 
         name: 'New Name Only' 
       });
-      (mockDb.updateRecipe as jest.Mock).mockResolvedValue(mockUpdatedRecipe);
+      (mockDb.updateRecipe as ReturnType<typeof vi.fn>).mockResolvedValue(mockUpdatedRecipe);
 
       const response = await request(app)
         .put('/api/recipes/recipe1')
@@ -543,7 +544,7 @@ describe('Server API Endpoints', () => {
   describe('DELETE /api/recipes/:recipeId', () => {
     it('should delete recipe successfully', async () => {
       const mockDeletedRecipe = createTestRecipe({ id: 'recipe1' });
-      (mockDb.deleteRecipe as jest.Mock).mockResolvedValue(mockDeletedRecipe);
+      (mockDb.deleteRecipe as ReturnType<typeof vi.fn>).mockResolvedValue(mockDeletedRecipe);
 
       const response = await request(app).delete('/api/recipes/recipe1');
 
@@ -553,7 +554,7 @@ describe('Server API Endpoints', () => {
     });
 
     it('should return 404 when recipe to delete not found', async () => {
-      (mockDb.deleteRecipe as jest.Mock).mockResolvedValue(null);
+      (mockDb.deleteRecipe as ReturnType<typeof vi.fn>).mockResolvedValue(null);
 
       const response = await request(app).delete('/api/recipes/nonexistent');
 
@@ -562,7 +563,7 @@ describe('Server API Endpoints', () => {
     });
 
     it('should return 500 when database deletion fails', async () => {
-      (mockDb.deleteRecipe as jest.Mock).mockRejectedValue(new Error('Database error'));
+      (mockDb.deleteRecipe as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('Database error'));
 
       const response = await request(app).delete('/api/recipes/recipe1');
 
@@ -573,7 +574,7 @@ describe('Server API Endpoints', () => {
 
   describe('GET /api/health', () => {
     it('should return health status with recipe count', async () => {
-      (mockDb.getRecipeCount as jest.Mock).mockResolvedValue(5);
+      (mockDb.getRecipeCount as ReturnType<typeof vi.fn>).mockResolvedValue(5);
 
       const response = await request(app).get('/api/health');
 
@@ -585,7 +586,7 @@ describe('Server API Endpoints', () => {
     });
 
     it('should return health status with 0 count when database fails', async () => {
-      (mockDb.getRecipeCount as jest.Mock).mockRejectedValue(new Error('Database error'));
+      (mockDb.getRecipeCount as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('Database error'));
 
       const response = await request(app).get('/api/health');
 
