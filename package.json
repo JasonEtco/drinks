@@ -52,7 +52,7 @@
         "@types/express": "^5.0.2",
 
         "@types/morgan": "^1.9.9",
-        "@types/node": "^22.15.21",
+        "@types/node": "^22.15.24",
         "@types/react": "^19.1.5",
         "@types/react-dom": "^19.1.5",
         "@types/supertest": "^6.0.3",
