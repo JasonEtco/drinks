@@ -45,4 +45,19 @@ export default defineConfig({
       '@': resolve('./src')
     }
   },
+  test: {
+    environment: 'node',
+    include: ['src/**/*.test.ts'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html'],
+      exclude: [
+        'node_modules/',
+        'src/__tests__/test-utils.ts',
+        'dist/',
+        'dist-server/',
+        'dist-test/'
+      ]
+    }
+  }
 });

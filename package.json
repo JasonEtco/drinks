@@ -14,7 +14,9 @@
         "kill": "fuser -k 5000/tcp",
         "lint": "eslint .",
         "optimize": "vite optimize",
-        "preview": "vite preview"
+        "preview": "vite preview",
+        "test": "vitest run",
+        "test:watch": "vitest"
     },
     "dependencies": {
         "@phosphor-icons/react": "^2.1.10",
@@ -45,12 +47,15 @@
     },
     "devDependencies": {
         "@eslint/js": "^9.27.0",
+
         "@tailwindcss/postcss": "^4.1.7",
         "@types/express": "^5.0.2",
+
         "@types/morgan": "^1.9.9",
         "@types/node": "^22.15.21",
         "@types/react": "^19.1.5",
         "@types/react-dom": "^19.1.5",
+        "@types/supertest": "^6.0.3",
         "@vitejs/plugin-react": "^4.5.0",
         "@vitejs/plugin-react-swc": "^3.10.0",
         "concurrently": "^9.1.2",
@@ -58,11 +63,14 @@
         "eslint-plugin-react-hooks": "^5.2.0",
         "eslint-plugin-react-refresh": "^0.4.20",
         "globals": "^16.2.0",
+
+        "supertest": "^7.1.1",
         "tailwindcss": "^4.1.7",
         "tsx": "^4.19.4",
         "typescript": "~5.8.3",
         "typescript-eslint": "^8.32.1",
-        "vite": "^6.3.5"
+        "vite": "^6.3.5",
+        "vitest": "^2.1.8"
     },
     "workspaces": {
         "packages": [
