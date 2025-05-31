@@ -17,9 +17,16 @@ export default defineConfig({
     outDir: process.env.OUTPUT_DIR || 'dist'
   },
   server: {
-    port: 5000,
+    port: 5173,
+    proxy: {
+      '/api': {
+        target: 'http://127.0.0.1:3000',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
     hmr: {
-      overlay: false,
+      overlay: true,
     },
     watch: {
       awaitWriteFinish: {
