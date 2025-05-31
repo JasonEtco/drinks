@@ -144,6 +144,79 @@ app.delete("/api/recipes/:recipeId", async (req: Request, res: Response) => {
   }
 });
 
+// Chat endpoint for AI cocktail ideas
+app.post("/api/chat", async (req: Request, res: Response) => {
+  try {
+    const { message } = req.body;
+    
+    if (!message || typeof message !== "string") {
+      res.status(400).json({ error: "Message is required" });
+      return;
+    }
+
+    const githubToken = process.env.GITHUB_TOKEN;
+    if (!githubToken) {
+      res.status(500).json({ error: "GitHub token not configured" });
+      return;
+    }
+
+    const systemPrompt = `You are an expert cocktail mixologist and recipe developer. Help users create and discover cocktail recipes. 
+    
+Your expertise includes:
+- Classic and modern cocktail recipes
+- Ingredient substitutions and alternatives
+- Flavor profiles and pairing suggestions
+- Techniques and preparation methods
+- Garnish and presentation ideas
+
+Please provide helpful, creative, and accurate cocktail advice. When suggesting recipes, include:
+- Ingredient list with measurements
+- Simple preparation instructions
+- Optional garnish suggestions
+- Brief tasting notes
+
+Keep responses concise but informative, and feel free to ask clarifying questions if needed.`;
+
+    // Call GitHub Models API
+    const response = await fetch("https://models.inference.ai.azure.com/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${githubToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: message }
+        ],
+        model: "gpt-4o-mini",
+        temperature: 0.7,
+        max_tokens: 800,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error("GitHub Models API error:", response.status, errorText);
+      res.status(500).json({ error: "Failed to get AI response" });
+      return;
+    }
+
+    const data = await response.json();
+    const aiResponse = data.choices?.[0]?.message?.content;
+
+    if (!aiResponse) {
+      res.status(500).json({ error: "No response from AI" });
+      return;
+    }
+
+    res.json({ response: aiResponse });
+  } catch (error) {
+    console.error("Chat endpoint error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
 // Health check endpoint
 app.get("/api/health", async (req: Request, res: Response) => {
   try {

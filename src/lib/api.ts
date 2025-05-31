@@ -79,6 +79,14 @@ export class ApiService {
     );
   }
 
+  // Chat with AI for cocktail ideas
+  static async chat(message: string): Promise<{ response: string }> {
+    return this.request<{ response: string }>("/chat", {
+      method: "POST",
+      body: JSON.stringify({ message }),
+    });
+  }
+
   // Health check
   static async healthCheck(): Promise<{
     status: string;
