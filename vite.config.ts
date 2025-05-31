@@ -1,7 +1,3 @@
-// IMPORTANT NOTE: This file is only used in two situations: local development, and the live preview in Workbench.
-// For deployed Sparks, the `server/main.ts` serves the app itself. Ensure consistency between this file and `server/main.ts`
-// if you have something that needs to available while deployed.
-
 import tailwindcss from "@tailwindcss/vite";
 import react from "@vitejs/plugin-react-swc";
 import { defineConfig } from "vite";
