@@ -17,20 +17,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-
 interface RecipeListProps {
   recipes: Recipe[];
-  onDeleteRecipe: (recipeId: string) => void;
   onBatchCalculate: (recipeId: string) => void;
   onClarify: (recipeId: string) => void;
 }
@@ -52,12 +40,11 @@ const getUniqueCategories = (recipes: Recipe[]): string[] => {
 };
 
 const RecipeList: React.FC<RecipeListProps> = React.memo(
-  ({ recipes, onDeleteRecipe, onBatchCalculate, onClarify }) => {
+  ({ recipes, onBatchCalculate, onClarify }) => {
     const [searchTerm, setSearchTerm] = useState("");
     const [sortField, setSortField] = useState<SortField>("name");
     const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
     const [categoryFilter, setCategoryFilter] = useState<string>("all");
-    const [recipeToDelete, setRecipeToDelete] = useState<Recipe | null>(null);
 
     // Memoize expensive calculations
     const uniqueCategories = useMemo(
@@ -77,21 +64,6 @@ const RecipeList: React.FC<RecipeListProps> = React.memo(
       },
       [sortField, sortOrder]
     );
-
-    const handleDeleteClick = useCallback((recipe: Recipe) => {
-      setRecipeToDelete(recipe);
-    }, []);
-
-    const confirmDelete = useCallback(() => {
-      if (recipeToDelete) {
-        onDeleteRecipe(recipeToDelete.id);
-        setRecipeToDelete(null);
-      }
-    }, [recipeToDelete, onDeleteRecipe]);
-
-    const cancelDelete = useCallback(() => {
-      setRecipeToDelete(null);
-    }, []);
 
     // Memoize filtered and sorted recipes
     const sortedRecipes = useMemo(() => {
@@ -248,31 +220,12 @@ const RecipeList: React.FC<RecipeListProps> = React.memo(
               <RecipeCard
                 key={recipe.id}
                 recipe={recipe}
-                onDelete={() => handleDeleteClick(recipe)}
                 onBatchCalculate={() => onBatchCalculate(recipe.id)}
                 onClarify={() => onClarify(recipe.id)}
               />
             ))}
           </div>
         )}
-
-        <AlertDialog open={!!recipeToDelete} onOpenChange={cancelDelete}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Delete Recipe</AlertDialogTitle>
-              <AlertDialogDescription>
-                Are you sure you want to delete "{recipeToDelete?.name}"? This
-                action cannot be undone.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction onClick={confirmDelete}>
-                Delete
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
       </div>
     );
   }

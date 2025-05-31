@@ -1,17 +1,30 @@
-import React from "react";
-import { useParams, Link } from "react-router-dom";
+import React, { useState } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useRecipes } from "../contexts/RecipeContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { PencilIcon, ArrowLeftIcon } from "@phosphor-icons/react";
+import { PencilIcon, ArrowLeftIcon, TrashIcon } from "@phosphor-icons/react";
 import { GlassIcon } from "../lib/glass-icons";
 import { calculateTotalVolume } from "../lib/recipe-utils";
 import { CategoryLabel } from "@/components/CategoryLabel";
 import Header from "@/components/Header";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 
 const RecipePage = () => {
   const { id } = useParams<{ id: string }>();
-  const { getRecipe } = useRecipes();
+  const { getRecipe, removeRecipe } = useRecipes();
+  const navigate = useNavigate();
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
   const recipe = id ? getRecipe(id) : undefined;
 
@@ -44,6 +57,19 @@ const RecipePage = () => {
 
   const totalVolume = calculateTotalVolume(recipe);
 
+  const handleDeleteRecipe = async () => {
+    if (!recipe) return;
+
+    try {
+      await removeRecipe(recipe.id);
+      toast.success("Recipe deleted successfully!");
+      navigate("/");
+    } catch (error) {
+      toast.error("Failed to delete recipe. Please try again.");
+    }
+    setShowDeleteDialog(false);
+  };
+
   return (
     <>
       <Header />
@@ -59,12 +85,21 @@ const RecipePage = () => {
               Back to recipes
             </Link>
           </Button>
-          <Button asChild>
-            <Link to={`/recipes/${recipe.id}/edit`}>
-              <PencilIcon className="h-4 w-4" />
-              Edit Recipe
-            </Link>
-          </Button>
+          <div className="flex gap-2">
+            <Button asChild>
+              <Link to={`/recipes/${recipe.id}/edit`}>
+                <PencilIcon className="h-4 w-4" />
+                Edit Recipe
+              </Link>
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => setShowDeleteDialog(true)}
+            >
+              <TrashIcon className="h-4 w-4" />
+              Delete Recipe
+            </Button>
+          </div>
         </div>
 
         <div className="bg-card rounded-lg border p-6">
@@ -156,6 +191,27 @@ const RecipePage = () => {
           </div>
         </div>
       </div>
+
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Recipe</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete "{recipe.name}"? This action
+              cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteRecipe}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 };

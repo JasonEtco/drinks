@@ -6,12 +6,11 @@ import BatchCalculator from "../components/BatchCalculator";
 import ClarificationCalculator from "../components/ClarificationCalculator";
 import { Button } from "@/components/ui/button";
 import { PlusIcon } from "@phosphor-icons/react";
-import { toast } from "sonner";
 import { WakeLockToggle } from "@/components/WakeLockToggle";
 import Header from "@/components/Header";
 
 export default function HomePage() {
-  const { recipes, removeRecipe, getRecipe, isLoading } = useRecipes();
+  const { recipes, getRecipe, isLoading } = useRecipes();
 
   const [batchRecipeId, setBatchRecipeId] = useState<string | null>(null);
   const [clarifyRecipeId, setClarifyRecipeId] = useState<string | null>(null);
@@ -34,14 +33,6 @@ export default function HomePage() {
   const handleClarify = useCallback((recipeId: string) => {
     setClarifyRecipeId(recipeId);
   }, []);
-
-  const handleDeleteRecipe = useCallback(
-    (recipeId: string) => {
-      removeRecipe(recipeId);
-      toast.success("Recipe successfully deleted.");
-    },
-    [removeRecipe]
-  );
 
   const handleCloseBatch = useCallback(() => setBatchRecipeId(null), []);
   const handleCloseClarify = useCallback(() => setClarifyRecipeId(null), []);
@@ -77,7 +68,6 @@ export default function HomePage() {
         <div className="space-y-4 mt-4">
           <RecipeList
             recipes={recipes}
-            onDeleteRecipe={handleDeleteRecipe}
             onBatchCalculate={handleBatchCalculate}
             onClarify={handleClarify}
           />

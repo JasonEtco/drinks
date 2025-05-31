@@ -9,12 +9,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  PencilIcon,
-  CalculatorIcon,
-  TrashIcon,
-  FunnelIcon,
-} from "@phosphor-icons/react";
+import { CalculatorIcon, FunnelIcon } from "@phosphor-icons/react";
 import { calculateTotalVolume } from "../lib/recipe-utils";
 import { Badge } from "@/components/ui/badge";
 import { GlassIcon } from "../lib/glass-icons";
@@ -22,13 +17,12 @@ import { CategoryLabel } from "./CategoryLabel";
 
 interface RecipeCardProps {
   recipe: Recipe;
-  onDelete: () => void;
   onBatchCalculate: () => void;
   onClarify: () => void;
 }
 
 const RecipeCard: React.FC<RecipeCardProps> = React.memo(
-  ({ recipe, onDelete, onBatchCalculate, onClarify }) => {
+  ({ recipe, onBatchCalculate, onClarify }) => {
     // Memoize expensive calculation
     const totalVolume = useMemo(() => calculateTotalVolume(recipe), [recipe]);
 
@@ -85,60 +79,31 @@ const RecipeCard: React.FC<RecipeCardProps> = React.memo(
             </div>
           </CardContent>
 
-          <CardFooter className="pt-2 flex justify-between flex-wrap gap-2">
-            <div className="flex gap-2">
-              <Button
-                asChild
-                variant="outline"
-                size="icon"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                }}
-              >
-                <Link to={`/recipes/${recipe.id}/edit`}>
-                  <PencilIcon className="h-4 w-4" />
-                </Link>
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  onDelete();
-                }}
-              >
-                <TrashIcon className="h-4 w-4" />
-              </Button>
-            </div>
-
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  onBatchCalculate();
-                }}
-              >
-                <CalculatorIcon className="h-4 w-4" />
-                Batch
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  onClarify();
-                }}
-              >
-                <FunnelIcon className="h-4 w-4" />
-                Clarify
-              </Button>
-            </div>
+          <CardFooter className="pt-2 flex justify-center flex-wrap gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onBatchCalculate();
+              }}
+            >
+              <CalculatorIcon className="h-4 w-4" />
+              Batch
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onClarify();
+              }}
+            >
+              <FunnelIcon className="h-4 w-4" />
+              Clarify
+            </Button>
           </CardFooter>
         </Card>
       </Link>
