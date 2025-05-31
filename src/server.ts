@@ -1,3 +1,9 @@
+// Load environment variables in development
+if (process.env.NODE_ENV !== "production") {
+  const { config } = await import("dotenv");
+  config();
+}
+
 import express, { Request, Response, NextFunction } from "express";
 import morgan from "morgan";
 import path from "path";
