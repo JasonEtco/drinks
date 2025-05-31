@@ -164,6 +164,17 @@ app.post("/api/chat", async (req: Request, res: Response) => {
       return;
     }
 
+    // Fetch existing recipes to provide context
+    const existingRecipes = await database.listRecipes();
+    
+    // Format existing recipes into short definitions
+    const recipeDefinitions = existingRecipes.map(recipe => {
+      const ingredientsList = recipe.ingredients
+        .map(ing => `${ing.amount} ${ing.unit} ${ing.name}`)
+        .join(', ');
+      return `${recipe.name}: ${ingredientsList} - ${recipe.instructions}`;
+    }).join('\n');
+
     const systemPrompt = `You are an expert cocktail mixologist and recipe developer. Help users create and discover cocktail recipes. 
     
 Your expertise includes:
@@ -173,13 +184,16 @@ Your expertise includes:
 - Techniques and preparation methods
 - Garnish and presentation ideas
 
+EXISTING RECIPES IN THE SYSTEM:
+${recipeDefinitions}
+
 Please provide helpful, creative, and accurate cocktail advice. When suggesting recipes, include:
 - Ingredient list with measurements
 - Simple preparation instructions
 - Optional garnish suggestions
 - Brief tasting notes
 
-Keep responses concise but informative, and feel free to ask clarifying questions if needed.`;
+Keep responses concise but informative, and feel free to ask clarifying questions if needed. You can reference existing recipes in the system when appropriate.`;
 
     // Build messages array with system prompt, history, and current message
     const messages = [
