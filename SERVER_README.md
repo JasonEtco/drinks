@@ -32,12 +32,22 @@ export GITHUB_TOKEN=your_github_personal_access_token
 ```
 Note: The AI chat feature on the `/ideate` page requires a GitHub Personal Access Token with access to GitHub Models.
 
-3. For development with hot-reload (frontend only):
+3. For development with Hot Module Reloading (HMR):
 ```bash
 npm run dev
 ```
+This starts both the frontend dev server with HMR (http://localhost:5173) and backend server (http://localhost:3000). Changes to React components will be instantly reflected in the browser without losing application state.
 
-4. To run the full-stack application:
+4. To run individual development servers:
+```bash
+# Frontend only (with HMR)
+npm run dev:client
+
+# Backend only (with hot reload)
+npm run dev:server
+```
+
+5. To run the full-stack application (production-like):
 ```bash
 npm run dev:full
 ```
@@ -47,11 +57,26 @@ npm run dev:full
 npm run start:prod
 ```
 
+## Development Workflow
+
+### Hot Module Reloading (HMR)
+The project is configured with Vite's Hot Module Reloading for optimal development experience:
+
+- **React Fast Refresh**: Instant updates to React components while preserving component state
+- **CSS Hot Reload**: Immediate style changes without page refresh  
+- **API Proxy**: Development server automatically proxies API calls to the backend
+- **Error Overlay**: Helpful error messages displayed directly in the browser
+
+### Development vs Production
+- **Development** (`npm run dev`): Uses Vite dev server (port 5173) with HMR + Express server (port 3000)
+- **Production** (`npm run start:prod`): Builds static assets and serves everything from Express server (port 3000)
+
 ### Available Scripts
 
-- `npm run dev` - Start Vite development server (frontend only)
-- `npm run dev:server` - Start Express server with hot-reload
-- `npm run dev:full` - Build frontend and start server
+- `npm run dev` - Start full development environment (Vite HMR + Express server)
+- `npm run dev:client` - Start Vite development server with HMR (port 5173)
+- `npm run dev:server` - Start Express server with hot-reload (port 3000)
+- `npm run dev:full` - Build frontend and start server (production-like)
 - `npm run build` - Build frontend for production
 - `npm run start:prod` - Build everything and start production server
 - `npm run lint` - Run ESLint
