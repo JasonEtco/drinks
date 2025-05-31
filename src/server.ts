@@ -203,7 +203,7 @@ Keep responses concise but informative, and feel free to ask clarifying question
     ];
 
     // Call GitHub Models API with streaming
-    const response = await fetch("https://models.inference.ai.azure.com/chat/completions", {
+    const response = await fetch("https://models.github.ai/inference/chat/completions", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${githubToken}`,
