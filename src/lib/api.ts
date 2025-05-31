@@ -79,6 +79,95 @@ export class ApiService {
     );
   }
 
+  // Chat with AI for cocktail ideas with streaming support
+  static async chatStream(
+    message: string, 
+    history: Array<{role: "user" | "assistant"; content: string}> = [],
+    onChunk: (chunk: string) => void,
+    onError?: (error: Error) => void,
+    onComplete?: () => void
+  ): Promise<void> {
+    try {
+      const response = await fetch(`${API_BASE_URL}/chat`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ message, history }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`API Error: ${response.status} ${response.statusText}`);
+      }
+
+      if (!response.body) {
+        throw new Error("No response body");
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value);
+        const lines = chunk.split('\n');
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6).trim();
+            if (!data) continue;
+
+            try {
+              const parsed = JSON.parse(data);
+              
+              if (parsed.error) {
+                onError?.(new Error(parsed.error));
+                return;
+              }
+              
+              if (parsed.done) {
+                onComplete?.();
+                return;
+              }
+              
+              if (parsed.content) {
+                onChunk(parsed.content);
+              }
+            } catch (parseError) {
+              // Skip invalid JSON
+              continue;
+            }
+          }
+        }
+      }
+    } catch (error) {
+      onError?.(error instanceof Error ? error : new Error(String(error)));
+    }
+  }
+
+  // Legacy chat method for backwards compatibility (now deprecated)
+  static async chat(message: string): Promise<{ response: string }> {
+    let fullResponse = '';
+    
+    return new Promise((resolve, reject) => {
+      this.chatStream(
+        message,
+        [],
+        (chunk) => {
+          fullResponse += chunk;
+        },
+        (error) => {
+          reject(error);
+        },
+        () => {
+          resolve({ response: fullResponse });
+        }
+      );
+    });
+  }
+
   // Health check
   static async healthCheck(): Promise<{
     status: string;

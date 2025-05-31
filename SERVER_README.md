@@ -8,6 +8,7 @@ A modern cocktail recipe management application with a React frontend and Expres
 - 🚀 Express.js server with RESTful API
 - 🍸 Complete recipe management (CRUD operations)
 - 🔍 Search and filter recipes
+- 🧠 AI-powered cocktail ideation and suggestions
 - 📱 Responsive design
 - 🎯 TypeScript throughout
 
@@ -25,17 +26,23 @@ A modern cocktail recipe management application with a React frontend and Expres
 npm install
 ```
 
-2. For development with hot-reload (frontend only):
+2. Set up environment variables (optional, for AI chat feature):
+```bash
+export GITHUB_TOKEN=your_github_personal_access_token
+```
+Note: The AI chat feature on the `/ideate` page requires a GitHub Personal Access Token with access to GitHub Models.
+
+3. For development with hot-reload (frontend only):
 ```bash
 npm run dev
 ```
 
-3. To run the full-stack application:
+4. To run the full-stack application:
 ```bash
 npm run dev:full
 ```
 
-4. For production:
+5. For production:
 ```bash
 npm run start:prod
 ```
@@ -63,6 +70,9 @@ The server provides the following REST API endpoints:
 ### Search & Filter
 - `GET /api/recipes/search/:query` - Search recipes
 - `GET /api/recipes/category/:category` - Get recipes by category
+
+### AI Chat
+- `POST /api/chat` - Get AI-powered cocktail suggestions (requires GITHUB_TOKEN)
 
 ### Health Check
 - `GET /api/health` - API health check
