@@ -44,21 +44,51 @@ export default function IdeatePage() {
     setInput("");
     setIsLoading(true);
 
-    try {
-      const data = await ApiService.chat(userMessage.content);
-      
-      const assistantMessage: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: data.response,
-        timestamp: new Date(),
-      };
+    // Create a placeholder assistant message that we'll update with streaming content
+    const assistantMessageId = (Date.now() + 1).toString();
+    const assistantMessage: ChatMessage = {
+      id: assistantMessageId,
+      role: "assistant",
+      content: "",
+      timestamp: new Date(),
+    };
 
-      setMessages(prev => [...prev, assistantMessage]);
+    setMessages(prev => [...prev, assistantMessage]);
+
+    // Convert chat history to the format expected by the API
+    const history = messages.map(msg => ({
+      role: msg.role,
+      content: msg.content
+    }));
+
+    try {
+      await ApiService.chatStream(
+        userMessage.content,
+        history,
+        (chunk) => {
+          // Update the assistant message with new content
+          setMessages(prev => prev.map(msg => 
+            msg.id === assistantMessageId 
+              ? { ...msg, content: msg.content + chunk }
+              : msg
+          ));
+        },
+        (error) => {
+          console.error("Chat error:", error);
+          toast.error(error.message || "Failed to get response");
+          // Remove the failed assistant message
+          setMessages(prev => prev.filter(msg => msg.id !== assistantMessageId));
+        },
+        () => {
+          // Streaming complete
+          setIsLoading(false);
+        }
+      );
     } catch (error) {
       console.error("Chat error:", error);
       toast.error(error instanceof Error ? error.message : "Failed to get response");
-    } finally {
+      // Remove the failed assistant message
+      setMessages(prev => prev.filter(msg => msg.id !== assistantMessageId));
       setIsLoading(false);
     }
   };
@@ -111,6 +141,9 @@ export default function IdeatePage() {
                     }`}
                   >
                     <p className="whitespace-pre-wrap">{message.content}</p>
+                    {message.role === "assistant" && isLoading && message.content && (
+                      <span className="inline-block w-2 h-4 bg-current opacity-70 animate-pulse ml-1">|</span>
+                    )}
                     <p className="text-xs opacity-70 mt-1">
                       {formatTime(message.timestamp)}
                     </p>
@@ -118,7 +151,7 @@ export default function IdeatePage() {
                 </div>
               ))}
               
-              {isLoading && (
+              {isLoading && messages.length > 0 && messages[messages.length - 1].role === "user" && (
                 <div className="flex justify-start">
                   <div className="bg-muted text-muted-foreground rounded-lg px-4 py-2">
                     <div className="flex items-center gap-2">

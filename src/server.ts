@@ -144,12 +144,12 @@ app.delete("/api/recipes/:recipeId", async (req: Request, res: Response) => {
   }
 });
 
-// Chat endpoint for AI cocktail ideas
+// Chat endpoint for AI cocktail ideas with streaming support
 app.post("/api/chat", async (req: Request, res: Response) => {
   try {
     // Validate input using Zod schema
     const validatedData = ChatMessageSchema.parse(req.body);
-    const { message } = validatedData;
+    const { message, history } = validatedData;
 
     const githubToken = process.env.GITHUB_TOKEN;
     if (!githubToken) {
@@ -175,7 +175,14 @@ Please provide helpful, creative, and accurate cocktail advice. When suggesting 
 
 Keep responses concise but informative, and feel free to ask clarifying questions if needed.`;
 
-    // Call GitHub Models API
+    // Build messages array with system prompt, history, and current message
+    const messages = [
+      { role: "system", content: systemPrompt },
+      ...history,
+      { role: "user", content: message }
+    ];
+
+    // Call GitHub Models API with streaming
     const response = await fetch("https://models.inference.ai.azure.com/chat/completions", {
       method: "POST",
       headers: {
@@ -183,13 +190,11 @@ Keep responses concise but informative, and feel free to ask clarifying question
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: message }
-        ],
+        messages,
         model: "gpt-4o-mini",
         temperature: 0.7,
         max_tokens: 800,
+        stream: true,
       }),
     });
 
@@ -200,16 +205,58 @@ Keep responses concise but informative, and feel free to ask clarifying question
       return;
     }
 
-    const data = await response.json();
-    const aiResponse = data.choices?.[0]?.message?.content;
+    // Set up streaming response
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Headers', 'Cache-Control');
 
-    if (!aiResponse) {
-      console.error("No response from AI model");
-      res.status(500).json({ error: "AI service temporarily unavailable" });
+    if (!response.body) {
+      res.write(`data: ${JSON.stringify({ error: "No response body" })}\n\n`);
+      res.end();
       return;
     }
 
-    res.json({ response: aiResponse });
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+
+    try {
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value);
+        const lines = chunk.split('\n');
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6);
+            if (data === '[DONE]') {
+              res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
+              res.end();
+              return;
+            }
+
+            try {
+              const parsed = JSON.parse(data);
+              const content = parsed.choices?.[0]?.delta?.content;
+              if (content) {
+                res.write(`data: ${JSON.stringify({ content })}\n\n`);
+              }
+            } catch (parseError) {
+              // Skip invalid JSON chunks
+              continue;
+            }
+          }
+        }
+      }
+    } catch (streamError) {
+      console.error("Stream processing error:", streamError);
+      res.write(`data: ${JSON.stringify({ error: "Stream processing error" })}\n\n`);
+    } finally {
+      res.end();
+    }
   } catch (error) {
     // Handle Zod validation errors
     if (error instanceof Error && error.name === "ZodError") {

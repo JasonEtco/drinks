@@ -34,12 +34,20 @@ export const UpdateRecipeSchema = z.object({
   tags: z.array(z.string()).optional(),
 }).partial();
 
-// Zod schema for chat message
+// Zod schema for a single chat message
+export const SingleChatMessageSchema = z.object({
+  role: z.enum(["user", "assistant"]),
+  content: z.string().min(1, "Message content is required"),
+});
+
+// Zod schema for chat request with history
 export const ChatMessageSchema = z.object({
   message: z.string().min(1, "Message is required").max(1000, "Message is too long"),
+  history: z.array(SingleChatMessageSchema).default([]),
 });
 
 // Type exports for convenience
 export type CreateRecipeInput = z.infer<typeof CreateRecipeSchema>;
 export type UpdateRecipeInput = z.infer<typeof UpdateRecipeSchema>;
 export type ChatMessageInput = z.infer<typeof ChatMessageSchema>;
+export type SingleChatMessage = z.infer<typeof SingleChatMessageSchema>;
