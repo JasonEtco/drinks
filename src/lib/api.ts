@@ -132,8 +132,8 @@ export class ApiService {
                 return;
               }
               
-              if (parsed.content) {
-                onChunk(parsed.content);
+              if (parsed.choices[0]?.delta?.content) {
+                onChunk(parsed.choices[0].delta.content);
               }
             } catch (parseError) {
               // Skip invalid JSON
