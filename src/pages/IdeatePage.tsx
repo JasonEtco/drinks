@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PaperPlaneRightIcon, BrainIcon } from "@phosphor-icons/react";
+import { PaperPlaneRightIcon, BrainIcon, TrashIcon } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import Header from "@/components/Header";
 import { useChat } from "@ai-sdk/react";
@@ -10,8 +10,9 @@ import { MemoizedMarkdown } from "@/components/MemoizedMarkdown";
 
 export default function IdeatePage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const { messages, input, handleSubmit, handleInputChange, status } =
+  const { messages, input, handleSubmit, handleInputChange, status, setMessages } =
     useChat();
 
   const scrollToBottom = () => {
@@ -22,8 +23,24 @@ export default function IdeatePage() {
     scrollToBottom();
   }, [messages]);
 
+  // Focus input on component mount and after submission
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+
+  useEffect(() => {
+    if (status === "ready" && messages.length > 0) {
+      inputRef.current?.focus();
+    }
+  }, [status, messages.length]);
+
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  };
+
+  const handleClearChat = () => {
+    setMessages([]);
+    inputRef.current?.focus();
   };
 
   return (
@@ -118,6 +135,7 @@ export default function IdeatePage() {
             <form onSubmit={handleSubmit} className="flex flex-col gap-2">
               <div className="flex gap-2">
                 <Input
+                  ref={inputRef}
                   value={input}
                   onChange={handleInputChange}
                   placeholder="Ask for cocktail ideas..."
@@ -137,6 +155,16 @@ export default function IdeatePage() {
                   <PaperPlaneRightIcon className="h-4 w-4" />
                   Send
                 </Button>
+                {messages.length > 0 && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleClearChat}
+                    disabled={status === "streaming" || status === "submitted"}
+                  >
+                    <TrashIcon className="h-4 w-4" />
+                  </Button>
+                )}
               </div>
               {input.length > 900 && (
                 <p
