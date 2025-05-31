@@ -169,7 +169,7 @@ app.use(express.static(path.join(__dirname, "../public")));
 
 // Catch-all handler: send back React's index.html file for client-side routing
 app.get("*splat", (_: Request, res: Response) => {
-  res.sendFile(path.join(__dirname, "../index.html"));
+  res.sendFile(path.join(__dirname, "../dist/index.html"));
 });
 
 // Error handling middleware

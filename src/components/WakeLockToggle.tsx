@@ -42,7 +42,7 @@ export function WakeLockToggle() {
         aria-label="Keep screen awake"
         className="text-xs"
       >
-        <DeviceMobileIcon className="h-3 w-3 mr-1" />
+        <DeviceMobileIcon className="h-3 w-3" />
         {wakeLock.isActive ? "Awake" : "Sleep"}
       </Toggle>
     </div>
