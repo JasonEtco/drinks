@@ -5,6 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PaperPlaneRightIcon, BrainIcon } from "@phosphor-icons/react";
 import { toast } from "sonner";
 import Header from "@/components/Header";
+import { ApiService } from "@/lib/api";
 
 interface ChatMessage {
   id: string;
@@ -44,20 +45,7 @@ export default function IdeatePage() {
     setIsLoading(true);
 
     try {
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ message: userMessage.content }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Failed to get response");
-      }
-
-      const data = await response.json();
+      const data = await ApiService.chat(userMessage.content);
       
       const assistantMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
@@ -148,18 +136,26 @@ export default function IdeatePage() {
               <div ref={messagesEndRef} />
             </div>
 
-            <form onSubmit={handleSubmit} className="flex gap-2">
-              <Input
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="Ask for cocktail ideas..."
-                disabled={isLoading}
-                className="flex-1"
-              />
-              <Button type="submit" disabled={isLoading || !input.trim()}>
-                <PaperPlaneRightIcon className="h-4 w-4" />
-                Send
-              </Button>
+            <form onSubmit={handleSubmit} className="flex flex-col gap-2">
+              <div className="flex gap-2">
+                <Input
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder="Ask for cocktail ideas..."
+                  disabled={isLoading}
+                  className="flex-1"
+                  maxLength={1000}
+                />
+                <Button type="submit" disabled={isLoading || !input.trim() || input.length > 1000}>
+                  <PaperPlaneRightIcon className="h-4 w-4" />
+                  Send
+                </Button>
+              </div>
+              {input.length > 900 && (
+                <p className={`text-xs text-right ${input.length > 1000 ? 'text-destructive' : 'text-muted-foreground'}`}>
+                  {input.length}/1000 characters
+                </p>
+              )}
             </form>
           </CardContent>
         </Card>

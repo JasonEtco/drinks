@@ -3,7 +3,7 @@ import morgan from "morgan";
 import path from "path";
 import { fileURLToPath } from "url";
 import { database } from "./lib/database.js";
-import { CreateRecipeSchema, UpdateRecipeSchema } from "./lib/validation.js";
+import { CreateRecipeSchema, UpdateRecipeSchema, ChatMessageSchema } from "./lib/validation.js";
 import { Recipe } from "./lib/types.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -147,16 +147,14 @@ app.delete("/api/recipes/:recipeId", async (req: Request, res: Response) => {
 // Chat endpoint for AI cocktail ideas
 app.post("/api/chat", async (req: Request, res: Response) => {
   try {
-    const { message } = req.body;
-    
-    if (!message || typeof message !== "string") {
-      res.status(400).json({ error: "Message is required" });
-      return;
-    }
+    // Validate input using Zod schema
+    const validatedData = ChatMessageSchema.parse(req.body);
+    const { message } = validatedData;
 
     const githubToken = process.env.GITHUB_TOKEN;
     if (!githubToken) {
-      res.status(500).json({ error: "GitHub token not configured" });
+      console.error("GitHub token not configured");
+      res.status(500).json({ error: "AI service temporarily unavailable" });
       return;
     }
 
@@ -198,7 +196,7 @@ Keep responses concise but informative, and feel free to ask clarifying question
     if (!response.ok) {
       const errorText = await response.text();
       console.error("GitHub Models API error:", response.status, errorText);
-      res.status(500).json({ error: "Failed to get AI response" });
+      res.status(500).json({ error: "AI service temporarily unavailable" });
       return;
     }
 
@@ -206,12 +204,21 @@ Keep responses concise but informative, and feel free to ask clarifying question
     const aiResponse = data.choices?.[0]?.message?.content;
 
     if (!aiResponse) {
-      res.status(500).json({ error: "No response from AI" });
+      console.error("No response from AI model");
+      res.status(500).json({ error: "AI service temporarily unavailable" });
       return;
     }
 
     res.json({ response: aiResponse });
   } catch (error) {
+    // Handle Zod validation errors
+    if (error instanceof Error && error.name === "ZodError") {
+      res.status(400).json({ 
+        error: "Validation failed", 
+        details: (error as any).errors 
+      });
+      return;
+    }
     console.error("Chat endpoint error:", error);
     res.status(500).json({ error: "Internal server error" });
   }

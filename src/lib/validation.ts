@@ -34,6 +34,12 @@ export const UpdateRecipeSchema = z.object({
   tags: z.array(z.string()).optional(),
 }).partial();
 
+// Zod schema for chat message
+export const ChatMessageSchema = z.object({
+  message: z.string().min(1, "Message is required").max(1000, "Message is too long"),
+});
+
 // Type exports for convenience
 export type CreateRecipeInput = z.infer<typeof CreateRecipeSchema>;
 export type UpdateRecipeInput = z.infer<typeof UpdateRecipeSchema>;
+export type ChatMessageInput = z.infer<typeof ChatMessageSchema>;
