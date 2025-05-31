@@ -5,7 +5,7 @@ import RecipeForm from "../components/RecipeForm";
 import { Recipe } from "../lib/types";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { CheckCircle } from "@phosphor-icons/react";
+import { CheckCircleIcon } from "@phosphor-icons/react";
 
 const NewRecipePage = () => {
   const { addNewRecipe } = useRecipes();
@@ -37,7 +37,7 @@ const NewRecipePage = () => {
           </div>
 
           <div className="mt-4 text-center space-y-4">
-            <CheckCircle className="w-16 h-16 text-green-500 mx-auto" />
+            <CheckCircleIcon className="w-16 h-16 text-green-500 mx-auto" />
             <p className="text-lg">
               "{submittedRecipe.name}" has been created successfully!
             </p>

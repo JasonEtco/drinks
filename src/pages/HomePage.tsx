@@ -1,19 +1,16 @@
-import React, { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useRecipes } from "../contexts/RecipeContext";
 import RecipeList from "../components/RecipeList";
 import BatchCalculator from "../components/BatchCalculator";
 import ClarificationCalculator from "../components/ClarificationCalculator";
 import { Button } from "@/components/ui/button";
-import { Toggle } from "@/components/ui/toggle";
-import { PlusIcon, DeviceMobileIcon } from "@phosphor-icons/react";
+import { PlusIcon } from "@phosphor-icons/react";
 import { toast } from "sonner";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { useWakeLock } from "@/hooks/use-wake-lock";
+import { WakeLockToggle } from "@/components/WakeLockToggle";
+import Header from "@/components/Header";
 
-const HomePage = React.memo(() => {
-  const isMobile = useIsMobile();
-  const wakeLock = useWakeLock();
+export default function HomePage() {
   const { recipes, removeRecipe, getRecipe, isLoading } = useRecipes();
 
   const [batchRecipeId, setBatchRecipeId] = useState<string | null>(null);
@@ -28,25 +25,6 @@ const HomePage = React.memo(() => {
   const clarifyRecipe = useMemo(
     () => (clarifyRecipeId ? getRecipe(clarifyRecipeId) : undefined),
     [clarifyRecipeId, getRecipe]
-  );
-
-  // Memoize event handlers
-  const handleWakeLockToggle = useCallback(
-    async (pressed: boolean) => {
-      try {
-        if (pressed) {
-          await wakeLock.request();
-          toast.success("Screen will stay awake");
-        } else {
-          await wakeLock.release();
-          toast.success("Screen can now sleep normally");
-        }
-      } catch (error) {
-        toast.error("Failed to toggle screen wake lock");
-        console.error("Wake lock toggle error:", error);
-      }
-    },
-    [wakeLock]
   );
 
   const handleBatchCalculate = useCallback((recipeId: string) => {
@@ -80,32 +58,7 @@ const HomePage = React.memo(() => {
 
   return (
     <>
-      <header className="mb-8">
-        <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-3xl md:text-4xl font-bold">Drinks</h1>
-
-          {/* Mobile sleep prevention toggle - only show on mobile devices */}
-          {isMobile && wakeLock.isSupported && (
-            <div className="flex items-center gap-2">
-              <Toggle
-                pressed={wakeLock.isActive}
-                onPressedChange={handleWakeLockToggle}
-                variant="outline"
-                size="sm"
-                aria-label="Keep screen awake"
-                className="text-xs"
-              >
-                <DeviceMobileIcon className="h-3 w-3 mr-1" />
-                {wakeLock.isActive ? "Awake" : "Sleep"}
-              </Toggle>
-            </div>
-          )}
-        </div>
-
-        <p className="text-muted-foreground">
-          Create, store, and scale your favorite cocktail recipes
-        </p>
-      </header>
+      <Header />
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-semibold">Recipes</h2>
@@ -146,6 +99,4 @@ const HomePage = React.memo(() => {
       )}
     </>
   );
-});
-
-export default HomePage;
+}

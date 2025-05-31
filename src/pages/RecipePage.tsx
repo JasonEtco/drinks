@@ -7,6 +7,7 @@ import { PencilIcon, ArrowLeftIcon } from "@phosphor-icons/react";
 import { GlassIcon } from "../lib/glass-icons";
 import { calculateTotalVolume } from "../lib/recipe-utils";
 import { CategoryLabel } from "@/components/CategoryLabel";
+import Header from "@/components/Header";
 
 const RecipePage = () => {
   const { id } = useParams<{ id: string }>();
@@ -18,14 +19,7 @@ const RecipePage = () => {
   if (id && !recipe) {
     return (
       <>
-        <header className="mb-8">
-          <div className="mb-6">
-            <h1 className="text-3xl md:text-4xl font-bold">Drinks</h1>
-          </div>
-          <p className="text-muted-foreground">
-            Create, store, and scale your favorite cocktail recipes
-          </p>
-        </header>
+        <Header />
         <div className="space-y-6">
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-semibold">Recipe Not Found</h2>
@@ -52,15 +46,7 @@ const RecipePage = () => {
 
   return (
     <>
-      <header className="mb-8">
-        <div className="mb-6">
-          <h1 className="text-3xl md:text-4xl font-bold">Drinks</h1>
-        </div>
-        <p className="text-muted-foreground">
-          Create, store, and scale your favorite cocktail recipes
-        </p>
-      </header>
-
+      <Header />
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <Button

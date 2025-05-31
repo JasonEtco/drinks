@@ -5,9 +5,10 @@ import RecipeForm from "../components/RecipeForm";
 import { Recipe } from "../lib/types";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { CheckCircle } from "@phosphor-icons/react";
+import { CheckCircleIcon } from "@phosphor-icons/react";
+import Header from "@/components/Header";
 
-const EditRecipePage = () => {
+export default function EditRecipePage() {
   const { id } = useParams<{ id: string }>();
   const { updateExistingRecipe, getRecipe } = useRecipes();
   const [isSubmitted, setIsSubmitted] = useState(false);
@@ -25,22 +26,14 @@ const EditRecipePage = () => {
   if (isSubmitted && submittedRecipe) {
     return (
       <>
-        <header className="mb-8">
-          <div className="mb-6">
-            <h1 className="text-3xl md:text-4xl font-bold">Drinks</h1>
-          </div>
-
-          <p className="text-muted-foreground">
-            Create, store, and scale your favorite cocktail recipes
-          </p>
-        </header>
+        <Header />
         <div className="space-y-6">
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-semibold">Recipe Updated!</h2>
           </div>
 
           <div className="mt-4 text-center space-y-4">
-            <CheckCircle className="w-16 h-16 text-green-500 mx-auto" />
+            <CheckCircleIcon className="w-16 h-16 text-green-500 mx-auto" />
             <p className="text-lg">
               "{submittedRecipe.name}" has been updated successfully!
             </p>
@@ -115,6 +108,4 @@ const EditRecipePage = () => {
       </div>
     </>
   );
-};
-
-export default EditRecipePage;
+}
