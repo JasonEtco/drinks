@@ -1,19 +1,28 @@
-import React, { useState, useRef, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PaperPlaneRightIcon, BrainIcon, TrashIcon } from "@phosphor-icons/react";
-import { toast } from "sonner";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  PaperPlaneRightIcon,
+  BrainIcon,
+  TrashIcon,
+} from "@phosphor-icons/react";
 import Header from "@/components/Header";
 import { useChat } from "@ai-sdk/react";
-import { MemoizedMarkdown } from "@/components/MemoizedMarkdown";
+import { ChatMessage } from "@/components/ChatMessage";
 
 export default function IdeatePage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const { messages, input, handleSubmit, handleInputChange, status, setMessages } =
-    useChat();
+  const {
+    messages,
+    input,
+    handleSubmit,
+    handleInputChange,
+    status,
+    setMessages,
+  } = useChat();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -33,10 +42,6 @@ export default function IdeatePage() {
       inputRef.current?.focus();
     }
   }, [status, messages.length]);
-
-  const formatTime = (date: Date) => {
-    return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  };
 
   const handleClearChat = () => {
     setMessages([]);
@@ -72,38 +77,7 @@ export default function IdeatePage() {
               )}
 
               {messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`flex ${
-                    message.role === "user" ? "justify-end" : "justify-start"
-                  }`}
-                >
-                  <div
-                    className={`max-w-[80%] rounded-lg px-6 py-4 ${
-                      message.role === "user"
-                        ? "bg-primary text-primary-foreground"
-                        : "bg-muted text-muted-foreground"
-                    }`}
-                  >
-                    <div className="prose space-y-2">
-                      <MemoizedMarkdown
-                        id={message.id}
-                        content={message.content}
-                      />
-                    </div>
-
-                    {message.role === "assistant" &&
-                      status === "streaming" &&
-                      message.content && (
-                        <span className="inline-block w-2 h-4 bg-current opacity-70 animate-pulse ml-1">
-                          |
-                        </span>
-                      )}
-                    <p className="text-xs opacity-70 mt-1">
-                      {formatTime(message.createdAt)}
-                    </p>
-                  </div>
-                </div>
+                <ChatMessage message={message} status={status} />
               ))}
 
               {status === "streaming" &&

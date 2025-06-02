@@ -89,7 +89,6 @@ const RecipePage = () => {
             <Button asChild>
               <Link to={`/recipes/${recipe.id}/edit`}>
                 <PencilIcon className="h-4 w-4" />
-                Edit Recipe
               </Link>
             </Button>
             <Button
@@ -97,12 +96,11 @@ const RecipePage = () => {
               onClick={() => setShowDeleteDialog(true)}
             >
               <TrashIcon className="h-4 w-4" />
-              Delete Recipe
             </Button>
           </div>
         </div>
 
-        <div className="bg-card rounded-lg border p-6">
+        <div>
           <div className="space-y-6">
             {/* Title and Category */}
             <div className="flex justify-between items-start">

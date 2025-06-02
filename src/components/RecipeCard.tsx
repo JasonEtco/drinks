@@ -27,8 +27,8 @@ const RecipeCard: React.FC<RecipeCardProps> = React.memo(
     const totalVolume = useMemo(() => calculateTotalVolume(recipe), [recipe]);
 
     return (
-      <Link to={`/recipes/${recipe.id}`} className="block h-full">
-        <Card className="h-full flex flex-col hover:border-primary/50 transition-colors duration-200 cursor-pointer">
+      <Card className="h-full flex flex-col">
+        <Link to={`/recipes/${recipe.id}`} className="block h-full">
           <CardHeader className="pb-2">
             <div className="flex justify-between items-start">
               <CardTitle className="text-xl md:text-2xl">
@@ -78,35 +78,35 @@ const RecipeCard: React.FC<RecipeCardProps> = React.memo(
               )}
             </div>
           </CardContent>
+        </Link>
 
-          <CardFooter className="pt-2 flex justify-center flex-wrap gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                onBatchCalculate();
-              }}
-            >
-              <CalculatorIcon className="h-4 w-4" />
-              Batch
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                onClarify();
-              }}
-            >
-              <FunnelIcon className="h-4 w-4" />
-              Clarify
-            </Button>
-          </CardFooter>
-        </Card>
-      </Link>
+        <CardFooter className="pt-2 flex flex-wrap gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onBatchCalculate();
+            }}
+          >
+            <CalculatorIcon className="h-4 w-4" />
+            Batch
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onClarify();
+            }}
+          >
+            <FunnelIcon className="h-4 w-4" />
+            Clarify
+          </Button>
+        </CardFooter>
+      </Card>
     );
   }
 );

@@ -122,7 +122,6 @@ const RecipeList: React.FC<RecipeListProps> = React.memo(
         <div className="space-y-4">
           <div className="flex flex-wrap gap-4 items-end">
             <div className="flex-1 space-y-2">
-              <Label htmlFor="search">Search Recipes</Label>
               <div className="relative">
                 <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
                 <Input
@@ -137,7 +136,6 @@ const RecipeList: React.FC<RecipeListProps> = React.memo(
 
             {uniqueCategories.length > 0 && (
               <div className="w-40 space-y-2">
-                <Label htmlFor="category-filter">Filter by Category</Label>
                 <Select
                   value={categoryFilter || "all"}
                   onValueChange={setCategoryFilter}
