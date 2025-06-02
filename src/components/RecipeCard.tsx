@@ -42,7 +42,7 @@ const RecipeCard: React.FC<RecipeCardProps> = React.memo(
             <div className="space-y-4">
               <div>
                 <div className="flex justify-between items-center mb-2">
-                  <h3 className="text-sm font-medium text-muted-foreground">
+                  <h3 className="text-sm font-semibold text-muted-foreground">
                     Ingredients
                   </h3>
                   <Badge variant="outline" className="text-xs">

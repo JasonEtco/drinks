@@ -73,118 +73,102 @@ const RecipePage = () => {
   return (
     <>
       <Header />
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <Button
-            asChild
-            variant="ghost"
-            className="text-muted-foreground hover:text-foreground"
-          >
-            <Link to="/">
-              <ArrowLeftIcon className="mr-2 h-4 w-4" />
-              Back to recipes
-            </Link>
-          </Button>
-          <div className="flex gap-2">
-            <Button asChild>
-              <Link to={`/recipes/${recipe.id}/edit`}>
-                <PencilIcon className="h-4 w-4" />
-              </Link>
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={() => setShowDeleteDialog(true)}
-            >
-              <TrashIcon className="h-4 w-4" />
-            </Button>
+
+      <div className="space-y-12 max-w-4xl mx-auto px-4">
+        {/* Title */}
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-6xl font-bold">{recipe.name}</h2>
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-2">
+              {recipe.category && <CategoryLabel category={recipe.category} />}
+              <Button asChild>
+                <Link to={`/recipes/${recipe.id}/edit`}>
+                  <PencilIcon className="h-4 w-4" />
+                </Link>
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => setShowDeleteDialog(true)}
+              >
+                <TrashIcon className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </div>
 
+        {/* Ingredients */}
         <div>
-          <div className="space-y-6">
-            {/* Title and Category */}
-            <div className="flex justify-between items-start">
-              <h2 className="text-3xl font-bold">{recipe.name}</h2>
-              {recipe.category && <CategoryLabel category={recipe.category} />}
-            </div>
+          <div className="flex justify-between items-center mb-4">
+            <h3>Ingredients</h3>
+            <Badge variant="outline">{totalVolume.toFixed(1)} oz total</Badge>
+          </div>
+          <ul className="space-y-2">
+            {recipe.ingredients.map((ingredient, index) => (
+              <li
+                key={index}
+                className="flex justify-between items-center py-2 border-b border-muted"
+              >
+                <span className="font-medium">{ingredient.name}</span>
+                <span className="text-muted-foreground">
+                  {ingredient.amount} {ingredient.unit}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
 
-            {/* Tags */}
-            {recipe.tags && recipe.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2">
-                {recipe.tags.map((tag) => (
-                  <Badge key={tag} variant="outline">
-                    {tag}
-                  </Badge>
-                ))}
+        {/* Instructions */}
+        <div>
+          <h3 className="mb-4">Instructions</h3>
+          <p className="text-muted-foreground whitespace-pre-wrap leading-relaxed">
+            {recipe.instructions}
+          </p>
+        </div>
+
+        {/* Glass and Garnish */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {recipe.glass && (
+            <div className="flex items-center space-x-3">
+              <GlassIcon
+                glassType={recipe.glass}
+                className="h-6 w-6 text-primary"
+              />
+              <div>
+                <span className="text-sm text-muted-foreground">Glass</span>
+                <p className="font-medium">{recipe.glass}</p>
               </div>
-            )}
+            </div>
+          )}
 
-            {/* Ingredients */}
+          {recipe.garnish && (
             <div>
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-xl font-semibold">Ingredients</h3>
-                <Badge variant="outline">
-                  {totalVolume.toFixed(1)} oz total
-                </Badge>
-              </div>
-              <ul className="space-y-2">
-                {recipe.ingredients.map((ingredient, index) => (
-                  <li
-                    key={index}
-                    className="flex justify-between items-center py-2 border-b border-muted"
-                  >
-                    <span className="font-medium">{ingredient.name}</span>
-                    <span className="text-muted-foreground">
-                      {ingredient.amount} {ingredient.unit}
-                    </span>
-                  </li>
-                ))}
-              </ul>
+              <span className="text-sm text-muted-foreground">Garnish</span>
+              <p className="font-medium">{recipe.garnish}</p>
             </div>
+          )}
+        </div>
 
-            {/* Instructions */}
+        {/* Tags */}
+        {recipe.tags && recipe.tags.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {recipe.tags.map((tag) => (
+              <Badge key={tag} variant="outline">
+                {tag}
+              </Badge>
+            ))}
+          </div>
+        )}
+
+        {/* Metadata */}
+        <div className="pt-4 border-t border-muted">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-muted-foreground">
             <div>
-              <h3 className="text-xl font-semibold mb-4">Instructions</h3>
-              <p className="text-muted-foreground whitespace-pre-wrap leading-relaxed">
-                {recipe.instructions}
-              </p>
+              <span>Created: </span>
+              {new Date(recipe.createdAt).toLocaleDateString()}
             </div>
-
-            {/* Glass and Garnish */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {recipe.glass && (
-                <div className="flex items-center space-x-3">
-                  <GlassIcon
-                    glassType={recipe.glass}
-                    className="h-6 w-6 text-primary"
-                  />
-                  <div>
-                    <span className="text-sm text-muted-foreground">Glass</span>
-                    <p className="font-medium">{recipe.glass}</p>
-                  </div>
-                </div>
-              )}
-
-              {recipe.garnish && (
-                <div>
-                  <span className="text-sm text-muted-foreground">Garnish</span>
-                  <p className="font-medium">{recipe.garnish}</p>
-                </div>
-              )}
-            </div>
-
-            {/* Metadata */}
-            <div className="pt-4 border-t border-muted">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-muted-foreground">
-                <div>
-                  <span>Created: </span>
-                  {new Date(recipe.createdAt).toLocaleDateString()}
-                </div>
-                <div>
-                  <span>Updated: </span>
-                  {new Date(recipe.updatedAt).toLocaleDateString()}
-                </div>
-              </div>
+            <div>
+              <span>Updated: </span>
+              {new Date(recipe.updatedAt).toLocaleDateString()}
             </div>
           </div>
         </div>
