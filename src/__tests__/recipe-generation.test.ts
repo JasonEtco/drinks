@@ -104,4 +104,32 @@ describe('Recipe Generation API', () => {
     expect(response.status).toBe(400);
     expect(response.body.error).toBe('Messages array is required');
   });
+
+  it('should include proper recipe structure in response', async () => {
+    const app = createTestApp();
+    
+    const messages = [
+      { role: "user", content: "Can you suggest a margarita recipe?" },
+      { role: "assistant", content: "Here's a classic margarita: 2 oz tequila, 1 oz lime juice, 0.75 oz triple sec. Shake with ice." }
+    ];
+    
+    const response = await request(app)
+      .post('/api/chat/generate-recipe')
+      .send({ messages });
+
+    expect(response.status).toBe(200);
+    
+    const recipe = response.body.recipes[0];
+    expect(recipe.name).toBe("Test Cocktail");
+    expect(recipe.ingredients).toHaveLength(2);
+    expect(recipe.ingredients[0]).toEqual({
+      name: "Gin",
+      amount: 2,
+      unit: "oz"
+    });
+    expect(recipe.instructions).toContain("Shake with ice");
+    expect(recipe.glass).toBe("Coupe");
+    expect(recipe.garnish).toBe("Lemon twist");
+    expect(recipe.category).toBe("Classic");
+  });
 });
