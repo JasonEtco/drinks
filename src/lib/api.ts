@@ -168,6 +168,26 @@ export class ApiService {
     });
   }
 
+  // Generate recipes from chat history
+  static async generateRecipesFromChat(
+    messages: Array<{role: "user" | "assistant"; content: string}>
+  ): Promise<{
+    recipes: Array<{
+      name: string;
+      ingredients: Array<{name: string; amount: number; unit: string}>;
+      instructions: string;
+      glass?: string;
+      garnish?: string;
+      category?: string;
+    }>;
+    reasoning: string;
+  }> {
+    return this.request("/chat/generate-recipe", {
+      method: "POST",
+      body: JSON.stringify({ messages }),
+    });
+  }
+
   // Health check
   static async healthCheck(): Promise<{
     status: string;

@@ -10,6 +10,7 @@ import {
 import Header from "@/components/Header";
 import { useChat } from "@ai-sdk/react";
 import { ChatMessage } from "@/components/ChatMessage";
+import RecipeGenerationDialog from "@/components/RecipeGenerationDialog";
 
 export default function IdeatePage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -122,14 +123,22 @@ export default function IdeatePage() {
                 <PaperPlaneRightIcon className="h-4 w-4" />
               </Button>
               {messages.length > 0 && (
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleClearChat}
-                  disabled={status === "streaming" || status === "submitted"}
-                >
-                  <TrashIcon className="h-4 w-4" />
-                </Button>
+                <>
+                  <RecipeGenerationDialog
+                    messages={messages}
+                    onRecipeSaved={() => {
+                      // Optionally handle recipe saved event
+                    }}
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleClearChat}
+                    disabled={status === "streaming" || status === "submitted"}
+                  >
+                    <TrashIcon className="h-4 w-4" />
+                  </Button>
+                </>
               )}
             </div>
             {input.length > 900 && (
