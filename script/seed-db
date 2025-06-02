@@ -11,7 +11,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Get database path from command line argument or use default
-const DB_PATH = process.argv[2] || path.join(__dirname, '../data/recipes.db');
+const DB_PATH = process.argv[2] || path.join(__dirname, '../recipes.db');
 
 // Colors for console output
 const colors = {

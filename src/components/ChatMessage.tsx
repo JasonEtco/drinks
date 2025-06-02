@@ -16,18 +16,16 @@ export function ChatMessage({
   return (
     <div
       key={message.id}
-      className={`flex ${
-        message.role === "user" ? "justify-end" : "justify-start"
-      }`}
+      className={`${message.role === "user" ? "flex justify-end" : "w-full"}`}
     >
       <div
         className={` rounded-lg px-6 py-4 ${
           message.role === "user"
             ? "max-w-[80%] bg-muted text-muted-foregroud"
-            : "w-full"
+            : "w-full flex-1"
         }`}
       >
-        <div className="prose space-y-2">
+        <div className="prose w-full">
           <MemoizedMarkdown id={message.id} content={message.content} />
         </div>
 
