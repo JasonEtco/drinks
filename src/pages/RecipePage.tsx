@@ -3,11 +3,19 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { useRecipes } from "../contexts/RecipeContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { PencilIcon, ArrowLeftIcon, TrashIcon } from "@phosphor-icons/react";
+import {
+  PencilIcon,
+  ArrowLeftIcon,
+  TrashIcon,
+  CalculatorIcon,
+  FunnelIcon,
+} from "@phosphor-icons/react";
 import { GlassIcon } from "../lib/glass-icons";
 import { calculateTotalVolume } from "../lib/recipe-utils";
 import { CategoryLabel } from "@/components/CategoryLabel";
 import Header from "@/components/Header";
+import BatchCalculator from "@/components/BatchCalculator";
+import ClarificationCalculator from "@/components/ClarificationCalculator";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,6 +33,9 @@ const RecipePage = () => {
   const { getRecipe, removeRecipe } = useRecipes();
   const navigate = useNavigate();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showBatchCalculator, setShowBatchCalculator] = useState(false);
+  const [showClarificationCalculator, setShowClarificationCalculator] =
+    useState(false);
 
   const recipe = id ? getRecipe(id) : undefined;
 
@@ -81,6 +92,22 @@ const RecipePage = () => {
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-2">
               {recipe.category && <CategoryLabel category={recipe.category} />}
+              <Button
+                variant="outline"
+                onClick={() => setShowBatchCalculator(true)}
+                title="Batch Calculator"
+              >
+                <CalculatorIcon className="h-4 w-4" />
+                Batch
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setShowClarificationCalculator(true)}
+                title="Clarification Calculator"
+              >
+                <FunnelIcon className="h-4 w-4" />
+                Clarify
+              </Button>
               <Button asChild>
                 <Link to={`/recipes/${recipe.id}/edit`}>
                   <PencilIcon className="h-4 w-4" />
@@ -173,6 +200,18 @@ const RecipePage = () => {
           </div>
         </div>
       </div>
+
+      <BatchCalculator
+        recipe={recipe}
+        open={showBatchCalculator}
+        onClose={() => setShowBatchCalculator(false)}
+      />
+
+      <ClarificationCalculator
+        recipe={recipe}
+        open={showClarificationCalculator}
+        onClose={() => setShowClarificationCalculator(false)}
+      />
 
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
