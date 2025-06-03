@@ -44,8 +44,8 @@ const getUniqueCategories = (recipes: Recipe[]): string[] => {
 const RecipeList: React.FC<RecipeListProps> = React.memo(
   ({ recipes, onBatchCalculate, onClarify }) => {
     const [searchTerm, setSearchTerm] = useState("");
-    const [sortField, setSortField] = useState<SortField>("name");
-    const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
+    const [sortField, setSortField] = useState<SortField>("created");
+    const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
     const [categoryFilter, setCategoryFilter] = useState<string>("all");
 
     // Memoize expensive calculations
