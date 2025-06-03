@@ -14,7 +14,6 @@
         "start": "node dist-server/server/index.js",
         "start:prod": "npm run build && npm start",
         "kill": "fuser -k 5000/tcp",
-        "lint": "eslint .",
         "optimize": "vite optimize",
         "preview": "vite preview",
         "test": "vitest run",
@@ -55,7 +54,6 @@
         "zod": "^3.25.42"
     },
     "devDependencies": {
-        "@eslint/js": "^9.28.0",
         "@tailwindcss/postcss": "^4.1.8",
         "@types/express": "^5.0.2",
         "@types/morgan": "^1.9.9",
@@ -67,15 +65,11 @@
         "@vitejs/plugin-react-swc": "^3.10.0",
         "concurrently": "^9.1.2",
         "dotenv": "^16.5.0",
-        "eslint": "^9.28.0",
-        "eslint-plugin-react-hooks": "^5.2.0",
-        "eslint-plugin-react-refresh": "^0.4.20",
         "globals": "^16.2.0",
         "supertest": "^7.1.1",
         "tailwindcss": "^4.1.8",
         "tsx": "^4.19.4",
         "typescript": "~5.8.3",
-        "typescript-eslint": "^8.33.0",
         "vite": "^6.3.5",
         "vitest": "^3.1.4"
     },
