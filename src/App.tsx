@@ -6,6 +6,7 @@ import NewRecipePage from "./pages/NewRecipePage";
 import EditRecipePage from "./pages/EditRecipePage";
 import RecipePage from "./pages/RecipePage";
 import IdeatePage from "./pages/IdeatePage";
+import TinderPage from "./pages/TinderPage";
 import { Toaster } from "sonner";
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
             <Route path="/recipes/:id" element={<RecipePage />} />
             <Route path="/recipes/:id/edit" element={<EditRecipePage />} />
             <Route path="/ideate" element={<IdeatePage />} />
+            <Route path="/tinder" element={<TinderPage />} />
           </Routes>
         </div>
         <Toaster position="bottom-right" />

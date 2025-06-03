@@ -1,7 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { WakeLockToggle } from "./WakeLockToggle";
 import { Button } from "@/components/ui/button";
-import { BrainIcon, HouseIcon } from "@phosphor-icons/react";
+import { BrainIcon, HouseIcon, HeartIcon } from "@phosphor-icons/react";
 
 export default function Header() {
   const location = useLocation();
@@ -22,6 +22,16 @@ export default function Header() {
               <Link to="/">
                 <HouseIcon className="h-4 w-4" />
                 Recipes
+              </Link>
+            </Button>
+            <Button
+              asChild
+              variant={location.pathname === "/tinder" ? "default" : "ghost"}
+              size="sm"
+            >
+              <Link to="/tinder">
+                <HeartIcon className="h-4 w-4" />
+                Tinder
               </Link>
             </Button>
             <Button
