@@ -105,7 +105,7 @@ const RecipeForm: React.FC<RecipeFormProps> = React.memo(
     }, [newIngredientName, newIngredientAmount, newIngredientUnit]);
 
     const handleRemoveIngredient = useCallback((id: string) => {
-      setIngredients((prev) => prev.filter((i) => i.id !== id));
+      setIngredients((prev) => prev.filter((i) => i.name !== name));
     }, []);
 
     const handleSelectIngredient = useCallback((ingredient: string) => {
@@ -269,7 +269,7 @@ const RecipeForm: React.FC<RecipeFormProps> = React.memo(
 
             <div className="space-y-4">
               {ingredients.map((ingredient) => (
-                <div key={ingredient.id} className="flex items-center gap-2">
+                <div key={ingredient.name} className="flex items-center gap-2">
                   <div className="flex-1 bg-muted p-3 rounded-md flex justify-between items-center">
                     <span>
                       {ingredient.amount} {ingredient.unit} {ingredient.name}
@@ -278,7 +278,7 @@ const RecipeForm: React.FC<RecipeFormProps> = React.memo(
                       type="button"
                       size="icon"
                       variant="ghost"
-                      onClick={() => handleRemoveIngredient(ingredient.id)}
+                      onClick={() => handleRemoveIngredient(ingredient.name)}
                     >
                       <XIcon className="h-4 w-4" />
                     </Button>

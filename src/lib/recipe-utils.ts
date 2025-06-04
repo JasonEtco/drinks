@@ -99,7 +99,6 @@ export const createIngredient = (
   unit: string,
 ): Ingredient => {
   return {
-    id: generateId(),
     name,
     amount,
     unit,

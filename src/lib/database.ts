@@ -100,10 +100,9 @@ class Database {
             instructions:
               "Shake all ingredients with ice and strain over fresh ice.",
             ingredients: [
-              { id: generateId(), name: "Tequila", amount: 2, unit: "oz" },
-              { id: generateId(), name: "Cointreau", amount: 1, unit: "oz" },
+              { name: "Tequila", amount: 2, unit: "oz" },
+              { name: "Cointreau", amount: 1, unit: "oz" },
               {
-                id: generateId(),
                 name: "Fresh lime juice",
                 amount: 1,
                 unit: "oz",
@@ -124,19 +123,16 @@ class Database {
               "Muddle sugar with bitters, add whiskey and ice, stir.",
             ingredients: [
               {
-                id: generateId(),
                 name: "Bourbon whiskey",
                 amount: 2,
                 unit: "oz",
               },
               {
-                id: generateId(),
                 name: "Simple syrup",
                 amount: 0.25,
                 unit: "oz",
               },
               {
-                id: generateId(),
                 name: "Angostura bitters",
                 amount: 2,
                 unit: "dashes",

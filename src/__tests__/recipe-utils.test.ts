@@ -43,19 +43,9 @@ describe('Recipe Utilities', () => {
     it('should create a valid ingredient object', () => {
       const ingredient = createIngredient('Vodka', 2, 'oz');
       
-      expect(ingredient).toHaveProperty('id');
       expect(ingredient).toHaveProperty('name', 'Vodka');
       expect(ingredient).toHaveProperty('amount', 2);
       expect(ingredient).toHaveProperty('unit', 'oz');
-      expect(typeof ingredient.id).toBe('string');
-      expect(ingredient.id.length).toBeGreaterThan(0);
-    });
-
-    it('should create ingredients with unique IDs', () => {
-      const ingredient1 = createIngredient('Gin', 1.5, 'oz');
-      const ingredient2 = createIngredient('Gin', 1.5, 'oz');
-      
-      expect(ingredient1.id).not.toBe(ingredient2.id);
     });
 
     it('should handle decimal amounts', () => {
