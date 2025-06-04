@@ -55,7 +55,7 @@ describe('Recipe Utilities', () => {
     });
 
     it('should handle different units', () => {
-      const units = ['oz', 'ml', 'dashes', 'splash', 'tsp', 'tbsp'];
+      const units = ['oz', 'ml', 'dashes', 'splash', 'tsp', 'tbsp', 'teaspoon'];
       
       units.forEach(unit => {
         const ingredient = createIngredient('Test Ingredient', 1, unit);
@@ -140,6 +140,25 @@ describe('Recipe Utilities', () => {
       
       expect(recipe.name).toBe(specialName);
       expect(recipe.instructions).toBe(specialInstructions);
+    });
+
+    it('should create recipe with teaspoon units', () => {
+      const ingredientsWithTeaspoon = [
+        createIngredient('Vodka', 2, 'oz'),
+        createIngredient('Sugar', 1, 'teaspoon'),
+        createIngredient('Lime Juice', 0.5, 'oz'),
+      ];
+      
+      const recipe = createRecipe(
+        'Teaspoon Test Cocktail',
+        ingredientsWithTeaspoon,
+        'Mix ingredients with teaspoon measurements'
+      );
+      
+      expect(recipe.ingredients).toHaveLength(3);
+      expect(recipe.ingredients[1].unit).toBe('teaspoon');
+      expect(recipe.ingredients[1].amount).toBe(1);
+      expect(recipe.ingredients[1].name).toBe('Sugar');
     });
   });
 });
