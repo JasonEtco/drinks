@@ -3,7 +3,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { GlassIcon } from "@/components/GlassIcon";
 import { calculateTotalVolume } from "../lib/recipe-utils";
-import { CategoryLabel } from "@/components/CategoryLabel";
 import { Recipe } from "../lib/types";
 
 interface SwipeableCardProps {
@@ -167,7 +166,6 @@ const SwipeableCard: React.FC<SwipeableCardProps> = ({
             <CardTitle className="text-2xl mb-2  md:text-3xl">
               {recipe.name}
             </CardTitle>
-            {recipe.category && <CategoryLabel category={recipe.category} />}
           </div>
         </CardHeader>
 

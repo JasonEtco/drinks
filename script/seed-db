@@ -1,18 +1,13 @@
 #!/usr/bin/env node
-
 // Seed script for Drinks Database
 // Usage: node script/seed-db [database-path]
-
 import sqlite3 from 'sqlite3';
 import path from 'path';
 import { fileURLToPath } from 'url';
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
 // Get database path from command line argument or use default
 const DB_PATH = process.argv[2] || path.join(__dirname, '../recipes.db');
-
 // Colors for console output
 const colors = {
   reset: '\x1b[0m',
@@ -24,11 +19,9 @@ const colors = {
   magenta: '\x1b[35m',
   cyan: '\x1b[36m'
 };
-
 const log = (color, message) => {
   console.log(`${color}${message}${colors.reset}`);
 };
-
 // Glass types enum matching the application
 const GlassType = {
   COUPE: "Coupe",
@@ -46,13 +39,11 @@ const GlassType = {
   JULEP: "Julep",
   OTHER: "Other"
 };
-
 // Comprehensive seed data with classic cocktails
 const seedRecipes = [
   {
     name: 'Classic Margarita',
     description: 'A perfect balance of tequila, citrus, and orange liqueur with a salted rim',
-    category: 'Cocktail',
     glass: GlassType.COUPE,
     garnish: 'Lime wheel and salt rim',
     instructions: 'Salt the rim of a coupe glass. Shake all ingredients with ice and double strain into the glass.',
@@ -66,7 +57,6 @@ const seedRecipes = [
   {
     name: 'Old Fashioned',
     description: 'The quintessential whiskey cocktail - simple, strong, and timeless',
-    category: 'Cocktail',
     glass: GlassType.ROCKS,
     garnish: 'Orange peel',
     instructions: 'Add sugar and bitters to a rocks glass, muddle. Add whiskey and ice, stir until chilled. Express orange peel over drink.',
@@ -80,7 +70,6 @@ const seedRecipes = [
   {
     name: 'Manhattan',
     description: 'Sophisticated and stirred, the Manhattan is whiskey perfection with sweet vermouth',
-    category: 'Cocktail',
     glass: GlassType.COUPE,
     garnish: 'Maraschino cherry',
     instructions: 'Stir all ingredients with ice in a mixing glass. Strain into a chilled coupe glass.',
@@ -94,7 +83,6 @@ const seedRecipes = [
   {
     name: 'Negroni',
     description: 'Equal parts gin, Campari, and sweet vermouth create this bitter and complex aperitivo',
-    category: 'Cocktail',
     glass: GlassType.ROCKS,
     garnish: 'Orange peel',
     instructions: 'Build all ingredients in a rocks glass over ice. Stir gently. Express orange peel over drink.',
@@ -108,7 +96,6 @@ const seedRecipes = [
   {
     name: 'Daiquiri',
     description: 'Hemingway\'s favorite - a simple yet perfect balance of rum, lime, and sugar',
-    category: 'Cocktail',
     glass: GlassType.COUPE,
     garnish: 'Lime wheel',
     instructions: 'Shake all ingredients with ice and double strain into a chilled coupe glass.',
@@ -122,7 +109,6 @@ const seedRecipes = [
   {
     name: 'Whiskey Sour',
     description: 'A classic sour elevated with silky egg white foam and bright citrus',
-    category: 'Cocktail',
     glass: GlassType.COUPE,
     garnish: 'Lemon wheel and cherry',
     instructions: 'Dry shake all ingredients, then shake with ice. Double strain into a coupe glass.',
@@ -137,7 +123,6 @@ const seedRecipes = [
   {
     name: 'Martini',
     description: 'The king of cocktails - gin and vermouth in perfect harmony',
-    category: 'Cocktail',
     glass: GlassType.MARTINI,
     garnish: 'Olive or lemon twist',
     instructions: 'Stir gin and vermouth with ice in a mixing glass. Strain into a chilled martini glass.',
@@ -150,7 +135,6 @@ const seedRecipes = [
   {
     name: 'Cosmopolitan',
     description: 'Sex and the City\'s favorite - a sophisticated pink cocktail with vodka and cranberry',
-    category: 'Cocktail',
     glass: GlassType.MARTINI,
     garnish: 'Lime wheel',
     instructions: 'Shake all ingredients with ice and double strain into a chilled martini glass.',
@@ -165,7 +149,6 @@ const seedRecipes = [
   {
     name: 'Mojito',
     description: 'Cuba\'s refreshing national cocktail with muddled mint and lime',
-    category: 'Cocktail',
     glass: GlassType.COLLINS,
     garnish: 'Fresh mint sprig',
     instructions: 'Gently muddle mint leaves with lime juice and simple syrup. Add rum and ice, top with soda water. Stir gently.',
@@ -181,7 +164,6 @@ const seedRecipes = [
   {
     name: 'Moscow Mule',
     description: 'A spicy and refreshing vodka cocktail with ginger beer and lime',
-    category: 'Cocktail',
     glass: GlassType.COPPER_MUG,
     garnish: 'Lime wheel and mint sprig',
     instructions: 'Build in a copper mug over ice. Add vodka and lime juice, top with ginger beer. Stir gently.',
@@ -195,7 +177,6 @@ const seedRecipes = [
   {
     name: 'Espresso Martini',
     description: 'The perfect pick-me-up - coffee and cocktails united in caffeinated bliss',
-    category: 'Cocktail',
     glass: GlassType.MARTINI,
     garnish: 'Three coffee beans',
     instructions: 'Shake all ingredients vigorously with ice and double strain into a chilled martini glass.',
@@ -210,7 +191,6 @@ const seedRecipes = [
   {
     name: 'Aperol Spritz',
     description: 'Italy\'s beloved aperitivo - light, bubbly, and perfectly bitter-sweet',
-    category: 'Aperitif',
     glass: GlassType.WINE,
     garnish: 'Orange slice',
     instructions: 'Build in a wine glass over ice. Add Aperol and Prosecco, top with soda water. Stir gently.',
@@ -224,7 +204,6 @@ const seedRecipes = [
   {
     name: 'Sazerac',
     description: 'New Orleans\' original cocktail with rye whiskey and an absinthe rinse',
-    category: 'Cocktail',
     glass: GlassType.ROCKS,
     garnish: 'Lemon peel',
     instructions: 'Rinse glass with absinthe. Stir rye, sugar, and bitters with ice. Strain into rinsed glass. Express lemon peel.',
@@ -239,7 +218,6 @@ const seedRecipes = [
   {
     name: 'Aviation',
     description: 'A pre-Prohibition gin cocktail with floral violet and cherry notes',
-    category: 'Cocktail',
     glass: GlassType.COUPE,
     garnish: 'Maraschino cherry',
     instructions: 'Shake all ingredients with ice and double strain into a chilled coupe glass.',
@@ -254,7 +232,6 @@ const seedRecipes = [
   {
     name: 'Paper Plane',
     description: 'A modern equal-parts cocktail balancing whiskey with Italian bitters',
-    category: 'Cocktail',
     glass: GlassType.COUPE,
     garnish: 'None',
     instructions: 'Shake all ingredients with ice and double strain into a chilled coupe glass.',
@@ -269,7 +246,6 @@ const seedRecipes = [
   {
     name: 'Ramos Gin Fizz',
     description: 'New Orleans\' most labor-intensive cocktail - 12 minutes of shaking for silky perfection',
-    category: 'Cocktail',
     glass: GlassType.COLLINS,
     garnish: 'None',
     instructions: 'Dry shake all ingredients except soda for 12 minutes. Add ice and shake briefly. Strain into glass and top with soda.',
@@ -288,7 +264,6 @@ const seedRecipes = [
   {
     name: 'Last Word',
     description: 'A Prohibition-era equal-parts cocktail with herbal Chartreuse complexity',
-    category: 'Cocktail',
     glass: GlassType.COUPE,
     garnish: 'Lime wheel',
     instructions: 'Shake all ingredients with ice and double strain into a chilled coupe glass.',
@@ -303,7 +278,6 @@ const seedRecipes = [
   {
     name: 'Dark n Stormy',
     description: 'Bermuda\'s national drink - dark rum and ginger beer with a stormy kick',
-    category: 'Cocktail',
     glass: GlassType.HIGHBALL,
     garnish: 'Lime wheel',
     instructions: 'Build in a highball glass over ice. Add rum and lime juice, top with ginger beer.',
@@ -317,7 +291,6 @@ const seedRecipes = [
   {
     name: 'Vieux Carré',
     description: 'A complex New Orleans cocktail blending American whiskey with French cognac',
-    category: 'Cocktail',
     glass: GlassType.ROCKS,
     garnish: 'Lemon peel',
     instructions: 'Stir all ingredients with ice in a mixing glass. Strain over fresh ice in a rocks glass.',
@@ -334,7 +307,6 @@ const seedRecipes = [
   {
     name: 'Bee\'s Knees',
     description: 'A Prohibition-era gin sour sweetened with honey instead of sugar',
-    category: 'Cocktail',
     glass: GlassType.COUPE,
     garnish: 'Lemon twist',
     instructions: 'Shake all ingredients with ice and double strain into a chilled coupe glass.',
@@ -346,13 +318,11 @@ const seedRecipes = [
     tags: ['classic', 'gin', 'honey', 'citrus', 'prohibition era']
   }
 ];
-
 class DatabaseSeeder {
   constructor(dbPath) {
     this.dbPath = dbPath;
     this.db = null;
   }
-
   async connect() {
     return new Promise((resolve, reject) => {
       sqlite3.verbose();
@@ -366,7 +336,6 @@ class DatabaseSeeder {
       });
     });
   }
-
   async initializeDatabase() {
     return new Promise((resolve, reject) => {
       const createTableSQL = `
@@ -374,7 +343,6 @@ class DatabaseSeeder {
           id TEXT PRIMARY KEY,
           name TEXT NOT NULL,
           description TEXT,
-          category TEXT,
           glass TEXT,
           garnish TEXT,
           instructions TEXT NOT NULL,
@@ -384,7 +352,6 @@ class DatabaseSeeder {
           updatedAt TEXT NOT NULL
         )
       `;
-
       this.db.run(createTableSQL, (err) => {
         if (err) {
           reject(err);
@@ -395,7 +362,6 @@ class DatabaseSeeder {
       });
     });
   }
-
   async clearDatabase() {
     return new Promise((resolve, reject) => {
       this.db.run('DELETE FROM recipes', (err) => {
@@ -408,10 +374,8 @@ class DatabaseSeeder {
       });
     });
   }
-
   async seedRecipes() {
     log(colors.blue, `🌱 Seeding ${seedRecipes.length} recipes...`);
-    
     for (let i = 0; i < seedRecipes.length; i++) {
       const recipe = seedRecipes[i];
       try {
@@ -422,7 +386,6 @@ class DatabaseSeeder {
       }
     }
   }
-
   async insertRecipe(recipe) {
     return new Promise((resolve, reject) => {
       const now = new Date().toISOString();
@@ -430,7 +393,6 @@ class DatabaseSeeder {
         id: Date.now().toString() + Math.random().toString(36).substring(2, 9),
         name: recipe.name,
         description: recipe.description || null,
-        category: recipe.category || null,
         glass: recipe.glass || null,
         garnish: recipe.garnish || null,
         instructions: recipe.instructions,
@@ -439,14 +401,12 @@ class DatabaseSeeder {
         createdAt: now,
         updatedAt: now
       };
-
       const sql = `
-        INSERT INTO recipes (id, name, description, category, glass, garnish, instructions, ingredients, tags, createdAt, updatedAt)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO recipes (id, name, description, glass, garnish, instructions, ingredients, tags, createdAt, updatedAt)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
-
       this.db.run(sql, [
-        recipeData.id, recipeData.name, recipeData.description, recipeData.category, recipeData.glass,
+        recipeData.id, recipeData.name, recipeData.description, recipeData.glass,
         recipeData.garnish, recipeData.instructions, recipeData.ingredients,
         recipeData.tags, recipeData.createdAt, recipeData.updatedAt
       ], function(err) {
@@ -458,7 +418,6 @@ class DatabaseSeeder {
       });
     });
   }
-
   async getRecipeCount() {
     return new Promise((resolve, reject) => {
       this.db.get('SELECT COUNT(*) as count FROM recipes', (err, row) => {
@@ -470,7 +429,6 @@ class DatabaseSeeder {
       });
     });
   }
-
   async close() {
     return new Promise((resolve) => {
       if (this.db) {
@@ -486,22 +444,17 @@ class DatabaseSeeder {
     });
   }
 }
-
 async function main() {
   log(colors.bright + colors.magenta, '🍹 Drinks Database Seeder');
   log(colors.bright + colors.magenta, '========================');
-  
   const seeder = new DatabaseSeeder(DB_PATH);
-  
   try {
     await seeder.connect();
     await seeder.initializeDatabase();
     await seeder.clearDatabase();
     await seeder.seedRecipes();
-    
     const count = await seeder.getRecipeCount();
     log(colors.green, `✨ Successfully seeded ${count} recipes!`);
-    
   } catch (error) {
     log(colors.red, `❌ Error: ${error.message}`);
     process.exit(1);
@@ -509,6 +462,5 @@ async function main() {
     await seeder.close();
   }
 }
-
 // Run the seeder
 main().catch(console.error);

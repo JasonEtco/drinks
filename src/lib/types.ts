@@ -29,7 +29,6 @@ export interface Recipe {
   instructions: string;
   glass?: GlassType;
   garnish?: string;
-  category?: string;
   tags: string[];
   createdAt: string;
   updatedAt: string;

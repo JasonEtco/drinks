@@ -18,7 +18,6 @@ const createRecipeToolSchema = z.object({
   instructions: z.string().min(1, "Instructions are required"),
   glass: z.nativeEnum(GlassType),
   garnish: z.string(),
-  category: z.string(),
   tags: z.array(z.string()),
 }).required();
 
@@ -37,7 +36,6 @@ const editRecipeToolSchema = z.object({
   instructions: z.string().min(1, "Instructions are required"),
   glass: z.nativeEnum(GlassType),
   garnish: z.string(),
-  category: z.string(),
   tags: z.array(z.string()),
 }).required();
 
@@ -53,7 +51,6 @@ export const createRecipeTool = tool({
   - instructions: Step-by-step preparation instructions
   - glass: Optional glass type (${Object.values(GlassType).join(", ")})
   - garnish: Optional garnish description
-  - category: Optional category (e.g., "cocktail", "mocktail")
   - tags: Optional array of tags for categorization`,
   parameters: createRecipeToolSchema,
   experimental_toToolResultContent: (result: any) => {
@@ -74,7 +71,6 @@ export const createRecipeTool = tool({
         instructions: params.instructions,
         glass: params.glass,
         garnish: params.garnish,
-        category: params.category,
         tags: params.tags || [],
       };
 
@@ -111,7 +107,6 @@ export const editRecipeTool = tool({
   - instructions: New step-by-step preparation instructions (optional)
   - glass: New glass type (optional, ${Object.values(GlassType).join(", ")})
   - garnish: New garnish description (optional)
-  - category: New category (optional)
   - tags: New array of tags (optional)`,
   parameters: editRecipeToolSchema,
     experimental_toToolResultContent: (result: any) => {
@@ -151,7 +146,6 @@ export const editRecipeTool = tool({
       if (params.instructions !== undefined) updates.instructions = params.instructions;
       if (params.glass !== undefined) updates.glass = params.glass;
       if (params.garnish !== undefined) updates.garnish = params.garnish;
-      if (params.category !== undefined) updates.category = params.category;
       if (params.tags !== undefined) updates.tags = params.tags;
       if (params.ingredients !== undefined) updates.ingredients = params.ingredients;
 

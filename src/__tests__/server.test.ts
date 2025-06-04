@@ -3,7 +3,25 @@ import request from 'supertest';
 import express, { Request, Response } from 'express';
 import { GlassType } from '../lib/types';
 
-// Define Recipe interface locally to avoid imports
+// Define locally to avoid imports
+const createTestRecipe = (overrides: Partial<Recipe> = {}): Recipe => ({
+  id: 'test-id',
+  name: 'Test Margarita',
+  glass: GlassType.COUPE,
+  garnish: 'Lime wheel',
+  instructions: 'Shake all ingredients with ice and strain over fresh ice.',
+  ingredients: [
+    { id: 'ing1', name: 'Tequila', amount: 2, unit: 'oz' },
+    { id: 'ing2', name: 'Cointreau', amount: 1, unit: 'oz' },
+    { id: 'ing3', name: 'Fresh lime juice', amount: 1, unit: 'oz' },
+  ],
+  tags: ['classic', 'citrus'],
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+  ...overrides,
+});
+
+// Define interface locally to avoid imports
 interface Recipe {
   id: string;
   name: string;
@@ -17,7 +35,6 @@ interface Recipe {
   instructions: string;
   glass?: GlassType;
   garnish?: string;
-  category?: string;
   tags: string[];
   createdAt: string;
   updatedAt: string;
@@ -27,7 +44,6 @@ interface Recipe {
 interface MockDatabase {
   listRecipes(): Promise<Recipe[]>;
   searchRecipes(query: string): Promise<Recipe[]>;
-  getRecipesByCategory(category: string): Promise<Recipe[]>;
   createRecipe(recipe: any): Promise<Recipe>;
   getRecipeById(id: string): Promise<Recipe | null>;
   updateRecipe(id: string, updates: any): Promise<Recipe | null>;
@@ -38,7 +54,6 @@ interface MockDatabase {
 const createMockDatabase = (): MockDatabase => ({
   listRecipes: vi.fn(),
   searchRecipes: vi.fn(),
-  getRecipesByCategory: vi.fn(),
   createRecipe: vi.fn(),
   getRecipeById: vi.fn(),
   updateRecipe: vi.fn(),
@@ -106,16 +121,6 @@ const createTestApp = (mockDb: MockDatabase) => {
       res.json(filteredRecipes);
     } catch (error) {
       res.status(500).json({ error: 'Failed to search recipes' });
-    }
-  });
-
-  // Get recipes by category
-  app.get('/api/recipes/category/:category', async (req: Request, res: Response) => {
-    try {
-      const filteredRecipes = await mockDb.getRecipesByCategory(req.params.category);
-      res.json(filteredRecipes);
-    } catch (error) {
-      res.status(500).json({ error: 'Failed to fetch recipes by category' });
     }
   });
 
@@ -208,25 +213,6 @@ const createTestApp = (mockDb: MockDatabase) => {
   return app;
 };
 
-// Helper function to create test recipe
-const createTestRecipe = (overrides: Partial<Recipe> = {}): Recipe => ({
-  id: 'test-id-' + Math.random().toString(36).substring(7),
-  name: 'Test Margarita',
-  category: 'cocktail',
-  glass: GlassType.COUPE,
-  garnish: 'Lime wheel',
-  instructions: 'Shake all ingredients with ice and strain over fresh ice.',
-  ingredients: [
-    { id: 'ing1', name: 'Tequila', amount: 2, unit: 'oz' },
-    { id: 'ing2', name: 'Cointreau', amount: 1, unit: 'oz' },
-    { id: 'ing3', name: 'Fresh lime juice', amount: 1, unit: 'oz' },
-  ],
-  tags: ['classic', 'citrus'],
-  createdAt: new Date().toISOString(),
-  updatedAt: new Date().toISOString(),
-  ...overrides,
-});
-
 describe('Server API Endpoints', () => {
   let app: express.Application;
   let mockDb: MockDatabase;
@@ -318,40 +304,6 @@ describe('Server API Endpoints', () => {
     });
   });
 
-  describe('GET /api/recipes/category/:category', () => {
-    it('should return recipes by category successfully', async () => {
-      const mockRecipes = [
-        createTestRecipe({ id: '1', category: 'cocktail' }),
-        createTestRecipe({ id: '2', category: 'cocktail' }),
-      ];
-      (mockDb.getRecipesByCategory as ReturnType<typeof vi.fn>).mockResolvedValue(mockRecipes);
-
-      const response = await request(app).get('/api/recipes/category/cocktail');
-
-      expect(response.status).toBe(200);
-      expect(response.body).toEqual(mockRecipes);
-      expect(mockDb.getRecipesByCategory).toHaveBeenCalledWith('cocktail');
-    });
-
-    it('should return 500 when database fails', async () => {
-      (mockDb.getRecipesByCategory as ReturnType<typeof vi.fn>).mockRejectedValue(new Error('Database error'));
-
-      const response = await request(app).get('/api/recipes/category/cocktail');
-
-      expect(response.status).toBe(500);
-      expect(response.body).toEqual({ error: 'Failed to fetch recipes by category' });
-    });
-
-    it('should handle empty category results', async () => {
-      (mockDb.getRecipesByCategory as ReturnType<typeof vi.fn>).mockResolvedValue([]);
-
-      const response = await request(app).get('/api/recipes/category/empty');
-
-      expect(response.status).toBe(200);
-      expect(response.body).toEqual([]);
-    });
-  });
-
   describe('POST /api/recipes', () => {
     const validRecipeData = {
       name: 'Test Recipe',
@@ -361,7 +313,6 @@ describe('Server API Endpoints', () => {
       ],
       glass: GlassType.COUPE,
       garnish: 'Lemon twist',
-      category: 'cocktail',
       tags: ['test'],
     };
 

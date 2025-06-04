@@ -96,13 +96,11 @@ describe('Recipe Utilities', () => {
         sampleIngredients,
         'Complex preparation method',
         GlassType.MARTINI,
-        'Olive garnish',
-        'premium'
+        'Olive garnish'
       );
       
       expect(recipe.glass).toBe(GlassType.MARTINI);
       expect(recipe.garnish).toBe('Olive garnish');
-      expect(recipe.category).toBe('premium');
     });
 
     it('should generate unique IDs for different recipes', () => {

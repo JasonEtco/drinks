@@ -12,8 +12,7 @@ const GenerateDescriptionSchema = z.object({
     amount: z.number(),
     unit: z.string()
   })).min(1),
-  name: z.string().optional(),
-  category: z.string().optional()
+  name: z.string().optional()
 });
 
 export function chatRouter(): Router {
@@ -129,7 +128,7 @@ When using tools, always inform the user about what you're doing (e.g., "I'll sa
         return;
       }
 
-      const { ingredients, name, category } = validation.data;
+      const { ingredients, name } = validation.data;
 
       const githubModels = createOpenAI({
         apiKey: githubToken,
@@ -155,7 +154,7 @@ Guidelines:
 - Don't make it sound pretentious
 - Don't include the name of the cocktail in the description`
 
-      const userPrompt = `Create a description for a cocktail${name ? ` called "${name}"` : ""}${category ? ` in the ${category} category` : ""} with these ingredients: ${ingredientsList}`;
+      const userPrompt = `Create a description for a cocktail${name ? ` called "${name}"` : ""} with these ingredients: ${ingredientsList}`;
 
       const result = await generateText({
         model: githubModels(process.env.CHAT_MODEL || "openai/gpt-4.1-nano"),

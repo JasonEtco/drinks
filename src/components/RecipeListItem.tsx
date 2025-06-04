@@ -3,7 +3,6 @@ import type { Recipe } from "../lib/types";
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { calculateTotalVolume } from "../lib/recipe-utils";
-import { CategoryLabel } from "./CategoryLabel";
 import { GlassIcon } from "./GlassIcon";
 
 interface RecipeListItemProps {
@@ -38,7 +37,6 @@ export function RecipeListItem({ recipe, isLast }: RecipeListItemProps) {
         )}
 
         <div className="flex items-center gap-2 mt-4">
-          {recipe.category && <CategoryLabel category={recipe.category} />}
           {recipe.tags.slice(0, 3).map((tag) => (
             <Badge key={tag} variant="outline" className="text-xs">
               {tag}

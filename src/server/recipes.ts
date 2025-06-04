@@ -34,20 +34,6 @@ export function recipesRouter(): Router {
     }
   });
 
-  // Get recipes by category (must come before /:recipeId route)
-  router.get("/category/:category", async (req: Request, res: Response) => {
-      try {
-        const filteredRecipes = await database.getRecipesByCategory(
-          req.params.category
-        );
-        res.json(filteredRecipes);
-      } catch (error) {
-        console.error("Error fetching recipes by category:", error);
-        res.status(500).json({ error: "Failed to fetch recipes by category" });
-      }
-    }
-  );
-
   // Create new recipe
   router.post("/", async (req: Request, res: Response) => {
     try {

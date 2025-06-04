@@ -34,7 +34,6 @@ class Database {
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
         description TEXT,
-        category TEXT,
         glass TEXT,
         garnish TEXT,
         instructions TEXT NOT NULL,
@@ -94,7 +93,6 @@ class Database {
             id: "1",
             name: "Classic Margarita",
             description: "A perfect balance of tequila, citrus, and orange liqueur with a salted rim",
-            category: "cocktail",
             glass: GlassType.COUPE,
             garnish: "Lime wheel",
             instructions:
@@ -116,7 +114,6 @@ class Database {
             id: "2",
             name: "Old Fashioned",
             description: "The quintessential whiskey cocktail - simple, strong, and timeless",
-            category: "cocktail",
             glass: GlassType.ROCKS,
             garnish: "Orange peel",
             instructions:
@@ -157,7 +154,6 @@ class Database {
       id: recipe.id,
       name: recipe.name,
       description: recipe.description || null,
-      category: recipe.category || null,
       glass: recipe.glass || null,
       garnish: recipe.garnish || null,
       instructions: recipe.instructions,
@@ -174,7 +170,6 @@ class Database {
       id: row.id,
       name: row.name,
       description: row.description,
-      category: row.category,
       glass: row.glass,
       garnish: row.garnish,
       instructions: row.instructions,
@@ -230,8 +225,8 @@ class Database {
     return new Promise((resolve, reject) => {
       const row = this.recipeToRow(newRecipe);
       const sql = `
-        INSERT INTO recipes (id, name, description, category, glass, garnish, instructions, ingredients, tags, createdAt, updatedAt)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO recipes (id, name, description, glass, garnish, instructions, ingredients, tags, createdAt, updatedAt)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
 
       this.db.run(
@@ -240,7 +235,6 @@ class Database {
           row.id,
           row.name,
           row.description,
-          row.category,
           row.glass,
           row.garnish,
           row.instructions,
@@ -281,7 +275,7 @@ class Database {
       const row = this.recipeToRow(updatedRecipe);
       const sql = `
         UPDATE recipes 
-        SET name = ?, description = ?, category = ?, glass = ?, garnish = ?, instructions = ?, 
+        SET name = ?, description = ?, glass = ?, garnish = ?, instructions = ?, 
             ingredients = ?, tags = ?, updatedAt = ?
         WHERE id = ?
       `;
@@ -291,7 +285,6 @@ class Database {
         [
           row.name,
           row.description,
-          row.category,
           row.glass,
           row.garnish,
           row.instructions,
@@ -336,7 +329,6 @@ class Database {
       const sql = `
         SELECT * FROM recipes 
         WHERE LOWER(name) LIKE ? 
-           OR LOWER(category) LIKE ? 
            OR LOWER(ingredients) LIKE ? 
            OR LOWER(tags) LIKE ?
         ORDER BY createdAt DESC
@@ -344,24 +336,7 @@ class Database {
 
       this.db.all(
         sql,
-        [searchTerm, searchTerm, searchTerm, searchTerm],
-        (err, rows) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(rows.map((row) => this.rowToRecipe(row)));
-          }
-        },
-      );
-    });
-  }
-
-  // Get recipes by category
-  async getRecipesByCategory(category: string): Promise<Recipe[]> {
-    return new Promise((resolve, reject) => {
-      this.db.all(
-        "SELECT * FROM recipes WHERE category = ? ORDER BY createdAt DESC",
-        [category],
+        [searchTerm, searchTerm, searchTerm],
         (err, rows) => {
           if (err) {
             reject(err);

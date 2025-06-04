@@ -34,7 +34,6 @@ describe('MCP Tools - Create Recipe', () => {
       instructions: 'Shake with ice and strain into glass',
       glass: GlassType.COUPE,
       garnish: 'Lime wheel',
-      category: 'cocktail',
       tags: ['citrus', 'classic']
     }, {
       messages: [],
@@ -50,7 +49,6 @@ describe('MCP Tools - Create Recipe', () => {
     expect(result.recipe!.ingredients[0].unit).toBe('oz');
     expect(result.recipe!.glass).toBe(GlassType.COUPE);
     expect(result.recipe!.garnish).toBe('Lime wheel');
-    expect(result.recipe!.category).toBe('cocktail');
     expect(result.recipe!.tags).toEqual(['citrus', 'classic']);
     expect(result.message).toContain('Successfully created recipe');
   });
@@ -172,7 +170,6 @@ describe('MCP Tools - Edit Recipe', () => {
       ],
       glass: GlassType.ROCKS,
       garnish: 'Original garnish',
-      category: 'cocktail',
       tags: ['original']
     });
     testRecipeId = testRecipe.id;
@@ -234,7 +231,6 @@ describe('MCP Tools - Edit Recipe', () => {
       instructions: 'New instructions',
       glass: GlassType.MARTINI,
       garnish: 'New garnish',
-      category: 'updated',
       tags: ['new', 'updated']
     }, {
       messages: [],
@@ -246,7 +242,6 @@ describe('MCP Tools - Edit Recipe', () => {
     expect(result.recipe!.instructions).toBe('New instructions');
     expect(result.recipe!.glass).toBe(GlassType.MARTINI);
     expect(result.recipe!.garnish).toBe('New garnish');
-    expect(result.recipe!.category).toBe('updated');
     expect(result.recipe!.tags).toEqual(['new', 'updated']);
   });
 

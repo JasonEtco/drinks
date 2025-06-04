@@ -19,7 +19,6 @@ export const CreateRecipeSchema = z.object({
   instructions: z.string().min(1, "Instructions are required"),
   glass: GlassTypeSchema.optional(),
   garnish: z.string().optional(),
-  category: z.string().optional(),
   tags: z.array(z.string()).default([]),
 });
 
@@ -31,7 +30,6 @@ export const UpdateRecipeSchema = z.object({
   instructions: z.string().min(1, "Instructions are required").optional(),
   glass: GlassTypeSchema.optional(),
   garnish: z.string().optional(),
-  category: z.string().optional(),
   tags: z.array(z.string()).optional(),
 }).partial();
 

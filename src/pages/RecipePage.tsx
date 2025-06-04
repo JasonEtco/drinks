@@ -11,7 +11,7 @@ import {
 } from "@phosphor-icons/react";
 import { GlassIcon } from "@/components/GlassIcon";
 import { calculateTotalVolume } from "../lib/recipe-utils";
-import { CategoryLabel } from "@/components/CategoryLabel";
+
 import BatchCalculator from "@/components/BatchCalculator";
 import ClarificationCalculator from "@/components/ClarificationCalculator";
 import {
@@ -87,9 +87,6 @@ function RecipePage() {
             {/* Action Buttons */}
             <div className="sm:mt-0 mt-4 flex justify-between items-center">
               <div className="flex items-center gap-2">
-                {recipe.category && (
-                  <CategoryLabel category={recipe.category} />
-                )}
                 <Button
                   variant="outline"
                   onClick={() => setShowBatchCalculator(true)}

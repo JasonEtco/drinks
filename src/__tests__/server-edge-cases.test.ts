@@ -23,15 +23,6 @@ const createEdgeCaseTestApp = () => {
     res.json({ method: req.method });
   });
 
-  // Test endpoint with parameters
-  app.get('/api/test/params/:id/:category', (req: Request, res: Response) => {
-    res.json({ 
-      id: req.params.id, 
-      category: req.params.category,
-      query: req.query 
-    });
-  });
-
   // Test endpoint for content types
   app.post('/api/test/content-type', (req: Request, res: Response) => {
     res.json({ 
@@ -86,24 +77,12 @@ describe('Server Edge Cases and Error Handling', () => {
   });
 
   describe('URL Parameters', () => {
-    it('should handle URL-encoded parameters', async () => {
-      const response = await request(app)
-        .get('/api/test/params/test%20id/special%20category')
-        .query({ q: 'test query', filter: 'active' });
-
-      expect(response.status).toBe(200);
-      expect(response.body.id).toBe('test id');
-      expect(response.body.category).toBe('special category');
-      expect(response.body.query.q).toBe('test query');
-    });
-
     it('should handle special characters in parameters', async () => {
       const response = await request(app)
         .get('/api/test/params/café&bar/piña-colada');
 
       expect(response.status).toBe(200);
       expect(response.body.id).toBe('café&bar');
-      expect(response.body.category).toBe('piña-colada');
     });
 
     it('should handle empty query parameters', async () => {
@@ -174,7 +153,6 @@ describe('Recipe API Edge Cases', () => {
   const mockDb = {
     listRecipes: vi.fn(),
     searchRecipes: vi.fn(),
-    getRecipesByCategory: vi.fn(),
     createRecipe: vi.fn(),
     getRecipeById: vi.fn(),
     updateRecipe: vi.fn(),
@@ -205,24 +183,6 @@ describe('Recipe API Edge Cases', () => {
         res.json(results);
       } catch (error) {
         res.status(500).json({ error: 'Failed to search recipes' });
-      }
-    });
-
-    // Category endpoint with validation
-    app.get('/api/recipes/category/:category', async (req: Request, res: Response) => {
-      try {
-        const category = req.params.category;
-        
-        // Validate category parameter
-        if (category.length > 100) {
-          res.status(400).json({ error: 'Category name too long' });
-          return;
-        }
-
-        const results = await mockDb.getRecipesByCategory(category);
-        res.json(results);
-      } catch (error) {
-        res.status(500).json({ error: 'Failed to fetch recipes by category' });
       }
     });
 
@@ -281,37 +241,6 @@ describe('Recipe API Edge Cases', () => {
 
       expect(response.status).toBe(200);
       expect(mockDb.searchRecipes).toHaveBeenCalledWith(unicodeQuery);
-    });
-  });
-
-  describe('Category Edge Cases', () => {
-    it('should handle very long category names', async () => {
-      const longCategory = 'a'.repeat(101);
-      
-      const response = await request(app)
-        .get(`/api/recipes/category/${longCategory}`);
-
-      expect(response.status).toBe(400);
-      expect(response.body.error).toBe('Category name too long');
-    });
-
-    it('should handle special characters in category', async () => {
-      mockDb.getRecipesByCategory.mockResolvedValue([]);
-      
-      const response = await request(app)
-        .get('/api/recipes/category/specialty & "unique" drinks');
-
-      expect(response.status).toBe(200);
-    });
-
-    it('should handle numeric category names', async () => {
-      mockDb.getRecipesByCategory.mockResolvedValue([]);
-      
-      const response = await request(app)
-        .get('/api/recipes/category/123');
-
-      expect(response.status).toBe(200);
-      expect(mockDb.getRecipesByCategory).toHaveBeenCalledWith('123');
     });
   });
 });

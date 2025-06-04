@@ -44,7 +44,6 @@ describe('Database Integration Tests', () => {
     it('should insert test recipe successfully', async () => {
       const recipe = createTestRecipe({
         name: 'Test Mojito',
-        category: 'cocktail',
         glass: GlassType.HIGHBALL
       });
 
@@ -52,7 +51,6 @@ describe('Database Integration Tests', () => {
 
       expect(insertedRecipe.id).toBeDefined();
       expect(insertedRecipe.name).toBe('Test Mojito');
-      expect(insertedRecipe.category).toBe('cocktail');
       expect(insertedRecipe.glass).toBe(GlassType.HIGHBALL);
       expect(insertedRecipe.createdAt).toBeDefined();
       expect(insertedRecipe.updatedAt).toBeDefined();
@@ -128,7 +126,6 @@ describe('Database Integration Tests', () => {
     it('should handle recipe with all optional fields', async () => {
       const fullRecipe = createTestRecipe({
         name: 'Full Featured Recipe',
-        category: 'cocktail',
         glass: GlassType.NICK_AND_NORA,
         garnish: 'Lemon twist and cherry',
         instructions: 'Detailed mixing instructions with multiple steps',
@@ -137,7 +134,6 @@ describe('Database Integration Tests', () => {
 
       const insertedRecipe = await testDb.insertTestRecipe(fullRecipe);
 
-      expect(insertedRecipe.category).toBe('cocktail');
       expect(insertedRecipe.glass).toBe(GlassType.NICK_AND_NORA);
       expect(insertedRecipe.garnish).toBe('Lemon twist and cherry');
       expect(insertedRecipe.tags).toHaveLength(4);
@@ -157,7 +153,6 @@ describe('Database Integration Tests', () => {
       expect(insertedRecipe.name).toBe('Minimal Recipe');
       expect(insertedRecipe.instructions).toBe('Simple instructions');
       expect(insertedRecipe.ingredients).toHaveLength(1);
-      expect(insertedRecipe.category).toBe('cocktail'); // Default value
       expect(insertedRecipe.glass).toBe(GlassType.COUPE); // Default value
       expect(insertedRecipe.tags).toEqual([]); // Default value
     });

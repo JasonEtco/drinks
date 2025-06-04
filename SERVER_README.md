@@ -94,7 +94,6 @@ The server provides the following REST API endpoints:
 
 ### Search & Filter
 - `GET /api/recipes/search/:query` - Search recipes
-- `GET /api/recipes/category/:category` - Get recipes by category
 
 ### AI Chat
 - `POST /api/chat` - Get AI-powered cocktail suggestions (requires GITHUB_TOKEN)

@@ -10,30 +10,10 @@ interface RecipeListProps {
 type SortField = "name" | "created";
 type SortOrder = "asc" | "desc";
 
-// Get unique categories from recipes - memoized version
-const getUniqueCategories = (recipes: Recipe[]): string[] => {
-  const categories = new Set<string>();
-
-  recipes.forEach((recipe) => {
-    if (recipe.category) {
-      categories.add(recipe.category);
-    }
-  });
-
-  return Array.from(categories).sort();
-};
-
 function RecipeList({ recipes }: RecipeListProps) {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortField, setSortField] = useState<SortField>("created");
   const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
-  const [categoryFilter, setCategoryFilter] = useState<string>("all");
-
-  // Memoize expensive calculations
-  const uniqueCategories = useMemo(
-    () => getUniqueCategories(recipes),
-    [recipes]
-  );
 
   // Memoize event handlers
   const handleSortChange = useCallback(
@@ -52,15 +32,6 @@ function RecipeList({ recipes }: RecipeListProps) {
   const sortedRecipes = useMemo(() => {
     const filteredRecipes = recipes.filter((recipe) => {
       const lowerSearchTerm = searchTerm.toLowerCase();
-
-      // Apply category filter first
-      if (
-        categoryFilter &&
-        categoryFilter !== "all" &&
-        recipe.category !== categoryFilter
-      ) {
-        return false;
-      }
 
       // Search in recipe name
       if (recipe.name.toLowerCase().includes(lowerSearchTerm)) {
@@ -98,25 +69,22 @@ function RecipeList({ recipes }: RecipeListProps) {
         return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
       }
     });
-  }, [recipes, searchTerm, categoryFilter, sortField, sortOrder]);
+  }, [recipes, searchTerm, sortField, sortOrder]);
 
   return (
     <div className="space-y-6">
       <RecipeListHeader
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
-        categoryFilter={categoryFilter}
-        setCategoryFilter={setCategoryFilter}
         sortField={sortField}
         sortOrder={sortOrder}
-        uniqueCategories={uniqueCategories}
         handleSortChange={handleSortChange}
       />
 
       {sortedRecipes.length === 0 ? (
         <div className="text-center py-8">
           <p className="text-muted-foreground">
-            {searchTerm || (categoryFilter && categoryFilter !== "all")
+            {searchTerm
               ? "No recipes found matching your search."
               : "No recipes available. Create your first recipe!"}
           </p>

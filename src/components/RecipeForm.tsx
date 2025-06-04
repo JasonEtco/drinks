@@ -25,20 +25,6 @@ interface RecipeFormProps {
   cancelLinkTo: string;
 }
 
-// Predefined categories for cocktails
-const RECIPE_CATEGORIES = [
-  "Stirred",
-  "Shaken",
-  "Highball",
-  "Sour",
-  "Tiki",
-  "Martini",
-  "Old Fashioned",
-  "Punch",
-  "Fizz",
-  "Other",
-];
-
 // Get all glass types from the enum
 const GLASS_TYPES = Object.values(GlassType);
 
@@ -61,7 +47,6 @@ const RecipeForm: React.FC<RecipeFormProps> = React.memo(
     const [garnish, setGarnish] = useState(initialRecipe?.garnish || "");
     const [tags, setTags] = useState<string[]>(initialRecipe?.tags || []);
 
-    const [category, setCategory] = useState(initialRecipe?.category || "");
     const [isGeneratingDescription, setIsGeneratingDescription] =
       useState(false);
 
@@ -162,8 +147,7 @@ const RecipeForm: React.FC<RecipeFormProps> = React.memo(
             amount: ing.amount,
             unit: ing.unit,
           })),
-          name || undefined,
-          category || undefined
+          name || undefined
         );
         setDescription(result.description);
         toast.success("Description generated successfully!");
@@ -173,7 +157,7 @@ const RecipeForm: React.FC<RecipeFormProps> = React.memo(
       } finally {
         setIsGeneratingDescription(false);
       }
-    }, [ingredients, name, category]);
+    }, [ingredients, name]);
 
     const handleSubmit = useCallback(
       (e: React.FormEvent) => {
@@ -203,7 +187,6 @@ const RecipeForm: React.FC<RecipeFormProps> = React.memo(
               instructions,
               glass,
               garnish,
-              category,
               tags,
               updated: new Date().toISOString(),
             }
@@ -213,7 +196,6 @@ const RecipeForm: React.FC<RecipeFormProps> = React.memo(
               instructions,
               glass,
               garnish,
-              category,
               description,
               tags
             );
@@ -229,7 +211,6 @@ const RecipeForm: React.FC<RecipeFormProps> = React.memo(
         instructions,
         glass,
         garnish,
-        category,
         tags,
         initialRecipe,
         onSubmit,
@@ -278,23 +259,6 @@ const RecipeForm: React.FC<RecipeFormProps> = React.memo(
               placeholder="A brief description of the cocktail..."
               rows={2}
             />
-          </div>
-
-          {/* Recipe Category */}
-          <div className="space-y-2">
-            <Label htmlFor="category">Recipe Category</Label>
-            <Select value={category || ""} onValueChange={setCategory}>
-              <SelectTrigger id="category">
-                <SelectValue placeholder="Select a category" />
-              </SelectTrigger>
-              <SelectContent>
-                {RECIPE_CATEGORIES.map((cat) => (
-                  <SelectItem key={cat} value={cat}>
-                    {cat}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
           </div>
 
           {/* Ingredients */}

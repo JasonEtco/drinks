@@ -28,8 +28,10 @@ const createTestApp = () => {
             { name: 'Lime juice', amount: 1, unit: 'oz' }
           ],
           instructions: 'Shake with ice and strain',
-          category: 'cocktail',
           tags: ['ai-created']
+        }, {
+          messages: [],
+          toolCallId: 'test-tool-call-id'
         });
         
         if (createResult.success) {
@@ -62,6 +64,9 @@ const createTestApp = () => {
           id: recipeId,
           name: 'Updated AI Recipe',
           garnish: 'Lime wheel'
+        }, {
+          messages: [],
+          toolCallId: 'test-tool-call-id'
         });
         
         if (editResult.success) {
@@ -242,6 +247,9 @@ describe('MCP Tool Error Handling in Chat', () => {
       name: '', // Empty name should fail
       ingredients: [{ name: 'Vodka', amount: 2, unit: 'oz' }],
       instructions: 'Mix well'
+    }, {
+      messages: [],
+      toolCallId: 'test-tool-call-id'
     });
 
     expect(createResult.success).toBe(false);

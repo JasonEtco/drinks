@@ -7,7 +7,7 @@ A full-stack cocktail recipe management application built with React, TypeScript
 - **Recipe Management**: Create, edit, and organize cocktail recipes with precision
 - **Batch Calculator**: Scale recipes for events and large parties  
 - **Clarification Tools**: Professional clarification calculations for crystal-clear cocktails
-- **Search & Filter**: Find recipes by name, ingredient, category, or glass type
+- **Search & Filter**: Find recipes by name, ingredient, or glass type
 - **Persistent Storage**: SQLite database for reliable data persistence
 - **REST API**: Full backend API for recipe operations
 - **Mobile Sleep Prevention**: Toggle to keep mobile screens awake while viewing recipes
@@ -108,7 +108,6 @@ The server provides a REST API at `/api`:
 - `PUT /api/recipes/:id` - Update recipe
 - `DELETE /api/recipes/:id` - Delete recipe
 - `GET /api/recipes/search?q=query` - Search recipes
-- `GET /api/recipes/category/:category` - Get recipes by category
 - `GET /api/health` - Health check
 
 ## 🛠 Technology Stack

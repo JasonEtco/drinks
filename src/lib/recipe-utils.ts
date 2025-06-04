@@ -112,7 +112,6 @@ export const createRecipe = (
   instructions: string,
   glass?: GlassType,
   garnish?: string,
-  category?: string,
   description?: string,
   tags?: string[],
 ): Recipe => {
@@ -126,7 +125,6 @@ export const createRecipe = (
     instructions,
     glass,
     garnish,
-    category,
     tags: tags || [],
     createdAt: now,
     updatedAt: now,

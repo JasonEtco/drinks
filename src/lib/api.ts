@@ -72,22 +72,14 @@ export class ApiService {
     );
   }
 
-  // Get recipes by category
-  static async getRecipesByCategory(category: string): Promise<Recipe[]> {
-    return this.request<Recipe[]>(
-      `/recipes/category/${encodeURIComponent(category)}`,
-    );
-  }
-
   // Generate description for cocktail based on ingredients
   static async generateDescription(
     ingredients: Array<{ name: string; amount: number; unit: string }>,
-    name?: string,
-    category?: string
+    name?: string
   ): Promise<{ description: string }> {
     return this.request<{ description: string }>("/chat/generate/description", {
       method: "POST",
-      body: JSON.stringify({ ingredients, name, category }),
+      body: JSON.stringify({ ingredients, name }),
     });
   }
 

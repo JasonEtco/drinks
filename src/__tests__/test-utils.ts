@@ -28,7 +28,6 @@ export class TestDatabase {
           id TEXT PRIMARY KEY,
           name TEXT NOT NULL,
           description TEXT,
-          category TEXT,
           glass TEXT,
           garnish TEXT,
           instructions TEXT NOT NULL,
@@ -56,7 +55,6 @@ export class TestDatabase {
       description: recipe.description,
       instructions: recipe.instructions,
       ingredients: recipe.ingredients,
-      category: recipe.category || 'cocktail',
       glass: recipe.glass || GlassType.COUPE,
       garnish: recipe.garnish || '',
       tags: recipe.tags || [],
@@ -66,8 +64,8 @@ export class TestDatabase {
 
     return new Promise((resolve, reject) => {
       const sql = `
-        INSERT INTO recipes (id, name, description, category, glass, garnish, instructions, ingredients, tags, createdAt, updatedAt)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO recipes (id, name, description, glass, garnish, instructions, ingredients, tags, createdAt, updatedAt)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
 
       this.db!.run(
@@ -76,7 +74,6 @@ export class TestDatabase {
           fullRecipe.id,
           fullRecipe.name,
           fullRecipe.description,
-          fullRecipe.category,
           fullRecipe.glass,
           fullRecipe.garnish,
           fullRecipe.instructions,
@@ -131,7 +128,6 @@ export class TestDatabase {
 export const createTestRecipe = (overrides: Partial<Recipe> = {}): Recipe => ({
   id: generateId(),
   name: 'Test Margarita',
-  category: 'cocktail',
   glass: GlassType.COUPE,
   garnish: 'Lime wheel',
   instructions: 'Shake all ingredients with ice and strain over fresh ice.',
