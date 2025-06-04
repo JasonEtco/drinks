@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { calculateTotalVolume } from "../lib/recipe-utils";
 import { CategoryLabel } from "./CategoryLabel";
-import MenuGlassIcon from "./MenuGlassIcon";
+import { GlassIcon } from "./GlassIcon";
 
 interface MenuRecipeItemProps {
   recipe: Recipe;
@@ -23,7 +23,7 @@ export function MenuRecipeItem({ recipe, isLast }: MenuRecipeItemProps) {
       <div className="flex items-center p-4 gap-4">
         {/* Glass Icon */}
         <div className="flex-shrink-0">
-          <MenuGlassIcon glassType={recipe.glass} className="h-8 w-8" />
+          <GlassIcon glassType={recipe.glass} className="h-8 w-8" />
         </div>
 
         {/* Recipe Info */}

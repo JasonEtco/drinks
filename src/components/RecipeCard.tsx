@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { CalculatorIcon, FunnelIcon } from "@phosphor-icons/react";
 import { calculateTotalVolume } from "../lib/recipe-utils";
 import { Badge } from "@/components/ui/badge";
-import { GlassIcon } from "../lib/glass-icons";
+import { GlassIcon } from "@/components/GlassIcon";
 import { CategoryLabel } from "./CategoryLabel";
 
 interface RecipeCardProps {

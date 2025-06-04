@@ -23,7 +23,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { GlassIcon } from "../lib/glass-icons";
+import { GlassIcon } from "@/components/GlassIcon";
 
 interface RecipeFormProps {
   initialRecipe?: Recipe;
@@ -326,10 +326,9 @@ const RecipeForm: React.FC<RecipeFormProps> = React.memo(
                     {GLASS_TYPES.map((glassType) => (
                       <SelectItem key={glassType} value={glassType}>
                         <div className="flex items-center">
-                          <GlassIcon
-                            glassType={glassType as GlassType}
-                            className="mr-2 h-4 w-4"
-                          />
+                          <div className="mr-2 h-4 w-4">
+                            <GlassIcon glassType={glassType as GlassType} />
+                          </div>
                           <span>{glassType}</span>
                         </div>
                       </SelectItem>

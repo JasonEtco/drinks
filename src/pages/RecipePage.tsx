@@ -10,7 +10,7 @@ import {
   CalculatorIcon,
   FunnelIcon,
 } from "@phosphor-icons/react";
-import { GlassIcon } from "../lib/glass-icons";
+import { GlassIcon } from "@/components/GlassIcon";
 import { calculateTotalVolume } from "../lib/recipe-utils";
 import { CategoryLabel } from "@/components/CategoryLabel";
 import Header from "@/components/Header";

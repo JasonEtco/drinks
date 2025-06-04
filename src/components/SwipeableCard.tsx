@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { GlassIcon } from "../lib/glass-icons";
+import { GlassIcon } from "@/components/GlassIcon";
 import { calculateTotalVolume } from "../lib/recipe-utils";
 import { CategoryLabel } from "@/components/CategoryLabel";
 import { Recipe } from "../lib/types";
@@ -37,18 +37,18 @@ const SwipeableCard: React.FC<SwipeableCardProps> = ({
 
     const deltaX = clientX - startPos.current.x;
     const deltaY = clientY - startPos.current.y;
-    
+
     setDragOffset({ x: deltaX, y: deltaY });
     setRotation(deltaX * 0.1); // Slight rotation based on horizontal movement
   };
 
   const handleEnd = () => {
     if (!isDragging) return;
-    
+
     setIsDragging(false);
-    
+
     const threshold = 100; // Minimum swipe distance
-    
+
     if (Math.abs(dragOffset.x) > threshold) {
       if (dragOffset.x > 0) {
         onSwipeRight(); // Swipe right = like
@@ -56,7 +56,7 @@ const SwipeableCard: React.FC<SwipeableCardProps> = ({
         onSwipeLeft(); // Swipe left = pass
       }
     }
-    
+
     // Reset position and rotation
     setDragOffset({ x: 0, y: 0 });
     setRotation(0);
@@ -148,7 +148,7 @@ const SwipeableCard: React.FC<SwipeableCardProps> = ({
             </div>
           </div>
         )}
-        
+
         {showPassOverlay && (
           <div
             className="absolute inset-0 bg-red-500 bg-opacity-20 flex items-center justify-center z-10"
@@ -165,9 +165,7 @@ const SwipeableCard: React.FC<SwipeableCardProps> = ({
             <CardTitle className="text-2xl md:text-3xl">
               {recipe.name}
             </CardTitle>
-            {recipe.category && (
-              <CategoryLabel category={recipe.category} />
-            )}
+            {recipe.category && <CategoryLabel category={recipe.category} />}
           </div>
         </CardHeader>
 
@@ -175,16 +173,11 @@ const SwipeableCard: React.FC<SwipeableCardProps> = ({
           <div>
             <div className="flex justify-between items-center mb-3">
               <h3 className="font-semibold">Ingredients</h3>
-              <Badge variant="outline">
-                {totalVolume.toFixed(1)} oz total
-              </Badge>
+              <Badge variant="outline">{totalVolume.toFixed(1)} oz total</Badge>
             </div>
             <ul className="space-y-2">
               {recipe.ingredients.map((ingredient, index) => (
-                <li
-                  key={index}
-                  className="flex justify-between text-sm"
-                >
+                <li key={index} className="flex justify-between text-sm">
                   <span className="font-medium">{ingredient.name}</span>
                   <span className="text-muted-foreground">
                     {ingredient.amount} {ingredient.unit}
