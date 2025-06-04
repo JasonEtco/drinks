@@ -52,7 +52,7 @@
         "tailwind-merge": "^3.3.0",
         "tw-animate-css": "^1.3.2",
         "vite-plugin-svgr": "^4.3.0",
-        "zod": "^3.25.42"
+        "zod": "^3.25.51"
     },
     "devDependencies": {
         "@tailwindcss/postcss": "^4.1.8",
