@@ -34,7 +34,7 @@ export function RecipeListItem({ recipe, isLast }: RecipeListItemProps) {
 
             {/* Description */}
             {recipe.description && (
-              <p className="text-muted-foreground mt-2 text-sm line-clamp-2">
+              <p className="text-muted-foreground mt-2 text-sm max-w-140">
                 {recipe.description}
               </p>
             )}

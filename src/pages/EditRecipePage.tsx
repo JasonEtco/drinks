@@ -69,18 +69,10 @@ export default function EditRecipePage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-semibold">Edit Recipe</h2>
-      </div>
-
-      <div className="mt-4">
-        <RecipeForm
-          initialRecipe={editingRecipe}
-          onSubmit={handleRecipeSubmit}
-          cancelLinkTo="/"
-        />
-      </div>
-    </div>
+    <RecipeForm
+      initialRecipe={editingRecipe}
+      onSubmit={handleRecipeSubmit}
+      cancelLinkTo="/"
+    />
   );
 }

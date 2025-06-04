@@ -44,17 +44,7 @@ const NewRecipePage = () => {
     );
   }
 
-  return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-semibold">Create Recipe</h2>
-      </div>
-
-      <div className="mt-4">
-        <RecipeForm onSubmit={handleRecipeSubmit} cancelLinkTo="/" />
-      </div>
-    </div>
-  );
+  return <RecipeForm onSubmit={handleRecipeSubmit} cancelLinkTo="/" />;
 };
 
 export default NewRecipePage;
