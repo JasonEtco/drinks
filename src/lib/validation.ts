@@ -3,7 +3,6 @@ import { GlassType } from "./types.js";
 
 // Zod schema for Ingredient
 export const IngredientSchema = z.object({
-  id: z.string().min(1, "Ingredient ID is required"),
   name: z.string().min(1, "Ingredient name is required"),
   amount: z.number().positive("Ingredient amount must be positive"),
   unit: z.string().min(1, "Ingredient unit is required"),

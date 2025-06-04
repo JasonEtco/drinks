@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Recipe, Ingredient, GlassType } from "../lib/types";
 import { useRecipes } from "../contexts/RecipeContext";
 import { createRecipe, createIngredient } from "../lib/recipe-utils";
+import { ApiService } from "../lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -14,7 +15,7 @@ import {
   CardTitle,
   CardFooter,
 } from "@/components/ui/card";
-import { PlusIcon, XIcon, CheckIcon } from "@phosphor-icons/react";
+import { PlusIcon, XIcon, CheckIcon, SparkleIcon } from "@phosphor-icons/react";
 import {
   Select,
   SelectContent,
@@ -67,6 +68,8 @@ const RecipeForm: React.FC<RecipeFormProps> = React.memo(
     const [garnish, setGarnish] = useState(initialRecipe?.garnish || "");
 
     const [category, setCategory] = useState(initialRecipe?.category || "");
+    const [isGeneratingDescription, setIsGeneratingDescription] =
+      useState(false);
 
     const [newIngredientName, setNewIngredientName] = useState("");
     const [newIngredientAmount, setNewIngredientAmount] = useState("");
@@ -119,6 +122,33 @@ const RecipeForm: React.FC<RecipeFormProps> = React.memo(
     const handleGlassChange = useCallback((value: string) => {
       setGlass(value as GlassType);
     }, []);
+
+    const handleGenerateDescription = useCallback(async () => {
+      if (ingredients.length === 0) {
+        toast.error("Please add ingredients before generating a description");
+        return;
+      }
+
+      setIsGeneratingDescription(true);
+      try {
+        const result = await ApiService.generateDescription(
+          ingredients.map((ing) => ({
+            name: ing.name,
+            amount: ing.amount,
+            unit: ing.unit,
+          })),
+          name || undefined,
+          category || undefined
+        );
+        setDescription(result.description);
+        toast.success("Description generated successfully!");
+      } catch (error) {
+        console.error("Error generating description:", error);
+        toast.error("Failed to generate description. Please try again.");
+      } finally {
+        setIsGeneratingDescription(false);
+      }
+    }, [ingredients, name, category]);
 
     const handleSubmit = useCallback(
       (e: React.FormEvent) => {
@@ -199,7 +229,24 @@ const RecipeForm: React.FC<RecipeFormProps> = React.memo(
 
             {/* Recipe Description */}
             <div className="space-y-2">
-              <Label htmlFor="recipe-description">Description (Optional)</Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="recipe-description">
+                  Description (Optional)
+                </Label>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={handleGenerateDescription}
+                  disabled={isGeneratingDescription || ingredients.length === 0}
+                  className="flex items-center gap-2"
+                >
+                  <SparkleIcon className="h-4 w-4" />
+                  {isGeneratingDescription
+                    ? "Generating..."
+                    : "Generate Description"}
+                </Button>
+              </div>
               <Textarea
                 id="recipe-description"
                 value={description}

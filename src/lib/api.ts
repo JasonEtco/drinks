@@ -79,6 +79,18 @@ export class ApiService {
     );
   }
 
+  // Generate description for cocktail based on ingredients
+  static async generateDescription(
+    ingredients: Array<{ name: string; amount: number; unit: string }>,
+    name?: string,
+    category?: string
+  ): Promise<{ description: string }> {
+    return this.request<{ description: string }>("/chat/generate/description", {
+      method: "POST",
+      body: JSON.stringify({ ingredients, name, category }),
+    });
+  }
+
   // Chat with AI for cocktail ideas with streaming support
   static async chatStream(
     message: string, 
