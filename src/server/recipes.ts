@@ -1,7 +1,10 @@
 import { Request, Response, Router } from "express";
 import { database } from "../lib/database.js";
 import { CreateRecipeSchema, UpdateRecipeSchema } from "../lib/validation.js";
-import { Recipe } from "../lib/types.js";
+import { Ingredient, Recipe } from "../lib/types.js";
+import { createGitHubModels, generateRecipeTags } from "./llm.js";
+import { generateObject } from "ai";
+import zod from "zod";
 
 export function recipesRouter(): Router {
   const router = Router()
@@ -39,6 +42,14 @@ export function recipesRouter(): Router {
     try {
       // Validate input using Zod schema
       const validatedData = CreateRecipeSchema.parse(req.body);
+
+      // Create tags using LLM
+      if (validatedData.tags && validatedData.tags.length === 0) {
+        validatedData.tags = await generateRecipeTags({
+          name: validatedData.name,
+          ingredients: validatedData.ingredients as Ingredient[],
+        });
+      }
 
       // Cast to expected type for database
       const recipeData = validatedData as Omit<
@@ -81,6 +92,14 @@ export function recipesRouter(): Router {
     try {
       // Validate input using Zod schema
       const validatedData = UpdateRecipeSchema.parse(req.body);
+
+      // Create tags using LLM
+      if (validatedData.tags && validatedData.tags.length === 0) {
+        validatedData.tags = await generateRecipeTags({
+          name: validatedData.name,
+          ingredients: validatedData.ingredients as Ingredient[],
+        });
+      }
 
       // Cast to expected type for database
       const updateData = validatedData as Partial<Recipe>;

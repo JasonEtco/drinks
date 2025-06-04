@@ -4,6 +4,7 @@ import { streamText, ChatRequest, generateText } from "ai"
 import { createOpenAI } from "@ai-sdk/openai"
 import { z } from "zod";
 import { mcpTools } from "../lib/mcp-tools.js";
+import { createGitHubModels } from "./llm.js";
 
 // Schema for generate description request
 const GenerateDescriptionSchema = z.object({
@@ -21,17 +22,7 @@ export function chatRouter(): Router {
   // Chat endpoint for AI cocktail ideas with streaming support
   router.post("/", async (req: Request, res: Response) => {
     try {
-      const githubToken = process.env.GITHUB_TOKEN;
-      if (!githubToken) {
-        console.error("GitHub token not configured");
-        res.status(500).json({ error: "AI service temporarily unavailable" });
-        return;
-      }
-
-      const githubModels = createOpenAI({
-        apiKey: githubToken,
-        baseURL: "https://models.github.ai/inference",
-      });
+      const githubModels = createGitHubModels();
 
       // Fetch existing recipes to provide context
       const existingRecipes = await database.listRecipes();
@@ -111,12 +102,7 @@ When using tools, always inform the user about what you're doing (e.g., "I'll sa
   // Generate description endpoint
   router.post("/generate/description", async (req: Request, res: Response) => {
     try {
-      const githubToken = process.env.GITHUB_TOKEN;
-      if (!githubToken) {
-        console.error("GitHub token not configured");
-        res.status(500).json({ error: "AI service temporarily unavailable" });
-        return;
-      }
+      const githubModels = createGitHubModels();
 
       // Validate request body
       const validation = GenerateDescriptionSchema.safeParse(req.body);
@@ -129,11 +115,6 @@ When using tools, always inform the user about what you're doing (e.g., "I'll sa
       }
 
       const { ingredients, name } = validation.data;
-
-      const githubModels = createOpenAI({
-        apiKey: githubToken,
-        baseURL: "https://models.github.ai/inference",
-      });
 
       // Create ingredient list for prompt
       const ingredientsList = ingredients
