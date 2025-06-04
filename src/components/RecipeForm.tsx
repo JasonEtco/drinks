@@ -59,6 +59,7 @@ const RecipeForm: React.FC<RecipeFormProps> = React.memo(
       initialRecipe?.glass || undefined
     );
     const [garnish, setGarnish] = useState(initialRecipe?.garnish || "");
+    const [tags, setTags] = useState<string[]>(initialRecipe?.tags || []);
 
     const [category, setCategory] = useState(initialRecipe?.category || "");
     const [isGeneratingDescription, setIsGeneratingDescription] =
@@ -67,6 +68,7 @@ const RecipeForm: React.FC<RecipeFormProps> = React.memo(
     const [newIngredientName, setNewIngredientName] = useState("");
     const [newIngredientAmount, setNewIngredientAmount] = useState("");
     const [newIngredientUnit, setNewIngredientUnit] = useState("oz");
+    const [newTag, setNewTag] = useState("");
 
     // Memoize filtered ingredients to avoid recalculating on every render
     const filteredIngredients = useMemo(() => {
@@ -115,6 +117,36 @@ const RecipeForm: React.FC<RecipeFormProps> = React.memo(
     const handleGlassChange = useCallback((value: string) => {
       setGlass(value as GlassType);
     }, []);
+
+    const handleAddTag = useCallback(() => {
+      const trimmedTag = newTag.trim();
+      if (!trimmedTag) {
+        toast.error("Please enter a tag");
+        return;
+      }
+
+      if (tags.includes(trimmedTag)) {
+        toast.error("Tag already exists");
+        return;
+      }
+
+      setTags((prev) => [...prev, trimmedTag]);
+      setNewTag("");
+    }, [newTag, tags]);
+
+    const handleRemoveTag = useCallback((tagToRemove: string) => {
+      setTags((prev) => prev.filter((tag) => tag !== tagToRemove));
+    }, []);
+
+    const handleTagKeyPress = useCallback(
+      (e: React.KeyboardEvent) => {
+        if (e.key === "Enter") {
+          e.preventDefault();
+          handleAddTag();
+        }
+      },
+      [handleAddTag]
+    );
 
     const handleGenerateDescription = useCallback(async () => {
       if (ingredients.length === 0) {
@@ -172,6 +204,7 @@ const RecipeForm: React.FC<RecipeFormProps> = React.memo(
               glass,
               garnish,
               category,
+              tags,
               updated: new Date().toISOString(),
             }
           : createRecipe(
@@ -181,8 +214,11 @@ const RecipeForm: React.FC<RecipeFormProps> = React.memo(
               glass,
               garnish,
               category,
-              description
+              description,
+              tags
             );
+
+        // No need to update tags separately since createRecipe now accepts them
 
         onSubmit(recipe);
       },
@@ -194,6 +230,7 @@ const RecipeForm: React.FC<RecipeFormProps> = React.memo(
         glass,
         garnish,
         category,
+        tags,
         initialRecipe,
         onSubmit,
       ]
@@ -357,6 +394,48 @@ const RecipeForm: React.FC<RecipeFormProps> = React.memo(
               placeholder="How to prepare the cocktail..."
               rows={5}
             />
+          </div>
+
+          {/* Tags */}
+          <div className="space-y-4">
+            <Label>Tags</Label>
+
+            {/* Display existing tags */}
+            {tags.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {tags.map((tag) => (
+                  <div
+                    key={tag}
+                    className="bg-muted px-3 py-1 rounded-full text-sm flex items-center gap-2"
+                  >
+                    <span>{tag}</span>
+                    <Button
+                      type="button"
+                      size="icon"
+                      variant="ghost"
+                      className="h-4 w-4 hover:bg-destructive hover:text-destructive-foreground"
+                      onClick={() => handleRemoveTag(tag)}
+                    >
+                      <XIcon className="h-3 w-3" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Add new tag */}
+            <div className="flex gap-2">
+              <Input
+                value={newTag}
+                onChange={(e) => setNewTag(e.target.value)}
+                onKeyPress={handleTagKeyPress}
+                placeholder="Add a tag (e.g., citrus, classic, tiki)"
+                className="flex-1"
+              />
+              <Button type="button" onClick={handleAddTag} size="icon">
+                <PlusIcon className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
 
           {/* Additional Details */}
