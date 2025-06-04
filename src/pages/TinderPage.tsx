@@ -1,19 +1,28 @@
 import { useState, useCallback, useMemo } from "react";
 import { useRecipes } from "../contexts/RecipeContext";
 import { Button } from "@/components/ui/button";
-import { HeartIcon, XIcon, ArrowClockwiseIcon } from "@phosphor-icons/react";
+import { HeartIcon, XIcon, ArrowClockwiseIcon, SparkleIcon } from "@phosphor-icons/react";
 import SwipeableCard from "@/components/SwipeableCard";
+import { ApiService } from "../lib/api";
+import { Recipe } from "../lib/types";
 
 function TinderPage() {
   const { recipes, isLoading } = useRecipes();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [likedRecipes, setLikedRecipes] = useState<string[]>([]);
   const [passedRecipes, setPassedRecipes] = useState<string[]>([]);
+  const [generatedRecipes, setGeneratedRecipes] = useState<Recipe[]>([]);
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  // Combine original recipes with generated ones
+  const allRecipes = useMemo(() => {
+    return [...recipes, ...generatedRecipes];
+  }, [recipes, generatedRecipes]);
 
   // Shuffle recipes to make it more interesting
   const shuffledRecipes = useMemo(() => {
-    return [...recipes].sort(() => Math.random() - 0.5);
-  }, [recipes]);
+    return [...allRecipes].sort(() => Math.random() - 0.5);
+  }, [allRecipes]);
 
   const currentRecipe = shuffledRecipes[currentIndex];
 
@@ -35,7 +44,37 @@ function TinderPage() {
     setCurrentIndex(0);
     setLikedRecipes([]);
     setPassedRecipes([]);
+    setGeneratedRecipes([]);
   }, []);
+
+  /**
+   * Generate a new recipe based on the user's liked recipes
+   * Uses the LLM to create a personalized cocktail recommendation
+   */
+  const handleGenerateFromLikes = useCallback(async () => {
+    if (likedRecipes.length === 0) {
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      const generatedRecipe = await ApiService.generateRecipeFromLikes(
+        likedRecipes,
+        passedRecipes
+      );
+      
+      // Add the generated recipe to our state
+      setGeneratedRecipes(prev => [...prev, generatedRecipe]);
+      
+      // Optionally, move to the new recipe immediately
+      // setCurrentIndex(shuffledRecipes.length);
+    } catch (error) {
+      console.error("Error generating recipe:", error);
+      // You could add a toast notification here to show the error to the user
+    } finally {
+      setIsGenerating(false);
+    }
+  }, [likedRecipes, passedRecipes]);
 
   if (isLoading) {
     return (
@@ -59,10 +98,23 @@ function TinderPage() {
             <p className="text-sm">❤️ Liked: {likedRecipes.length} drinks</p>
             <p className="text-sm">👋 Passed: {passedRecipes.length} drinks</p>
           </div>
-          <Button onClick={handleReset} className="mt-4">
-            <ArrowClockwiseIcon className="h-4 w-4 mr-2" />
-            Start Over
-          </Button>
+          <div className="flex flex-col gap-3 mt-4">
+            {likedRecipes.length > 0 && (
+              <Button 
+                onClick={handleGenerateFromLikes}
+                disabled={isGenerating}
+                variant="outline"
+                className="border-purple-200 hover:border-purple-300 hover:bg-purple-50"
+              >
+                <SparkleIcon className="h-4 w-4 mr-2" />
+                {isGenerating ? "Generating..." : "Generate Recipe from Likes"}
+              </Button>
+            )}
+            <Button onClick={handleReset}>
+              <ArrowClockwiseIcon className="h-4 w-4 mr-2" />
+              Start Over
+            </Button>
+          </div>
         </div>
       </div>
     );
@@ -103,6 +155,22 @@ function TinderPage() {
               <HeartIcon className="h-6 w-6 text-white" />
             </Button>
           </div>
+
+          {/* Generate Recipe Button - Show when user has liked some recipes */}
+          {likedRecipes.length > 0 && (
+            <div className="flex justify-center mt-4">
+              <Button 
+                onClick={handleGenerateFromLikes}
+                disabled={isGenerating}
+                variant="outline"
+                size="sm"
+                className="border-purple-200 hover:border-purple-300 hover:bg-purple-50"
+              >
+                <SparkleIcon className="h-4 w-4 mr-2" />
+                {isGenerating ? "Generating..." : "Generate Recipe from Likes"}
+              </Button>
+            </div>
+          )}
 
           {/* Progress indicator */}
           <div className="mt-4">

@@ -2,7 +2,7 @@ import { Request, Response, Router } from "express";
 import { database } from "../lib/database.js";
 import { CreateRecipeSchema, UpdateRecipeSchema } from "../lib/validation.js";
 import { Ingredient, Recipe } from "../lib/types.js";
-import { createGitHubModels, generateRecipeTags } from "./llm.js";
+import { createGitHubModels, generateRecipeTags, generateRecipeFromLikes } from "./llm.js";
 import { generateObject } from "ai";
 import zod from "zod";
 
@@ -34,6 +34,55 @@ export function recipesRouter(): Router {
     } catch (error) {
       console.error("Error searching recipes:", error);
       res.status(500).json({ error: "Failed to search recipes" });
+    }
+  });
+
+  // Generate recipe from likes (must come before /:recipeId route)
+  router.post("/generate-from-likes", async (req: Request, res: Response) => {
+    try {
+      const { likedRecipeIds, passedRecipeIds = [] } = req.body;
+
+      if (!likedRecipeIds || !Array.isArray(likedRecipeIds) || likedRecipeIds.length === 0) {
+        res.status(400).json({ error: "likedRecipeIds array is required and must not be empty" });
+        return;
+      }
+
+      // Fetch the actual recipe objects for liked recipes
+      const likedRecipes: Recipe[] = [];
+      for (const id of likedRecipeIds) {
+        const recipe = await database.getRecipeById(id);
+        if (recipe) {
+          likedRecipes.push(recipe);
+        }
+      }
+
+      // Fetch the actual recipe objects for passed recipes (optional)
+      const passedRecipes: Recipe[] = [];
+      for (const id of passedRecipeIds) {
+        const recipe = await database.getRecipeById(id);
+        if (recipe) {
+          passedRecipes.push(recipe);
+        }
+      }
+
+      if (likedRecipes.length === 0) {
+        res.status(400).json({ error: "No valid liked recipes found" });
+        return;
+      }
+
+      // Generate new recipe using LLM
+      const generatedRecipe = await generateRecipeFromLikes({
+        likedRecipes,
+        passedRecipes,
+      });
+
+      // Create the recipe in the database
+      const newRecipe = await database.createRecipe(generatedRecipe);
+
+      res.status(201).json(newRecipe);
+    } catch (error) {
+      console.error("Error generating recipe from likes:", error);
+      res.status(500).json({ error: "Failed to generate recipe from likes" });
     }
   });
 
