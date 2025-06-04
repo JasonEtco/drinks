@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   PaperPlaneRightIcon,
-  BrainIcon,
+  SparkleIcon,
   TrashIcon,
 } from "@phosphor-icons/react";
 import Header from "@/components/Header";
@@ -13,7 +13,7 @@ import { ChatMessage } from "@/components/ChatMessage";
 
 export default function IdeatePage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const {
     messages,
@@ -53,7 +53,7 @@ export default function IdeatePage() {
       <div className="flex-1 overflow-y-auto space-y-4 mb-4 max-w-[800px] mx-auto">
         {messages.length === 0 && (
           <div className="text-center text-muted-foreground py-16">
-            <BrainIcon className="h-12 w-12 mx-auto mb-4 opacity-50" />
+            <SparkleIcon className="h-12 w-12 mx-auto mb-4 opacity-50" />
             <p>Start a conversation to get cocktail ideas!</p>
             <p className="text-sm mt-2">
               Try asking: "Suggest a refreshing summer cocktail" or "What can I
@@ -95,16 +95,16 @@ export default function IdeatePage() {
       <div className="fixed z-50 bg-background bottom-6 left-0 right-0">
         <form
           onSubmit={handleSubmit}
-          className="w-[768px] max-w-full mx-auto p-6 shadow-md border-2 border-muted ring-1 ring-muted-foreground/20 rounded-md focus-within:ring-accent focus-within:ring-2 transition-all"
+          className="container max-w-2xl mx-auto p-4 shadow-md border-2 border-muted ring-1 ring-muted-foreground/20 rounded-md focus-within:ring-primary focus-within:ring-2 transition-all"
         >
           <div className="flex gap-2">
-            <input
+            <textarea
               ref={inputRef}
               value={input}
               onChange={handleInputChange}
               placeholder="Ask for cocktail ideas..."
               disabled={status === "streaming" || status === "submitted"}
-              className="flex-1 text-lg border-0 focus:ring-0 focus:border-0 focus:outline-none"
+              className="flex-1 text-lg border-0 focus:ring-0 focus:border-0 focus:outline-none resize-none"
               maxLength={1000}
               autoFocus
             />

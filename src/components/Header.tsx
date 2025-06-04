@@ -1,7 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { WakeLockToggle } from "./WakeLockToggle";
 import { Button } from "@/components/ui/button";
-import { BrainIcon, HouseIcon, HeartIcon } from "@phosphor-icons/react";
+import { SparkleIcon, HouseIcon, HeartIcon } from "@phosphor-icons/react";
 
 export default function Header() {
   const location = useLocation();
@@ -39,7 +39,7 @@ export default function Header() {
             size="sm"
           >
             <Link to="/ideate">
-              <BrainIcon className="h-4 w-4" />
+              <SparkleIcon className="h-4 w-4" />
               Ideate
             </Link>
           </Button>
