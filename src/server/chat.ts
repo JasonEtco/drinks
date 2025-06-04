@@ -4,7 +4,8 @@ import { streamText, ChatRequest, generateText } from "ai"
 import { createOpenAI } from "@ai-sdk/openai"
 import { z } from "zod";
 import { mcpTools } from "../lib/mcp-tools.js";
-import { createGitHubModels } from "./llm.js";
+import { createGitHubModels, generateRecipeDescription } from "./llm.js";
+import { Ingredient } from "@/lib/types.js";
 
 // Schema for generate description request
 const GenerateDescriptionSchema = z.object({
@@ -116,35 +117,12 @@ When using tools, always inform the user about what you're doing (e.g., "I'll sa
 
       const { ingredients, name } = validation.data;
 
-      // Create ingredient list for prompt
-      const ingredientsList = ingredients
-        .map((ing) => `${ing.amount} ${ing.unit} ${ing.name}`)
-        .join(", ");
+      const description = await generateRecipeDescription({
+        name,
+        ingredients: ingredients as Ingredient[],
+      })
 
-      // Create system prompt for description generation
-      const systemPrompt = `You are an expert cocktail sommelier and writer. Generate a simple description for a cocktail based on its ingredients. 
-
-Guidelines:
-- Focus on flavor profiles rather than exact measurements
-- Highlight the most interesting or premium ingredients
-- Keep it to 1-2 sentences maximum
-- Do not be verbose. Be concise.
-- Don't mention specific amounts or measurements
-- Make it sound appealing and interesting
-- DO NOT make it sound pretentious.
-- Don't include the name of the cocktail in the description`
-
-      const userPrompt = `Create a description for a cocktail${name ? ` called "${name}"` : ""} with these ingredients: ${ingredientsList}`;
-
-      const result = await generateText({
-        model: githubModels(process.env.CHAT_MODEL || "openai/gpt-4.1-nano"),
-        system: systemPrompt,
-        prompt: userPrompt,
-        maxTokens: 150,
-        temperature: 0.9, // Add some creativity
-      });
-
-      res.json({ description: result.text.trim() });
+      res.json({ description });
     } catch (error) {
       console.error("Error generating description:", error);
       res.status(500).json({ error: "Failed to generate description" });
