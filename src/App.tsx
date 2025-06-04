@@ -13,7 +13,7 @@ function App() {
   return (
     <RecipeProvider>
       <Router>
-        <div className="container max-w-6xl  mx-auto py-8 px-4">
+        <div className="container max-w-4xl  mx-auto sm:py-8 py-4 px-4">
           <Header />
           <Routes>
             <Route path="/" element={<HomePage />} />

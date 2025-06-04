@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useRecipes } from "../contexts/RecipeContext";
 import { Button } from "@/components/ui/button";
@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 
-const RecipePage = () => {
+function RecipePage() {
   const { id } = useParams<{ id: string }>();
   const { getRecipe, removeRecipe } = useRecipes();
   const navigate = useNavigate();
@@ -67,7 +67,7 @@ const RecipePage = () => {
     if (!recipe) return;
 
     try {
-      await removeRecipe(recipe.id);
+      removeRecipe(recipe.id);
       toast.success("Recipe deleted successfully!");
       navigate("/");
     } catch (error) {
@@ -78,12 +78,14 @@ const RecipePage = () => {
 
   return (
     <>
-      <div className="space-y-12 max-w-4xl mx-auto px-4">
+      <div className="space-y-12">
         {/* Title and Description */}
         <div className="space-y-4">
-          <div className="flex justify-between items-center mb-6">
+          <div className="sm:flex block justify-between items-center mb-6">
             <h2 className="text-6xl font-bold">{recipe.name}</h2>
-            <div className="flex justify-between items-center">
+
+            {/* Action Buttons */}
+            <div className="sm:mt-0 mt-4 flex justify-between items-center">
               <div className="flex items-center gap-2">
                 {recipe.category && (
                   <CategoryLabel category={recipe.category} />
@@ -238,6 +240,6 @@ const RecipePage = () => {
       </AlertDialog>
     </>
   );
-};
+}
 
 export default RecipePage;

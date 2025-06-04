@@ -237,10 +237,7 @@ const RecipeForm: React.FC<RecipeFormProps> = React.memo(
     );
 
     return (
-      <form
-        onSubmit={handleSubmit}
-        className="max-w-[768px] w-full px-6 mx-auto"
-      >
+      <form onSubmit={handleSubmit}>
         <h2 className="text-2xl font-semibold mb-6">
           {initialRecipe ? "Edit" : "Create"} Recipe
         </h2>

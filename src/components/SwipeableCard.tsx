@@ -132,6 +132,8 @@ const SwipeableCard: React.FC<SwipeableCardProps> = ({
         ref={cardRef}
         className="overflow-hidden relative"
         style={cardStyle}
+        onMouseMove={handleMouseMove}
+        onMouseUp={handleMouseUp}
         onMouseDown={handleMouseDown}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
@@ -160,9 +162,9 @@ const SwipeableCard: React.FC<SwipeableCardProps> = ({
           </div>
         )}
 
-        <CardHeader className="pb-3">
+        <CardHeader>
           <div className="flex justify-between items-start">
-            <CardTitle className="text-2xl md:text-3xl">
+            <CardTitle className="text-2xl mb-2  md:text-3xl">
               {recipe.name}
             </CardTitle>
             {recipe.category && <CategoryLabel category={recipe.category} />}
@@ -170,14 +172,23 @@ const SwipeableCard: React.FC<SwipeableCardProps> = ({
         </CardHeader>
 
         <CardContent className="space-y-4">
+          {recipe.description && (
+            <div>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                {recipe.description}
+              </p>
+            </div>
+          )}
+
           <div>
             <div className="flex justify-between items-center mb-3">
               <h3 className="font-semibold">Ingredients</h3>
               <Badge variant="outline">{totalVolume.toFixed(1)} oz total</Badge>
             </div>
-            <ul className="space-y-2">
+
+            <ul className="space-y-2 text-xs">
               {recipe.ingredients.map((ingredient, index) => (
-                <li key={index} className="flex justify-between text-sm">
+                <li key={index} className="flex justify-between">
                   <span className="font-medium">{ingredient.name}</span>
                   <span className="text-muted-foreground">
                     {ingredient.amount} {ingredient.unit}
@@ -187,22 +198,12 @@ const SwipeableCard: React.FC<SwipeableCardProps> = ({
             </ul>
           </div>
 
-          {recipe.instructions && (
-            <div>
-              <h3 className="font-semibold mb-2">Instructions</h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                {recipe.instructions}
-              </p>
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             {recipe.glass && (
               <div className="flex items-center space-x-2">
-                <GlassIcon
-                  glassType={recipe.glass}
-                  className="h-5 w-5 text-primary"
-                />
+                <div className="h-5 w-5 text-primary">
+                  <GlassIcon glassType={recipe.glass} />
+                </div>
                 <div>
                   <span className="text-xs text-muted-foreground">Glass</span>
                   <p className="text-sm font-medium">{recipe.glass}</p>

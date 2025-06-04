@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { HeartIcon, XIcon, ArrowClockwiseIcon } from "@phosphor-icons/react";
 import SwipeableCard from "@/components/SwipeableCard";
 
-const TinderPage = () => {
+function TinderPage() {
   const { recipes, isLoading } = useRecipes();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [likedRecipes, setLikedRecipes] = useState<string[]>([]);
@@ -49,7 +49,7 @@ const TinderPage = () => {
 
   if (currentIndex >= shuffledRecipes.length) {
     return (
-      <div className="space-y-6">
+      <div className="space-y-6 overflow-x-hidden w-full">
         <div className="text-center space-y-4">
           <h1 className="text-3xl md:text-4xl font-bold">No More Drinks!</h1>
           <p className="text-muted-foreground">
@@ -71,13 +71,10 @@ const TinderPage = () => {
   return (
     <div className="space-y-6">
       <div className="text-center space-y-2">
-        <h1 className="text-3xl md:text-4xl font-bold">Drink Tinder</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-xl md:text-4xl font-bold mb-0">Drink Tinder</h1>
+        <p className="text-muted-foreground text-sm">
           Swipe through drinks and find your next favorite cocktail
         </p>
-        <div className="text-sm text-muted-foreground">
-          {currentIndex + 1} of {shuffledRecipes.length}
-        </div>
       </div>
 
       {currentRecipe && (
@@ -123,12 +120,15 @@ const TinderPage = () => {
 
           {/* Swipe hints */}
           <div className="text-center mt-4 text-sm text-muted-foreground">
-            Swipe right to ❤️ like • Swipe left to 👋 pass
+            <p>Swipe right to ❤️ like • Swipe left to 👋 pass</p>
+            <p>
+              {currentIndex + 1} of {shuffledRecipes.length}
+            </p>
           </div>
         </div>
       )}
     </div>
   );
-};
+}
 
 export default TinderPage;
