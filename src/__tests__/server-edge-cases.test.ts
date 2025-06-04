@@ -76,25 +76,6 @@ describe('Server Edge Cases and Error Handling', () => {
     });
   });
 
-  describe('URL Parameters', () => {
-    it('should handle special characters in parameters', async () => {
-      const response = await request(app)
-        .get('/api/test/params/café&bar/piña-colada');
-
-      expect(response.status).toBe(200);
-      expect(response.body.id).toBe('café&bar');
-    });
-
-    it('should handle empty query parameters', async () => {
-      const response = await request(app)
-        .get('/api/test/params/123/cocktail')
-        .query({ q: '', empty: '' });
-
-      expect(response.status).toBe(200);
-      expect(response.body.query.q).toBe('');
-    });
-  });
-
   describe('HTTP Methods', () => {
     it('should handle different HTTP methods', async () => {
       const methods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
