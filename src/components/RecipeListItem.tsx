@@ -16,46 +16,45 @@ export function RecipeListItem({ recipe, isLast }: RecipeListItemProps) {
   return (
     <Link
       to={`/recipes/${recipe.id}`}
-      className={`flex w-full sm:items-center items-start sm:p-6 py-6 sm:gap-6 gap-4 hover:no-underline hover:bg-muted/50 transition-colors border-muted-foreground/50 ${
+      className={`block sm:p-6 py-6 sm:gap-6 gap-4 hover:no-underline hover:bg-muted/50 transition-colors border-muted-foreground/50 ${
         !isLast ? "border-b" : ""
       }`}
     >
-      {/* Glass Icon */}
-      <div className="sm:w-12 w-6 flex-shrink-0 mt-1 sm:mt-0 text-muted-foreground/50">
-        <GlassIcon glassType={recipe.glass} />
-      </div>
+      <div className="flex w-full sm:items-center items-start">
+        {/* Glass Icon */}
+        <div className="sm:w-8 w-6 mr-4 flex-shrink-0 mt-1 sm:mt-0 text-primary">
+          <GlassIcon glassType={recipe.glass} />
+        </div>
 
-      {/* Recipe Info */}
-      <div className="min-w-0 flex-1 flex flex-col">
-        <h2 className="sm:text-4xl text-2xl">{recipe.name}</h2>
+        {/* Recipe Info */}
+        <div className="min-w-0 flex-1 flex flex-col">
+          <h2 className="sm:text-2xl text-2xl font-bold">{recipe.name}</h2>
 
-        {/* Description */}
-        {recipe.description && (
-          <p className="text-muted-foreground mt-2 text-sm max-w-140">
-            {recipe.description}
+          <p className="lowercase text-sm text-muted-foreground mt-2 max-w-140">
+            {recipe.ingredients.map((ing) => ing.name).join(", ")}
           </p>
-        )}
-
-        <div className="flex items-center gap-2 mt-4">
-          {recipe.tags.slice(0, 3).map((tag) => (
-            <Badge key={tag} variant="outline" className="text-xs">
-              {tag}
-            </Badge>
-          ))}
-          {recipe.tags.length > 3 && (
-            <Badge variant="outline" className="text-xs">
-              +{recipe.tags.length - 3}
-            </Badge>
-          )}
         </div>
+
+        {/* Price-like display for ingredients count */}
+        {totalVolume > 0 && (
+          <div className="text-right ml-4 flex-shrink-0 text-sm text-muted-foreground">
+            {totalVolume.toFixed(1)} oz
+          </div>
+        )}
       </div>
 
-      {/* Price-like display for ingredients count */}
-      {totalVolume > 0 && (
-        <div className="text-right ml-4 flex-shrink-0 text-sm text-muted-foreground">
-          {totalVolume.toFixed(1)} oz
-        </div>
-      )}
+      <div className="flex items-center gap-2 mt-4 sm:pl-12 pl-10 ">
+        {recipe.tags.slice(0, 3).map((tag) => (
+          <Badge key={tag} variant="outline" className="text-xs">
+            {tag}
+          </Badge>
+        ))}
+        {recipe.tags.length > 3 && (
+          <Badge variant="outline" className="text-xs">
+            +{recipe.tags.length - 3}
+          </Badge>
+        )}
+      </div>
     </Link>
   );
 }

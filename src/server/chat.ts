@@ -145,13 +145,12 @@ When using tools, always inform the user about what you're doing (e.g., "I'll sa
 
 Guidelines:
 - Focus on flavor profiles rather than exact measurements
-- Be somewhat vague in your language
 - Highlight the most interesting or premium ingredients
 - Keep it to 1-2 sentences maximum
-- Do not be verbose
+- Do not be verbose. Be concise.
 - Don't mention specific amounts or measurements
 - Make it sound appealing and interesting
-- Don't make it sound pretentious
+- DO NOT make it sound pretentious.
 - Don't include the name of the cocktail in the description`
 
       const userPrompt = `Create a description for a cocktail${name ? ` called "${name}"` : ""} with these ingredients: ${ingredientsList}`;

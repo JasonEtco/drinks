@@ -1,18 +1,18 @@
 import React from "react";
 import { GlassType } from "../lib/types";
 
-import Beer from "@/icons/beer.svg?react";
-import Champagne from "@/icons/champagne.svg?react";
-import Coupe from "@/icons/coupe.svg?react";
-import Margarita from "@/icons/margarita.svg?react";
-import MartiniWheel from "@/icons/martini-wheel.svg?react";
-import Martini from "@/icons/martini.svg?react";
-import NickAndNora from "@/icons/nick-and-nora.svg?react";
-import RocksWheel from "@/icons/rocks-wheel.svg?react";
-import Rocks from "@/icons/rocks.svg?react";
-import WhiskeyWheel from "@/icons/whiskey-wheel.svg?react";
-import Whiskey from "@/icons/whiskey.svg?react";
-import Wine from "@/icons/wine.svg?react";
+import Beer from "@/icons/lines/beer.svg?react";
+import Champagne from "@/icons/lines/champagne.svg?react";
+import Coupe from "@/icons/lines/coupe.svg?react";
+import Margarita from "@/icons/lines/margarita.svg?react";
+import MartiniWheel from "@/icons/lines/martini-wheel.svg?react";
+import Martini from "@/icons/lines/martini.svg?react";
+import NickAndNora from "@/icons/lines/nick-and-nora.svg?react";
+import RocksWheel from "@/icons/lines/rocks-wheel.svg?react";
+import Rocks from "@/icons/lines/rocks.svg?react";
+import WhiskeyWheel from "@/icons/lines/whiskey-wheel.svg?react";
+import Whiskey from "@/icons/lines/whiskey.svg?react";
+import Wine from "@/icons/lines/wine.svg?react";
 
 interface GlassIconProps {
   glassType?: GlassType;
