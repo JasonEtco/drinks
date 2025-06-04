@@ -1,11 +1,10 @@
 import { Request, Response, Router } from "express";
 import { database } from "../lib/database.js";
-import { streamText, ChatRequest, generateText } from "ai"
-import { createOpenAI } from "@ai-sdk/openai"
+import { streamText, ChatRequest } from "ai"
 import { z } from "zod";
 import { mcpTools } from "../lib/mcp-tools.js";
 import { createGitHubModels, generateRecipeDescription } from "./llm.js";
-import { Ingredient } from "@/lib/types.js";
+import { Ingredient } from "../lib/types.js";
 
 // Schema for generate description request
 const GenerateDescriptionSchema = z.object({

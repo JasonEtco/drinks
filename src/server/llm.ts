@@ -1,7 +1,7 @@
-import { Ingredient } from "@/lib/types";
 import { createOpenAI } from "@ai-sdk/openai";
 import { generateObject, generateText } from "ai";
 import zod from "zod";
+import { Ingredient } from "../lib/types";
 
 export function createGitHubModels() {
   const githubToken = process.env.GITHUB_TOKEN;
