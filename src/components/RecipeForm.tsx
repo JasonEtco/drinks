@@ -334,6 +334,7 @@ const RecipeForm: React.FC<RecipeFormProps> = React.memo(
                     <SelectItem value="ml">ml</SelectItem>
                     <SelectItem value="dash">dash</SelectItem>
                     <SelectItem value="barspoon">barspoon</SelectItem>
+                    <SelectItem value="teaspoon">teaspoon</SelectItem>
                     <SelectItem value="each">each</SelectItem>
                   </SelectContent>
                 </Select>

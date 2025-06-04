@@ -155,6 +155,27 @@ describe('MCP Tools - Create Recipe', () => {
     expect(result.success).toBe(true);
     expect(result.recipe!.ingredients).toHaveLength(2);
   });
+
+  it('should successfully create recipe with teaspoon units', async () => {
+    const result = await createRecipeTool.execute({
+      name: 'Teaspoon Recipe',
+      ingredients: [
+        { name: 'Vodka', amount: 2, unit: 'oz' },
+        { name: 'Sugar', amount: 1, unit: 'teaspoon' },
+        { name: 'Lime juice', amount: 0.5, unit: 'oz' }
+      ],
+      instructions: 'Stir with sugar, add vodka and lime'
+    }, {
+      messages: [],
+      toolCallId: 'test-tool-call-id',
+    });
+
+    expect(result.success).toBe(true);
+    expect(result.recipe!.ingredients).toHaveLength(3);
+    expect(result.recipe!.ingredients[1].unit).toBe('teaspoon');
+    expect(result.recipe!.ingredients[1].amount).toBe(1);
+    expect(result.recipe!.ingredients[1].name).toBe('Sugar');
+  });
 });
 
 describe('MCP Tools - Edit Recipe', () => {
