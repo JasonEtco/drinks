@@ -13,6 +13,15 @@ export function ChatMessage({
   message: UIMessage;
   status: UseChatHelpers["status"];
 }) {
+  let content = message.content;
+
+  if (content === "" && message.parts && message.parts.length > 0) {
+    // If message has parts, join them into a single string
+    content = message.parts
+      .map((p: any) => p.toolInvocation?.result?.message)
+      .join("");
+  }
+
   return (
     <div
       key={message.id}
@@ -26,7 +35,7 @@ export function ChatMessage({
         }`}
       >
         <div className="prose w-full">
-          <MemoizedMarkdown id={message.id} content={message.content} />
+          <MemoizedMarkdown id={message.id} content={content} />
         </div>
 
         {message.role === "assistant" &&

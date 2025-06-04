@@ -56,6 +56,14 @@ export const createRecipeTool = tool({
   - category: Optional category (e.g., "cocktail", "mocktail")
   - tags: Optional array of tags for categorization`,
   parameters: createRecipeToolSchema,
+  experimental_toToolResultContent: (result: any) => {
+    return [{
+      type: "text",
+      text: result.success
+        ? `Recipe "${result.recipe.name}" created successfully with ID ${result.recipe.id}.`
+        : `Error creating recipe: ${result.error}`,
+    }]
+  },
   execute: async (params) => {
     try {
       // Prepare the recipe data for creation
@@ -106,6 +114,14 @@ export const editRecipeTool = tool({
   - category: New category (optional)
   - tags: New array of tags (optional)`,
   parameters: editRecipeToolSchema,
+    experimental_toToolResultContent: (result: any) => {
+    return [{
+      type: "text",
+      text: result.success
+        ? `Recipe "${result.recipe.name}" updated successfully.`
+        : `Error updating recipe: ${result.error}`,
+    }]
+  },
   execute: async (params) => {
     try {
       // Validate required ID parameter first
