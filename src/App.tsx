@@ -1,4 +1,3 @@
-import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { RecipeProvider } from "./contexts/RecipeContext";
 import HomePage from "./pages/HomePage";
@@ -7,6 +6,7 @@ import EditRecipePage from "./pages/EditRecipePage";
 import RecipePage from "./pages/RecipePage";
 import IdeatePage from "./pages/IdeatePage";
 import TinderPage from "./pages/TinderPage";
+import Header from "./components/Header";
 import { Toaster } from "sonner";
 
 function App() {
@@ -14,6 +14,7 @@ function App() {
     <RecipeProvider>
       <Router>
         <div className="container max-w-6xl mx-auto py-8 px-4">
+          <Header />
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/recipes/new" element={<NewRecipePage />} />

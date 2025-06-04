@@ -1,11 +1,10 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useRecipes } from "../contexts/RecipeContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   PencilIcon,
-  ArrowLeftIcon,
   TrashIcon,
   CalculatorIcon,
   FunnelIcon,
@@ -13,7 +12,6 @@ import {
 import { GlassIcon } from "@/components/GlassIcon";
 import { calculateTotalVolume } from "../lib/recipe-utils";
 import { CategoryLabel } from "@/components/CategoryLabel";
-import Header from "@/components/Header";
 import BatchCalculator from "@/components/BatchCalculator";
 import ClarificationCalculator from "@/components/ClarificationCalculator";
 import {
@@ -42,23 +40,20 @@ const RecipePage = () => {
   // If recipe doesn't exist, show error message
   if (id && !recipe) {
     return (
-      <>
-        <Header />
-        <div className="space-y-6">
-          <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-semibold">Recipe Not Found</h2>
-          </div>
-
-          <div className="mt-4">
-            <p className="text-muted-foreground">
-              The recipe you're looking for doesn't exist.
-            </p>
-            <Button asChild className="mt-2" variant="link">
-              <Link to="/">Return to recipes</Link>
-            </Button>
-          </div>
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <h2 className="text-2xl font-semibold">Recipe Not Found</h2>
         </div>
-      </>
+
+        <div className="mt-4">
+          <p className="text-muted-foreground">
+            The recipe you're looking for doesn't exist.
+          </p>
+          <Button asChild className="mt-2" variant="link">
+            <Link to="/">Return to recipes</Link>
+          </Button>
+        </div>
+      </div>
     );
   }
 
@@ -83,8 +78,6 @@ const RecipePage = () => {
 
   return (
     <>
-      <Header />
-
       <div className="space-y-12 max-w-4xl mx-auto px-4">
         {/* Title */}
         <div className="flex justify-between items-center mb-6">
