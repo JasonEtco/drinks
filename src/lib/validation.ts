@@ -15,6 +15,7 @@ export const GlassTypeSchema = z.nativeEnum(GlassType);
 // Zod schema for Recipe creation (without id, createdAt, updatedAt)
 export const CreateRecipeSchema = z.object({
   name: z.string().min(1, "Recipe name is required"),
+  description: z.string().optional(),
   ingredients: z.array(IngredientSchema).min(1, "At least one ingredient is required"),
   instructions: z.string().min(1, "Instructions are required"),
   glass: GlassTypeSchema.optional(),
@@ -26,6 +27,7 @@ export const CreateRecipeSchema = z.object({
 // Zod schema for Recipe update (all fields optional)
 export const UpdateRecipeSchema = z.object({
   name: z.string().min(1, "Recipe name is required").optional(),
+  description: z.string().optional(),
   ingredients: z.array(IngredientSchema).min(1, "At least one ingredient is required").optional(),
   instructions: z.string().min(1, "Instructions are required").optional(),
   glass: GlassTypeSchema.optional(),

@@ -7,6 +7,7 @@ import { GlassType } from '../lib/types';
 interface Recipe {
   id: string;
   name: string;
+  description?: string;
   ingredients: Array<{
     id: string;
     name: string;

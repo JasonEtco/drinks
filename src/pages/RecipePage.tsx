@@ -79,41 +79,52 @@ const RecipePage = () => {
   return (
     <>
       <div className="space-y-12 max-w-4xl mx-auto px-4">
-        {/* Title */}
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-6xl font-bold">{recipe.name}</h2>
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              {recipe.category && <CategoryLabel category={recipe.category} />}
-              <Button
-                variant="outline"
-                onClick={() => setShowBatchCalculator(true)}
-                title="Batch Calculator"
-              >
-                <CalculatorIcon className="h-4 w-4" />
-                Batch
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setShowClarificationCalculator(true)}
-                title="Clarification Calculator"
-              >
-                <FunnelIcon className="h-4 w-4" />
-                Clarify
-              </Button>
-              <Button asChild>
-                <Link to={`/recipes/${recipe.id}/edit`}>
-                  <PencilIcon className="h-4 w-4" />
-                </Link>
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={() => setShowDeleteDialog(true)}
-              >
-                <TrashIcon className="h-4 w-4" />
-              </Button>
+        {/* Title and Description */}
+        <div className="space-y-4">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-6xl font-bold">{recipe.name}</h2>
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                {recipe.category && (
+                  <CategoryLabel category={recipe.category} />
+                )}
+                <Button
+                  variant="outline"
+                  onClick={() => setShowBatchCalculator(true)}
+                  title="Batch Calculator"
+                >
+                  <CalculatorIcon className="h-4 w-4" />
+                  Batch
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowClarificationCalculator(true)}
+                  title="Clarification Calculator"
+                >
+                  <FunnelIcon className="h-4 w-4" />
+                  Clarify
+                </Button>
+                <Button asChild>
+                  <Link to={`/recipes/${recipe.id}/edit`}>
+                    <PencilIcon className="h-4 w-4" />
+                  </Link>
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={() => setShowDeleteDialog(true)}
+                >
+                  <TrashIcon className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           </div>
+
+          {/* Description */}
+          {recipe.description && (
+            <div className="text-muted-foreground text-lg leading-relaxed">
+              {recipe.description}
+            </div>
+          )}
         </div>
 
         {/* Ingredients */}

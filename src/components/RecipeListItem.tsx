@@ -32,6 +32,13 @@ export function RecipeListItem({ recipe, isLast }: RecipeListItemProps) {
           <div className="min-w-0 flex-1 flex flex-col">
             <h2 className="text-4xl transition-colors">{recipe.name}</h2>
 
+            {/* Description */}
+            {recipe.description && (
+              <p className="text-muted-foreground mt-2 text-sm line-clamp-2">
+                {recipe.description}
+              </p>
+            )}
+
             <div className="flex items-center gap-2 mt-4">
               {recipe.category && <CategoryLabel category={recipe.category} />}
               {recipe.tags.slice(0, 3).map((tag) => (

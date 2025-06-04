@@ -51,6 +51,7 @@ const GlassType = {
 const seedRecipes = [
   {
     name: 'Classic Margarita',
+    description: 'A perfect balance of tequila, citrus, and orange liqueur with a salted rim',
     category: 'Cocktail',
     glass: GlassType.COUPE,
     garnish: 'Lime wheel and salt rim',
@@ -64,6 +65,7 @@ const seedRecipes = [
   },
   {
     name: 'Old Fashioned',
+    description: 'The quintessential whiskey cocktail - simple, strong, and timeless',
     category: 'Cocktail',
     glass: GlassType.ROCKS,
     garnish: 'Orange peel',
@@ -77,6 +79,7 @@ const seedRecipes = [
   },
   {
     name: 'Manhattan',
+    description: 'Sophisticated and stirred, the Manhattan is whiskey perfection with sweet vermouth',
     category: 'Cocktail',
     glass: GlassType.COUPE,
     garnish: 'Maraschino cherry',
@@ -90,6 +93,7 @@ const seedRecipes = [
   },
   {
     name: 'Negroni',
+    description: 'Equal parts gin, Campari, and sweet vermouth create this bitter and complex aperitivo',
     category: 'Cocktail',
     glass: GlassType.ROCKS,
     garnish: 'Orange peel',
@@ -103,6 +107,7 @@ const seedRecipes = [
   },
   {
     name: 'Daiquiri',
+    description: 'Hemingway\'s favorite - a simple yet perfect balance of rum, lime, and sugar',
     category: 'Cocktail',
     glass: GlassType.COUPE,
     garnish: 'Lime wheel',
@@ -116,6 +121,7 @@ const seedRecipes = [
   },
   {
     name: 'Whiskey Sour',
+    description: 'A classic sour elevated with silky egg white foam and bright citrus',
     category: 'Cocktail',
     glass: GlassType.COUPE,
     garnish: 'Lemon wheel and cherry',
@@ -130,6 +136,7 @@ const seedRecipes = [
   },
   {
     name: 'Martini',
+    description: 'The king of cocktails - gin and vermouth in perfect harmony',
     category: 'Cocktail',
     glass: GlassType.MARTINI,
     garnish: 'Olive or lemon twist',
@@ -142,6 +149,7 @@ const seedRecipes = [
   },
   {
     name: 'Cosmopolitan',
+    description: 'Sex and the City\'s favorite - a sophisticated pink cocktail with vodka and cranberry',
     category: 'Cocktail',
     glass: GlassType.MARTINI,
     garnish: 'Lime wheel',
@@ -156,6 +164,7 @@ const seedRecipes = [
   },
   {
     name: 'Mojito',
+    description: 'Cuba\'s refreshing national cocktail with muddled mint and lime',
     category: 'Cocktail',
     glass: GlassType.COLLINS,
     garnish: 'Fresh mint sprig',
@@ -171,6 +180,7 @@ const seedRecipes = [
   },
   {
     name: 'Moscow Mule',
+    description: 'A spicy and refreshing vodka cocktail with ginger beer and lime',
     category: 'Cocktail',
     glass: GlassType.COPPER_MUG,
     garnish: 'Lime wheel and mint sprig',
@@ -184,6 +194,7 @@ const seedRecipes = [
   },
   {
     name: 'Espresso Martini',
+    description: 'The perfect pick-me-up - coffee and cocktails united in caffeinated bliss',
     category: 'Cocktail',
     glass: GlassType.MARTINI,
     garnish: 'Three coffee beans',
@@ -198,6 +209,7 @@ const seedRecipes = [
   },
   {
     name: 'Aperol Spritz',
+    description: 'Italy\'s beloved aperitivo - light, bubbly, and perfectly bitter-sweet',
     category: 'Aperitif',
     glass: GlassType.WINE,
     garnish: 'Orange slice',
@@ -211,6 +223,7 @@ const seedRecipes = [
   },
   {
     name: 'Sazerac',
+    description: 'New Orleans\' original cocktail with rye whiskey and an absinthe rinse',
     category: 'Cocktail',
     glass: GlassType.ROCKS,
     garnish: 'Lemon peel',
@@ -225,6 +238,7 @@ const seedRecipes = [
   },
   {
     name: 'Aviation',
+    description: 'A pre-Prohibition gin cocktail with floral violet and cherry notes',
     category: 'Cocktail',
     glass: GlassType.COUPE,
     garnish: 'Maraschino cherry',
@@ -239,6 +253,7 @@ const seedRecipes = [
   },
   {
     name: 'Paper Plane',
+    description: 'A modern equal-parts cocktail balancing whiskey with Italian bitters',
     category: 'Cocktail',
     glass: GlassType.COUPE,
     garnish: 'None',
@@ -253,6 +268,7 @@ const seedRecipes = [
   },
   {
     name: 'Ramos Gin Fizz',
+    description: 'New Orleans\' most labor-intensive cocktail - 12 minutes of shaking for silky perfection',
     category: 'Cocktail',
     glass: GlassType.COLLINS,
     garnish: 'None',
@@ -271,6 +287,7 @@ const seedRecipes = [
   },
   {
     name: 'Last Word',
+    description: 'A Prohibition-era equal-parts cocktail with herbal Chartreuse complexity',
     category: 'Cocktail',
     glass: GlassType.COUPE,
     garnish: 'Lime wheel',
@@ -285,6 +302,7 @@ const seedRecipes = [
   },
   {
     name: 'Dark n Stormy',
+    description: 'Bermuda\'s national drink - dark rum and ginger beer with a stormy kick',
     category: 'Cocktail',
     glass: GlassType.HIGHBALL,
     garnish: 'Lime wheel',
@@ -298,6 +316,7 @@ const seedRecipes = [
   },
   {
     name: 'Vieux Carré',
+    description: 'A complex New Orleans cocktail blending American whiskey with French cognac',
     category: 'Cocktail',
     glass: GlassType.ROCKS,
     garnish: 'Lemon peel',
@@ -314,6 +333,7 @@ const seedRecipes = [
   },
   {
     name: 'Bee\'s Knees',
+    description: 'A Prohibition-era gin sour sweetened with honey instead of sugar',
     category: 'Cocktail',
     glass: GlassType.COUPE,
     garnish: 'Lemon twist',
@@ -353,6 +373,7 @@ class DatabaseSeeder {
         CREATE TABLE IF NOT EXISTS recipes (
           id TEXT PRIMARY KEY,
           name TEXT NOT NULL,
+          description TEXT,
           category TEXT,
           glass TEXT,
           garnish TEXT,
@@ -408,6 +429,7 @@ class DatabaseSeeder {
       const recipeData = {
         id: Date.now().toString() + Math.random().toString(36).substring(2, 9),
         name: recipe.name,
+        description: recipe.description || null,
         category: recipe.category || null,
         glass: recipe.glass || null,
         garnish: recipe.garnish || null,
@@ -419,12 +441,12 @@ class DatabaseSeeder {
       };
 
       const sql = `
-        INSERT INTO recipes (id, name, category, glass, garnish, instructions, ingredients, tags, createdAt, updatedAt)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO recipes (id, name, description, category, glass, garnish, instructions, ingredients, tags, createdAt, updatedAt)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
 
       this.db.run(sql, [
-        recipeData.id, recipeData.name, recipeData.category, recipeData.glass,
+        recipeData.id, recipeData.name, recipeData.description, recipeData.category, recipeData.glass,
         recipeData.garnish, recipeData.instructions, recipeData.ingredients,
         recipeData.tags, recipeData.createdAt, recipeData.updatedAt
       ], function(err) {

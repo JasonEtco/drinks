@@ -52,6 +52,9 @@ const RecipeForm: React.FC<RecipeFormProps> = React.memo(
   ({ initialRecipe, onSubmit, cancelLinkTo }) => {
     const { uniqueIngredients } = useRecipes();
     const [name, setName] = useState(initialRecipe?.name || "");
+    const [description, setDescription] = useState(
+      initialRecipe?.description || ""
+    );
     const [ingredients, setIngredients] = useState<Ingredient[]>(
       initialRecipe?.ingredients || []
     );
@@ -140,6 +143,7 @@ const RecipeForm: React.FC<RecipeFormProps> = React.memo(
           ? {
               ...initialRecipe,
               name,
+              description,
               ingredients,
               instructions,
               glass,
@@ -153,13 +157,15 @@ const RecipeForm: React.FC<RecipeFormProps> = React.memo(
               instructions,
               glass,
               garnish,
-              category
+              category,
+              description
             );
 
         onSubmit(recipe);
       },
       [
         name,
+        description,
         ingredients,
         instructions,
         glass,
@@ -188,6 +194,18 @@ const RecipeForm: React.FC<RecipeFormProps> = React.memo(
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Manhattan, Negroni, etc."
+              />
+            </div>
+
+            {/* Recipe Description */}
+            <div className="space-y-2">
+              <Label htmlFor="recipe-description">Description (Optional)</Label>
+              <Textarea
+                id="recipe-description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="A brief description of the cocktail..."
+                rows={2}
               />
             </div>
 

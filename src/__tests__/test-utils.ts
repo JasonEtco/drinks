@@ -52,6 +52,7 @@ export class TestDatabase {
     const fullRecipe: Recipe = {
       id: recipe.id || generateId(),
       name: recipe.name,
+      description: recipe.description,
       instructions: recipe.instructions,
       ingredients: recipe.ingredients,
       category: recipe.category || 'cocktail',
@@ -64,8 +65,8 @@ export class TestDatabase {
 
     return new Promise((resolve, reject) => {
       const sql = `
-        INSERT INTO recipes (id, name, category, glass, garnish, instructions, ingredients, tags, createdAt, updatedAt)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO recipes (id, name, description, category, glass, garnish, instructions, ingredients, tags, createdAt, updatedAt)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
 
       this.db!.run(
@@ -73,6 +74,7 @@ export class TestDatabase {
         [
           fullRecipe.id,
           fullRecipe.name,
+          fullRecipe.description,
           fullRecipe.category,
           fullRecipe.glass,
           fullRecipe.garnish,

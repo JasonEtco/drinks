@@ -33,6 +33,7 @@ class Database {
       CREATE TABLE IF NOT EXISTS recipes (
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
+        description TEXT,
         category TEXT,
         glass TEXT,
         garnish TEXT,
@@ -49,8 +50,32 @@ class Database {
         console.error("Error creating recipes table:", err.message);
       } else {
         console.log("Recipes table ready");
-        this.seedDatabase();
+        this.migrateDatabase();
       }
+    });
+  }
+
+  private migrateDatabase(): void {
+    // Check if description column exists, if not add it
+    this.db.all("PRAGMA table_info(recipes)", (err, columns: any[]) => {
+      if (err) {
+        console.error("Error checking table info:", err.message);
+        return;
+      }
+
+      const hasDescription = columns.some(col => col.name === 'description');
+      if (!hasDescription) {
+        console.log("Adding description column to recipes table...");
+        this.db.run("ALTER TABLE recipes ADD COLUMN description TEXT", (err) => {
+          if (err) {
+            console.error("Error adding description column:", err.message);
+          } else {
+            console.log("Description column added successfully");
+          }
+        });
+      }
+      
+      this.seedDatabase();
     });
   }
 
@@ -68,6 +93,7 @@ class Database {
           {
             id: "1",
             name: "Classic Margarita",
+            description: "A perfect balance of tequila, citrus, and orange liqueur with a salted rim",
             category: "cocktail",
             glass: GlassType.COUPE,
             garnish: "Lime wheel",
@@ -90,6 +116,7 @@ class Database {
           {
             id: "2",
             name: "Old Fashioned",
+            description: "The quintessential whiskey cocktail - simple, strong, and timeless",
             category: "cocktail",
             glass: GlassType.ROCKS,
             garnish: "Orange peel",
@@ -133,6 +160,7 @@ class Database {
     return {
       id: recipe.id,
       name: recipe.name,
+      description: recipe.description || null,
       category: recipe.category || null,
       glass: recipe.glass || null,
       garnish: recipe.garnish || null,
@@ -149,6 +177,7 @@ class Database {
     return {
       id: row.id,
       name: row.name,
+      description: row.description,
       category: row.category,
       glass: row.glass,
       garnish: row.garnish,
@@ -205,8 +234,8 @@ class Database {
     return new Promise((resolve, reject) => {
       const row = this.recipeToRow(newRecipe);
       const sql = `
-        INSERT INTO recipes (id, name, category, glass, garnish, instructions, ingredients, tags, createdAt, updatedAt)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO recipes (id, name, description, category, glass, garnish, instructions, ingredients, tags, createdAt, updatedAt)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
 
       this.db.run(
@@ -214,6 +243,7 @@ class Database {
         [
           row.id,
           row.name,
+          row.description,
           row.category,
           row.glass,
           row.garnish,
@@ -255,7 +285,7 @@ class Database {
       const row = this.recipeToRow(updatedRecipe);
       const sql = `
         UPDATE recipes 
-        SET name = ?, category = ?, glass = ?, garnish = ?, instructions = ?, 
+        SET name = ?, description = ?, category = ?, glass = ?, garnish = ?, instructions = ?, 
             ingredients = ?, tags = ?, updatedAt = ?
         WHERE id = ?
       `;
@@ -264,6 +294,7 @@ class Database {
         sql,
         [
           row.name,
+          row.description,
           row.category,
           row.glass,
           row.garnish,
