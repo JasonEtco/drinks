@@ -28,9 +28,9 @@ export function RecipeListItem({ recipe, isLast }: RecipeListItemProps) {
 
         {/* Recipe Info */}
         <div className="min-w-0 flex-1 flex flex-col">
-          <h2 className="sm:text-2xl text-2xl font-bold">{recipe.name}</h2>
+          <h2 className="text-lg">{recipe.name}</h2>
 
-          <p className="lowercase text-sm text-muted-foreground mt-2 max-w-140">
+          <p className="lowercase text-sm text-muted-foreground max-w-140">
             {recipe.ingredients.map((ing) => ing.name).join(", ")}
           </p>
         </div>

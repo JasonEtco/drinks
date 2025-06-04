@@ -51,7 +51,7 @@ function TinderPage() {
     return (
       <div className="space-y-6 overflow-x-hidden w-full">
         <div className="text-center space-y-4">
-          <h1 className="text-3xl md:text-4xl font-bold">No More Drinks!</h1>
+          <h1 className="text-3xl md:text-4xl">No More Drinks!</h1>
           <p className="text-muted-foreground">
             You've swiped through all {shuffledRecipes.length} drinks.
           </p>

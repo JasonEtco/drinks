@@ -163,7 +163,7 @@ const SwipeableCard: React.FC<SwipeableCardProps> = ({
 
         <CardHeader>
           <div className="flex justify-between items-start">
-            <CardTitle className="text-2xl mb-2  md:text-3xl">
+            <CardTitle className="font-serif text-2xl mb-2  md:text-3xl">
               {recipe.name}
             </CardTitle>
           </div>

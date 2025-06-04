@@ -82,7 +82,7 @@ function RecipePage() {
         {/* Title and Description */}
         <div className="space-y-4">
           <div className="sm:flex block justify-between items-center mb-6">
-            <h2 className="text-6xl font-bold">{recipe.name}</h2>
+            <h2 className="text-4xl">{recipe.name}</h2>
 
             {/* Action Buttons */}
             <div className="sm:mt-0 mt-4 flex justify-between items-center">
@@ -136,7 +136,7 @@ function RecipePage() {
             {recipe.ingredients.map((ingredient, index) => (
               <li
                 key={index}
-                className="flex justify-between items-center py-2 border-b border-muted"
+                className="flex justify-between items-center py-2 border-b border-muted even:bg-muted -mx-2 px-2"
               >
                 <span className="font-medium">{ingredient.name}</span>
                 <span className="text-muted-foreground">

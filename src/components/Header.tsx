@@ -8,8 +8,11 @@ export default function Header() {
 
   return (
     <header className="mb-4 flex sm:flex-row flex-col items-center justify-between">
-      <Link to="/" className="block sm:mb-0 mb-2 text-xl font-bold uppercase">
-        Drinks
+      <Link
+        to="/"
+        className="block sm:mb-0 mb-2 text-xl font-bold font-serif uppercase"
+      >
+        Mookenflüster
       </Link>
       <div className="flex items-center gap-4">
         <nav className="flex gap-2">
