@@ -36,6 +36,9 @@ describe('MCP Tools - Create Recipe', () => {
       garnish: 'Lime wheel',
       category: 'cocktail',
       tags: ['citrus', 'classic']
+    }, {
+      messages: [],
+      toolCallId: 'test-tool-call-id',
     });
 
     expect(result.success).toBe(true);
@@ -59,6 +62,9 @@ describe('MCP Tools - Create Recipe', () => {
         { name: 'Vodka', amount: 2, unit: 'oz' }
       ],
       instructions: 'Serve neat'
+    }, {
+      messages: [],
+      toolCallId: 'test-tool-call-id',
     });
 
     expect(result.success).toBe(true);
@@ -76,6 +82,9 @@ describe('MCP Tools - Create Recipe', () => {
         { name: 'Vodka', amount: 2, unit: 'oz' }
       ],
       instructions: 'Serve neat'
+    }, {
+      messages: [],
+      toolCallId: 'test-tool-call-id',
     });
 
     expect(result.success).toBe(false);
@@ -88,6 +97,9 @@ describe('MCP Tools - Create Recipe', () => {
       name: 'Empty Recipe',
       ingredients: [],
       instructions: 'No ingredients'
+    }, {
+      messages: [],
+      toolCallId: 'test-tool-call-id',
     });
 
     expect(result.success).toBe(false);
@@ -102,6 +114,9 @@ describe('MCP Tools - Create Recipe', () => {
         { name: 'Vodka', amount: 2, unit: 'oz' }
       ],
       instructions: ''
+    }, {
+      messages: [],
+      toolCallId: 'test-tool-call-id',
     });
 
     expect(result.success).toBe(false);
@@ -116,6 +131,9 @@ describe('MCP Tools - Create Recipe', () => {
         { name: 'Vodka', amount: -1, unit: 'oz' }
       ],
       instructions: 'Serve neat'
+    }, {
+      messages: [],
+      toolCallId: 'test-tool-call-id',
     });
 
     expect(result.success).toBe(false);
@@ -131,13 +149,13 @@ describe('MCP Tools - Create Recipe', () => {
         { name: 'Lime juice', amount: 1, unit: 'oz' }
       ],
       instructions: 'Mix and serve'
+    }, {
+      messages: [],
+      toolCallId: 'test-tool-call-id',
     });
 
     expect(result.success).toBe(true);
     expect(result.recipe!.ingredients).toHaveLength(2);
-    expect(result.recipe!.ingredients[0].id).toBeDefined();
-    expect(result.recipe!.ingredients[1].id).toBeDefined();
-    expect(result.recipe!.ingredients[0].id).not.toBe(result.recipe!.ingredients[1].id);
   });
 });
 
@@ -150,7 +168,7 @@ describe('MCP Tools - Edit Recipe', () => {
       name: 'Original Recipe',
       instructions: 'Original instructions',
       ingredients: [
-        { id: 'ing1', name: 'Vodka', amount: 2, unit: 'oz' }
+        { name: 'Vodka', amount: 2, unit: 'oz' }
       ],
       glass: GlassType.ROCKS,
       garnish: 'Original garnish',
@@ -164,6 +182,9 @@ describe('MCP Tools - Edit Recipe', () => {
     const result = await editRecipeTool.execute({
       id: testRecipeId,
       name: 'Updated Recipe Name'
+    }, {
+      messages: [],
+      toolCallId: 'test-tool-call-id',
     });
 
     expect(result.success).toBe(true);
@@ -177,6 +198,9 @@ describe('MCP Tools - Edit Recipe', () => {
     const result = await editRecipeTool.execute({
       id: testRecipeId,
       instructions: 'New preparation method'
+    }, {
+      messages: [],
+      toolCallId: 'test-tool-call-id',
     });
 
     expect(result.success).toBe(true);
@@ -191,6 +215,9 @@ describe('MCP Tools - Edit Recipe', () => {
         { name: 'Gin', amount: 2.5, unit: 'oz' },
         { name: 'Tonic', amount: 4, unit: 'oz' }
       ]
+    }, {
+      messages: [],
+      toolCallId: 'test-tool-call-id',
     });
 
     expect(result.success).toBe(true);
@@ -198,9 +225,6 @@ describe('MCP Tools - Edit Recipe', () => {
     expect(result.recipe!.ingredients[0].name).toBe('Gin');
     expect(result.recipe!.ingredients[0].amount).toBe(2.5);
     expect(result.recipe!.ingredients[1].name).toBe('Tonic');
-    // Verify new IDs are assigned
-    expect(result.recipe!.ingredients[0].id).toBeDefined();
-    expect(result.recipe!.ingredients[1].id).toBeDefined();
   });
 
   it('should successfully edit multiple fields at once', async () => {
@@ -212,6 +236,9 @@ describe('MCP Tools - Edit Recipe', () => {
       garnish: 'New garnish',
       category: 'updated',
       tags: ['new', 'updated']
+    }, {
+      messages: [],
+      toolCallId: 'test-tool-call-id',
     });
 
     expect(result.success).toBe(true);
@@ -227,6 +254,9 @@ describe('MCP Tools - Edit Recipe', () => {
     const result = await editRecipeTool.execute({
       id: 'non-existent-id',
       name: 'Should not work'
+    }, {
+      messages: [],
+      toolCallId: 'test-tool-call-id',
     });
 
     expect(result.success).toBe(false);
@@ -238,6 +268,9 @@ describe('MCP Tools - Edit Recipe', () => {
     const result = await editRecipeTool.execute({
       id: '',
       name: 'Should not work'
+    }, {
+      messages: [],
+      toolCallId: 'test-tool-call-id',
     });
 
     expect(result.success).toBe(false);
@@ -250,6 +283,9 @@ describe('MCP Tools - Edit Recipe', () => {
       id: testRecipeId,
       name: '', // Empty name should fail
       instructions: 'Valid instructions'
+    }, {
+      messages: [],
+      toolCallId: 'test-tool-call-id',
     });
 
     expect(result.success).toBe(false);
@@ -263,6 +299,9 @@ describe('MCP Tools - Edit Recipe', () => {
       ingredients: [
         { name: 'Vodka', amount: -5, unit: 'oz' } // Negative amount
       ]
+    }, {
+      messages: [],
+      toolCallId: 'test-tool-call-id',
     });
 
     expect(result.success).toBe(false);
@@ -274,6 +313,9 @@ describe('MCP Tools - Edit Recipe', () => {
     const result = await editRecipeTool.execute({
       id: testRecipeId
       // No updates provided
+    }, {
+      messages: [],
+      toolCallId: 'test-tool-call-id',
     });
 
     expect(result.success).toBe(true);
@@ -291,6 +333,9 @@ describe('MCP Tools - Integration', () => {
         { name: 'Vodka', amount: 2, unit: 'oz' }
       ],
       instructions: 'Original instructions'
+    }, {
+      messages: [],
+      toolCallId: 'test-tool-call-id',
     });
 
     expect(createResult.success).toBe(true);
@@ -304,6 +349,9 @@ describe('MCP Tools - Integration', () => {
         { name: 'Gin', amount: 2.5, unit: 'oz' },
         { name: 'Tonic', amount: 4, unit: 'oz' }
       ]
+    }, {
+      messages: [],
+      toolCallId: 'test-tool-call-id',
     });
 
     expect(editResult.success).toBe(true);
