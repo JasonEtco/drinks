@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useCallback } from "react";
 import type { Recipe } from "../lib/types";
-import { MenuRecipeItem } from "./RecipeListItem";
+import { RecipeListItem } from "./RecipeListItem";
 import { RecipeListHeader } from "./RecipeListHeader";
 
 interface RecipeListProps {
@@ -122,10 +122,10 @@ function RecipeList({ recipes }: RecipeListProps) {
           </p>
         </div>
       ) : (
-        <ul className="space-y-1 bg-card rounded-lg border shadow-sm">
+        <ul>
           {sortedRecipes.map((recipe, index) => (
             <li key={recipe.id}>
-              <MenuRecipeItem
+              <RecipeListItem
                 recipe={recipe}
                 isLast={index === sortedRecipes.length - 1}
               />
