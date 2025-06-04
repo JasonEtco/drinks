@@ -1,5 +1,4 @@
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { Database as SqliteDB } from 'sqlite3';
 import { TestDatabase, createTestRecipe } from './test-utils';
 import { GlassType } from '../lib/types';
 
@@ -108,11 +107,11 @@ describe('Database Integration Tests', () => {
       const complexRecipe = createTestRecipe({
         name: 'Complex Cocktail',
         ingredients: [
-          { id: 'ing1', name: 'Bourbon Whiskey', amount: 2, unit: 'oz' },
-          { id: 'ing2', name: 'Sweet Vermouth', amount: 1, unit: 'oz' },
-          { id: 'ing3', name: 'Angostura Bitters', amount: 2, unit: 'dashes' },
-          { id: 'ing4', name: 'Simple Syrup', amount: 0.25, unit: 'oz' },
-          { id: 'ing5', name: 'Orange Peel', amount: 1, unit: 'piece' },
+          { name: 'Bourbon Whiskey', amount: 2, unit: 'oz' },
+          { name: 'Sweet Vermouth', amount: 1, unit: 'oz' },
+          { name: 'Angostura Bitters', amount: 2, unit: 'dashes' },
+          { name: 'Simple Syrup', amount: 0.25, unit: 'oz' },
+          { name: 'Orange Peel', amount: 1, unit: 'piece' },
         ],
         tags: ['classic', 'whiskey', 'stirred', 'strong']
       });
@@ -194,9 +193,9 @@ describe('Database Integration Tests', () => {
       const recipe = createTestRecipe({
         name: 'Precise Recipe',
         ingredients: [
-          { id: 'ing1', name: 'Gin', amount: 2.25, unit: 'oz' },
-          { id: 'ing2', name: 'Lemon Juice', amount: 0.75, unit: 'oz' },
-          { id: 'ing3', name: 'Simple Syrup', amount: 0.5, unit: 'oz' },
+          { name: 'Gin', amount: 2.25, unit: 'oz' },
+          { name: 'Lemon Juice', amount: 0.75, unit: 'oz' },
+          { name: 'Simple Syrup', amount: 0.5, unit: 'oz' },
         ]
       });
 

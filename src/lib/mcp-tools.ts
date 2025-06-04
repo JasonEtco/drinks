@@ -7,6 +7,7 @@ import { GlassType } from "./types.js";
 // MCP Tool Schema for creating recipes
 const createRecipeToolSchema = z.object({
   name: z.string().min(1, "Recipe name is required"),
+  description: z.string().optional(),
   ingredients: z.array(
     z.object({
       name: z.string().min(1, "Ingredient name is required"),
@@ -25,6 +26,7 @@ const createRecipeToolSchema = z.object({
 const editRecipeToolSchema = z.object({
   id: z.string().min(1, "Recipe ID is required"),
   name: z.string().min(1, "Recipe name is required").optional(),
+  description: z.string().optional(),
   ingredients: z.array(
     z.object({
       name: z.string().min(1, "Ingredient name is required"),
@@ -50,6 +52,7 @@ export const createRecipeTool = tool({
   
   Parameters:
   - name: The name of the cocktail
+  - description: Optional description of the cocktail
   - ingredients: Array of ingredients with name, amount, and unit
   - instructions: Step-by-step preparation instructions
   - glass: Optional glass type (${Object.values(GlassType).join(", ")})
@@ -70,6 +73,7 @@ export const createRecipeTool = tool({
       // Prepare the recipe data for creation
       const recipeData = {
         name: params.name,
+        description: params.description,
         ingredients: ingredientsWithIds,
         instructions: params.instructions,
         glass: params.glass,
@@ -106,6 +110,7 @@ export const editRecipeTool = tool({
   Parameters:
   - id: The ID of the recipe to edit (required)
   - name: New name for the cocktail (optional)
+  - description: New description for the cocktail (optional)
   - ingredients: New array of ingredients with name, amount, and unit (optional)
   - instructions: New step-by-step preparation instructions (optional)
   - glass: New glass type (optional, ${Object.values(GlassType).join(", ")})
@@ -138,6 +143,7 @@ export const editRecipeTool = tool({
       const updates: any = {};
       
       if (params.name !== undefined) updates.name = params.name;
+      if (params.description !== undefined) updates.description = params.description;
       if (params.instructions !== undefined) updates.instructions = params.instructions;
       if (params.glass !== undefined) updates.glass = params.glass;
       if (params.garnish !== undefined) updates.garnish = params.garnish;

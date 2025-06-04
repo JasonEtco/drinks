@@ -27,6 +27,7 @@ export class TestDatabase {
         CREATE TABLE recipes (
           id TEXT PRIMARY KEY,
           name TEXT NOT NULL,
+          description TEXT,
           category TEXT,
           glass TEXT,
           garnish TEXT,
@@ -52,6 +53,7 @@ export class TestDatabase {
     const fullRecipe: Recipe = {
       id: recipe.id || generateId(),
       name: recipe.name,
+      description: recipe.description,
       instructions: recipe.instructions,
       ingredients: recipe.ingredients,
       category: recipe.category || 'cocktail',
@@ -64,8 +66,8 @@ export class TestDatabase {
 
     return new Promise((resolve, reject) => {
       const sql = `
-        INSERT INTO recipes (id, name, category, glass, garnish, instructions, ingredients, tags, createdAt, updatedAt)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        INSERT INTO recipes (id, name, description, category, glass, garnish, instructions, ingredients, tags, createdAt, updatedAt)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `;
 
       this.db!.run(
@@ -73,6 +75,7 @@ export class TestDatabase {
         [
           fullRecipe.id,
           fullRecipe.name,
+          fullRecipe.description,
           fullRecipe.category,
           fullRecipe.glass,
           fullRecipe.garnish,
@@ -133,9 +136,9 @@ export const createTestRecipe = (overrides: Partial<Recipe> = {}): Recipe => ({
   garnish: 'Lime wheel',
   instructions: 'Shake all ingredients with ice and strain over fresh ice.',
   ingredients: [
-    { id: generateId(), name: 'Tequila', amount: 2, unit: 'oz' },
-    { id: generateId(), name: 'Cointreau', amount: 1, unit: 'oz' },
-    { id: generateId(), name: 'Fresh lime juice', amount: 1, unit: 'oz' },
+    { name: 'Tequila', amount: 2, unit: 'oz' },
+    { name: 'Cointreau', amount: 1, unit: 'oz' },
+    { name: 'Fresh lime juice', amount: 1, unit: 'oz' },
   ],
   tags: ['classic', 'citrus'],
   createdAt: new Date().toISOString(),
@@ -144,7 +147,6 @@ export const createTestRecipe = (overrides: Partial<Recipe> = {}): Recipe => ({
 });
 
 export const createTestIngredient = (overrides: Partial<Ingredient> = {}): Ingredient => ({
-  id: generateId(),
   name: 'Test Ingredient',
   amount: 1,
   unit: 'oz',

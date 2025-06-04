@@ -19,7 +19,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 
 # Default database path
-DB_PATH="${1:-$PROJECT_DIR/data/recipes.db}"
+DB_PATH="${1:-$PROJECT_DIR/recipes.db}"
 
 echo -e "${YELLOW}Database path: $DB_PATH${NC}"
 echo ""

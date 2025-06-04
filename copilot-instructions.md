@@ -1,0 +1,2 @@
+- Any time you're modifying the shape of Recipes, always updated the seed data in `script/seed-db`.
+- You don't need to run the server locally to test the changes. Just build the TypeScript bundles and run the tests.

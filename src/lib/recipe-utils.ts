@@ -99,7 +99,6 @@ export const createIngredient = (
   unit: string,
 ): Ingredient => {
   return {
-    id: generateId(),
     name,
     amount,
     unit,
@@ -114,12 +113,14 @@ export const createRecipe = (
   glass?: GlassType,
   garnish?: string,
   category?: string,
+  description?: string,
 ): Recipe => {
   const now = new Date().toISOString();
 
   return {
     id: generateId(),
     name,
+    description,
     ingredients,
     instructions,
     glass,

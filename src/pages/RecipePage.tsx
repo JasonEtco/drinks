@@ -1,13 +1,19 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useRecipes } from "../contexts/RecipeContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { PencilIcon, ArrowLeftIcon, TrashIcon } from "@phosphor-icons/react";
-import { GlassIcon } from "../lib/glass-icons";
+import {
+  PencilIcon,
+  TrashIcon,
+  CalculatorIcon,
+  FunnelIcon,
+} from "@phosphor-icons/react";
+import { GlassIcon } from "@/components/GlassIcon";
 import { calculateTotalVolume } from "../lib/recipe-utils";
 import { CategoryLabel } from "@/components/CategoryLabel";
-import Header from "@/components/Header";
+import BatchCalculator from "@/components/BatchCalculator";
+import ClarificationCalculator from "@/components/ClarificationCalculator";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,29 +31,29 @@ const RecipePage = () => {
   const { getRecipe, removeRecipe } = useRecipes();
   const navigate = useNavigate();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showBatchCalculator, setShowBatchCalculator] = useState(false);
+  const [showClarificationCalculator, setShowClarificationCalculator] =
+    useState(false);
 
   const recipe = id ? getRecipe(id) : undefined;
 
   // If recipe doesn't exist, show error message
   if (id && !recipe) {
     return (
-      <>
-        <Header />
-        <div className="space-y-6">
-          <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-semibold">Recipe Not Found</h2>
-          </div>
-
-          <div className="mt-4">
-            <p className="text-muted-foreground">
-              The recipe you're looking for doesn't exist.
-            </p>
-            <Button asChild className="mt-2" variant="link">
-              <Link to="/">Return to recipes</Link>
-            </Button>
-          </div>
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <h2 className="text-2xl font-semibold">Recipe Not Found</h2>
         </div>
-      </>
+
+        <div className="mt-4">
+          <p className="text-muted-foreground">
+            The recipe you're looking for doesn't exist.
+          </p>
+          <Button asChild className="mt-2" variant="link">
+            <Link to="/">Return to recipes</Link>
+          </Button>
+        </div>
+      </div>
     );
   }
 
@@ -72,28 +78,53 @@ const RecipePage = () => {
 
   return (
     <>
-      <Header />
-
       <div className="space-y-12 max-w-4xl mx-auto px-4">
-        {/* Title */}
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-6xl font-bold">{recipe.name}</h2>
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              {recipe.category && <CategoryLabel category={recipe.category} />}
-              <Button asChild>
-                <Link to={`/recipes/${recipe.id}/edit`}>
-                  <PencilIcon className="h-4 w-4" />
-                </Link>
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={() => setShowDeleteDialog(true)}
-              >
-                <TrashIcon className="h-4 w-4" />
-              </Button>
+        {/* Title and Description */}
+        <div className="space-y-4">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-6xl font-bold">{recipe.name}</h2>
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                {recipe.category && (
+                  <CategoryLabel category={recipe.category} />
+                )}
+                <Button
+                  variant="outline"
+                  onClick={() => setShowBatchCalculator(true)}
+                  title="Batch Calculator"
+                >
+                  <CalculatorIcon className="h-4 w-4" />
+                  Batch
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowClarificationCalculator(true)}
+                  title="Clarification Calculator"
+                >
+                  <FunnelIcon className="h-4 w-4" />
+                  Clarify
+                </Button>
+                <Button asChild>
+                  <Link to={`/recipes/${recipe.id}/edit`}>
+                    <PencilIcon className="h-4 w-4" />
+                  </Link>
+                </Button>
+                <Button
+                  variant="destructive"
+                  onClick={() => setShowDeleteDialog(true)}
+                >
+                  <TrashIcon className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
           </div>
+
+          {/* Description */}
+          {recipe.description && (
+            <div className="text-muted-foreground text-lg leading-relaxed">
+              {recipe.description}
+            </div>
+          )}
         </div>
 
         {/* Ingredients */}
@@ -173,6 +204,18 @@ const RecipePage = () => {
           </div>
         </div>
       </div>
+
+      <BatchCalculator
+        recipe={recipe}
+        open={showBatchCalculator}
+        onClose={() => setShowBatchCalculator(false)}
+      />
+
+      <ClarificationCalculator
+        recipe={recipe}
+        open={showClarificationCalculator}
+        onClose={() => setShowClarificationCalculator(false)}
+      />
 
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
