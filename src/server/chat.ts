@@ -43,9 +43,15 @@ export function chatRouter(): Router {
           const ingredientsList = recipe.ingredients
             .map((ing) => `${ing.amount} ${ing.unit} ${ing.name}`)
             .join(", ");
-          return `${recipe.name}: ${ingredientsList} - ${recipe.instructions}`;
+          return {
+            id: recipe.id,
+            name: recipe.name,
+            description: recipe.description || "",
+            ingredients: ingredientsList,
+            glass: recipe.glass || "Unknown",
+            instructions: recipe.instructions,
+          };
         })
-        .join("\n");
 
       const systemPrompt = `You are an expert cocktail mixologist and recipe developer. Help users create and discover cocktail recipes. 
     
@@ -57,7 +63,7 @@ Your expertise includes:
 - Garnish and presentation ideas
 
 EXISTING RECIPES IN THE SYSTEM:
-${recipeDefinitions}
+${JSON.stringify(recipeDefinitions)}
 
 AVAILABLE TOOLS:
 You have access to powerful tools that allow you to create and edit recipes in the database:

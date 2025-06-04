@@ -2,12 +2,12 @@ import { z } from "zod";
 import { tool } from "ai";
 import { database } from "./database.js";
 import { CreateRecipeSchema, UpdateRecipeSchema } from "./validation.js";
-import { GlassType } from "./types.js";
+import { GlassType, Recipe } from "./types.js";
 
 // MCP Tool Schema for creating recipes
 const createRecipeToolSchema = z.object({
   name: z.string().min(1, "Recipe name is required"),
-  description: z.string().optional(),
+  description: z.string(),
   ingredients: z.array(
     z.object({
       name: z.string().min(1, "Ingredient name is required"),
@@ -16,35 +16,31 @@ const createRecipeToolSchema = z.object({
     })
   ).min(1, "At least one ingredient is required"),
   instructions: z.string().min(1, "Instructions are required"),
-  glass: z.nativeEnum(GlassType).optional(),
-  garnish: z.string().optional(),
-  category: z.string().optional(),
-  tags: z.array(z.string()).default([]),
-});
+  glass: z.nativeEnum(GlassType),
+  garnish: z.string(),
+  category: z.string(),
+  tags: z.array(z.string()),
+}).required();
 
 // MCP Tool Schema for editing recipes
 const editRecipeToolSchema = z.object({
   id: z.string().min(1, "Recipe ID is required"),
-  name: z.string().min(1, "Recipe name is required").optional(),
-  description: z.string().optional(),
+  name: z.string().min(1, "Recipe name is required"),
+  description: z.string(),
   ingredients: z.array(
     z.object({
       name: z.string().min(1, "Ingredient name is required"),
       amount: z.number().positive("Ingredient amount must be positive"),
       unit: z.string().min(1, "Ingredient unit is required"),
     })
-  ).min(1, "At least one ingredient is required").optional(),
-  instructions: z.string().min(1, "Instructions are required").optional(),
-  glass: z.nativeEnum(GlassType).optional(),
-  garnish: z.string().optional(),
-  category: z.string().optional(),
-  tags: z.array(z.string()).optional(),
-});
+  ).min(1, "At least one ingredient is required"),
+  instructions: z.string().min(1, "Instructions are required"),
+  glass: z.nativeEnum(GlassType),
+  garnish: z.string(),
+  category: z.string(),
+  tags: z.array(z.string()),
+}).required();
 
-// Generate unique ID for ingredients
-function generateIngredientId(): string {
-  return `ing_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-}
 
 // MCP Tool for creating recipes
 export const createRecipeTool = tool({
@@ -62,19 +58,11 @@ export const createRecipeTool = tool({
   parameters: createRecipeToolSchema,
   execute: async (params) => {
     try {
-      // Transform ingredients to include IDs
-      const ingredientsWithIds = params.ingredients.map(ing => ({
-        id: generateIngredientId(),
-        name: ing.name,
-        amount: ing.amount,
-        unit: ing.unit,
-      }));
-
       // Prepare the recipe data for creation
       const recipeData = {
         name: params.name,
         description: params.description,
-        ingredients: ingredientsWithIds,
+        ingredients: params.ingredients,
         instructions: params.instructions,
         glass: params.glass,
         garnish: params.garnish,
@@ -86,7 +74,7 @@ export const createRecipeTool = tool({
       CreateRecipeSchema.parse(recipeData);
 
       // Create the recipe in the database  
-      const createdRecipe = await database.createRecipe(recipeData);
+      const createdRecipe = await database.createRecipe(recipeData as Recipe);
       
       return {
         success: true,
@@ -149,16 +137,7 @@ export const editRecipeTool = tool({
       if (params.garnish !== undefined) updates.garnish = params.garnish;
       if (params.category !== undefined) updates.category = params.category;
       if (params.tags !== undefined) updates.tags = params.tags;
-      
-      // Handle ingredients with ID generation
-      if (params.ingredients !== undefined) {
-        updates.ingredients = params.ingredients.map(ing => ({
-          id: generateIngredientId(),
-          name: ing.name,
-          amount: ing.amount,
-          unit: ing.unit,
-        }));
-      }
+      if (params.ingredients !== undefined) updates.ingredients = params.ingredients;
 
       // Validate updates with our existing schema
       if (Object.keys(updates).length > 0) {
