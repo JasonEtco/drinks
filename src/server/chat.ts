@@ -2,6 +2,7 @@ import { Request, Response, Router } from "express";
 import { database } from "../lib/database.js";
 import { streamText, ChatRequest } from "ai"
 import { createOpenAI } from "@ai-sdk/openai"
+import { mcpTools } from "../lib/mcp-tools.js";
 
 export function chatRouter(): Router {
   const router = Router();
@@ -46,6 +47,15 @@ Your expertise includes:
 EXISTING RECIPES IN THE SYSTEM:
 ${recipeDefinitions}
 
+AVAILABLE TOOLS:
+You have access to powerful tools that allow you to create and edit recipes in the database:
+
+1. **create_recipe**: Use this when a user asks you to save, store, or create a new recipe. You can create recipes based on their requests or your suggestions.
+
+2. **edit_recipe**: Use this when a user asks you to modify, update, or change an existing recipe. You'll need the recipe ID to edit it.
+
+When suggesting recipes, you can offer to save them to the database for the user. If they express interest in modifying existing recipes, you can help them edit those as well.
+
 Please provide helpful, creative, and accurate cocktail advice. When suggesting recipes, include:
 - Ingredient list with measurements
 - Simple preparation instructions
@@ -57,6 +67,8 @@ Keep responses concise but informative, and feel free to ask clarifying question
 Use markdown formatting for clarity, especially for ingredient lists and instructions. Use markdown headers for recipe names and sections.
 
 If the user asks for a specific cocktail, provide a recipe that matches their request. If they ask for general cocktail ideas, suggest a few creative options based on common ingredients or themes.
+
+When using tools, always inform the user about what you're doing (e.g., "I'll save this recipe to the database for you" or "Let me update that recipe").
 `;
 
       // Build messages array with system prompt, history, and current message
@@ -64,6 +76,7 @@ If the user asks for a specific cocktail, provide a recipe that matches their re
         model: githubModels(process.env.CHAT_MODEL || "openai/gpt-4.1"),
         system: systemPrompt,
         messages: (req.body as ChatRequest).messages,
+        tools: mcpTools,
       });
 
       result.pipeDataStreamToResponse(res, {
