@@ -42,7 +42,6 @@ export default defineConfig({
         "./src/**/*.ts",
         "./src/**/*.jsx",
         "./src/**/*.js",
-        "./src/styles/theme.css",
       ],
     },
   },
