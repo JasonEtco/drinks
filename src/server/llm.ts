@@ -2,6 +2,7 @@ import { createOpenAI } from "@ai-sdk/openai";
 import { generateObject, generateText } from "ai";
 import zod from "zod";
 import { Ingredient, Recipe } from "../lib/types";
+import { CreateRecipeSchema } from "@/lib/validation";
 
 export function createGitHubModels() {
   const githubToken = process.env.GITHUB_TOKEN;
@@ -99,10 +100,10 @@ Guidelines:
  */
 export async function generateRecipeFromLikes({
   likedRecipes,
-  passedRecipes = [],
+  passedRecipes,
 }: {
   likedRecipes: Recipe[];
-  passedRecipes?: Recipe[];
+  passedRecipes: Recipe[];
 }): Promise<Omit<Recipe, "id" | "createdAt" | "updatedAt">> {
   const githubModels = createGitHubModels();
 
@@ -111,7 +112,6 @@ export async function generateRecipeFromLikes({
     recipe.ingredients.map(ing => ing.name)
   );
   const likedTags = likedRecipes.flatMap(recipe => recipe.tags || []);
-  const likedGlasses = likedRecipes.map(recipe => recipe.glass).filter(Boolean);
 
   // Create system prompt for recipe generation
   const systemPrompt = `You are an expert cocktail sommelier and recipe creator. Generate a new cocktail recipe based on the user's preferences from their liked recipes.
@@ -135,6 +135,13 @@ ${likedRecipes.map(recipe => `
   Tags: ${recipe.tags?.join(", ") || "None"}
 `).join("")}
 
+Disliked Recipes:
+${passedRecipes.map(recipe => `
+- ${recipe.name}: ${recipe.ingredients.map(ing => `${ing.amount} ${ing.unit} ${ing.name}`).join(", ")}
+  Glass: ${recipe.glass || "Not specified"}
+  Tags: ${recipe.tags?.join(", ") || "None"}
+`).join("")}
+
 Common ingredients in liked recipes: ${[...new Set(likedIngredients)].slice(0, 10).join(", ")}
 Common tags: ${[...new Set(likedTags)].slice(0, 5).join(", ")}
 
@@ -144,19 +151,7 @@ Create a new recipe that would appeal to someone who liked these drinks.`;
     model: githubModels(process.env.CHAT_MODEL || "openai/gpt-4.1-nano"),
     system: systemPrompt,
     prompt: userPrompt,
-    schema: zod.object({
-      name: zod.string().min(1),
-      description: zod.string().min(1),
-      ingredients: zod.array(zod.object({
-        name: zod.string(),
-        amount: zod.number(),
-        unit: zod.string(),
-      })),
-      instructions: zod.string().min(1),
-      glass: zod.string().optional(),
-      garnish: zod.string().optional(),
-      tags: zod.array(zod.string()),
-    }),
+    schema: CreateRecipeSchema,
     maxTokens: 500,
     temperature: 0.8,
   });

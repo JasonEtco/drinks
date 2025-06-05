@@ -146,6 +146,7 @@ export const editRecipeTool = tool({
       if (params.instructions !== undefined) updates.instructions = params.instructions;
       if (params.glass !== undefined) updates.glass = params.glass;
       if (params.garnish !== undefined) updates.garnish = params.garnish;
+      if (params.category !== undefined) updates.category = params.category;
       if (params.tags !== undefined) updates.tags = params.tags;
       if (params.ingredients !== undefined) updates.ingredients = params.ingredients;
 
