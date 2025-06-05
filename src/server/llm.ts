@@ -2,7 +2,7 @@ import { createOpenAI } from "@ai-sdk/openai";
 import { generateObject, generateText } from "ai";
 import z from "zod";
 import { Ingredient, Recipe } from "../lib/types";
-import { GlassTypeSchema, IngredientSchema } from "@/lib/validation";
+import { GlassTypeSchema, IngredientSchema } from "../lib/validation";
 
 export function createGitHubModels() {
   const githubToken = process.env.GITHUB_TOKEN;
