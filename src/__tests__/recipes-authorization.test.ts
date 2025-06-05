@@ -27,17 +27,10 @@ vi.mock('../lib/validation.js', () => ({
   },
 }));
 
-// Mock fetch for Cloudflare public key
-global.fetch = vi.fn();
-
-// Mock crypto module
-vi.mock('crypto', () => ({
-  default: {
-    createVerify: vi.fn(() => ({
-      update: vi.fn(),
-      verify: vi.fn(() => true), // Default to valid signature
-    })),
-  },
+// Mock jose library for JWT verification
+vi.mock('jose', () => ({
+  createRemoteJWKSet: vi.fn(() => 'mock-jwks'),
+  jwtVerify: vi.fn(),
 }));
 
 // Mock the database import
@@ -76,20 +69,19 @@ const createTestRecipe = (overrides = {}) => ({
 
 describe('Recipes API Authorization', () => {
   let app: express.Application;
+  let mockJwtVerify: any;
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    const { jwtVerify } = await import('jose');
+    mockJwtVerify = jwtVerify as any;
+    
     app = express();
     app.use(express.json());
     app.use('/api/recipes', recipesRouter());
     
-    // Mock environment variables for auth
-    process.env.CLOUDFLARE_PUBLIC_SIGNING_KEY_URL = 'https://example.com/public-key';
-    
-    // Mock fetch to return a valid public key
-    (global.fetch as any).mockResolvedValue({
-      ok: true,
-      text: () => Promise.resolve('-----BEGIN PUBLIC KEY-----\nMOCK_PUBLIC_KEY\n-----END PUBLIC KEY-----'),
-    });
+    // Mock environment variables for new auth system
+    process.env.CLOUDFLARE_TEAM_DOMAIN = 'https://example.cloudflareaccess.com';
+    process.env.WRITER_USERS = 'editor@example.com,admin@example.com';
     
     // Reset all mocks
     vi.clearAllMocks();
@@ -145,10 +137,14 @@ describe('Recipes API Authorization', () => {
     it('should work with valid CF_Authorization header for read operations', async () => {
       const mockRecipes = [createTestRecipe()];
       (database.listRecipes as any).mockResolvedValue(mockRecipes);
+      
+      mockJwtVerify.mockResolvedValue({
+        payload: { email: 'viewer@example.com' }
+      });
 
       const response = await request(app)
         .get('/api/recipes')
-        .set('CF_Authorization', 'test-user:viewer');
+        .set('CF_Authorization', 'valid-jwt-token');
 
       expect(response.status).toBe(200);
       expect(response.body).toEqual(mockRecipes);
@@ -174,7 +170,11 @@ describe('Recipes API Authorization', () => {
         expect(database.createRecipe).not.toHaveBeenCalled();
       });
 
-      it('should deny recipe creation for viewer role', async () => {
+      it('should deny recipe creation for non-writer users', async () => {
+        mockJwtVerify.mockResolvedValue({
+          payload: { email: 'viewer@example.com' }
+        });
+
         const newRecipe = {
           name: 'New Cocktail',
           ingredients: [{ name: 'Vodka', amount: 2, unit: 'oz' }],
@@ -184,7 +184,7 @@ describe('Recipes API Authorization', () => {
 
         const response = await request(app)
           .post('/api/recipes')
-          .set('CF_Authorization', 'test-user:viewer')
+          .set('CF_Authorization', 'valid-jwt-token')
           .send(newRecipe);
 
         expect(response.status).toBe(403);
@@ -192,7 +192,11 @@ describe('Recipes API Authorization', () => {
         expect(database.createRecipe).not.toHaveBeenCalled();
       });
 
-      it('should allow recipe creation for editor role', async () => {
+      it('should allow recipe creation for writer users', async () => {
+        mockJwtVerify.mockResolvedValue({
+          payload: { email: 'editor@example.com' }
+        });
+
         const newRecipe = {
           name: 'New Cocktail',
           ingredients: [{ name: 'Vodka', amount: 2, unit: 'oz' }],
@@ -204,7 +208,7 @@ describe('Recipes API Authorization', () => {
 
         const response = await request(app)
           .post('/api/recipes')
-          .set('CF_Authorization', 'test-user:editor')
+          .set('CF_Authorization', 'valid-jwt-token')
           .send(newRecipe);
 
         expect(response.status).toBe(201);
@@ -226,12 +230,16 @@ describe('Recipes API Authorization', () => {
         expect(database.updateRecipe).not.toHaveBeenCalled();
       });
 
-      it('should deny recipe update for viewer role', async () => {
+      it('should deny recipe update for non-writer users', async () => {
+        mockJwtVerify.mockResolvedValue({
+          payload: { email: 'viewer@example.com' }
+        });
+
         const updateData = { name: 'Updated Cocktail' };
 
         const response = await request(app)
           .put('/api/recipes/test-recipe-id')
-          .set('CF_Authorization', 'test-user:viewer')
+          .set('CF_Authorization', 'valid-jwt-token')
           .send(updateData);
 
         expect(response.status).toBe(403);
@@ -239,14 +247,18 @@ describe('Recipes API Authorization', () => {
         expect(database.updateRecipe).not.toHaveBeenCalled();
       });
 
-      it('should allow recipe update for editor role', async () => {
+      it('should allow recipe update for writer users', async () => {
+        mockJwtVerify.mockResolvedValue({
+          payload: { email: 'editor@example.com' }
+        });
+
         const updateData = { name: 'Updated Cocktail' };
         const updatedRecipe = createTestRecipe(updateData);
         (database.updateRecipe as any).mockResolvedValue(updatedRecipe);
 
         const response = await request(app)
           .put('/api/recipes/test-recipe-id')
-          .set('CF_Authorization', 'test-user:editor')
+          .set('CF_Authorization', 'valid-jwt-token')
           .send(updateData);
 
         expect(response.status).toBe(200);
@@ -265,23 +277,31 @@ describe('Recipes API Authorization', () => {
         expect(database.deleteRecipe).not.toHaveBeenCalled();
       });
 
-      it('should deny recipe deletion for viewer role', async () => {
+      it('should deny recipe deletion for non-writer users', async () => {
+        mockJwtVerify.mockResolvedValue({
+          payload: { email: 'viewer@example.com' }
+        });
+
         const response = await request(app)
           .delete('/api/recipes/test-recipe-id')
-          .set('CF_Authorization', 'test-user:viewer');
+          .set('CF_Authorization', 'valid-jwt-token');
 
         expect(response.status).toBe(403);
         expect(response.body.error).toBe('Insufficient permissions');
         expect(database.deleteRecipe).not.toHaveBeenCalled();
       });
 
-      it('should allow recipe deletion for editor role', async () => {
+      it('should allow recipe deletion for writer users', async () => {
+        mockJwtVerify.mockResolvedValue({
+          payload: { email: 'editor@example.com' }
+        });
+
         const deletedRecipe = createTestRecipe();
         (database.deleteRecipe as any).mockResolvedValue(deletedRecipe);
 
         const response = await request(app)
           .delete('/api/recipes/test-recipe-id')
-          .set('CF_Authorization', 'test-user:editor');
+          .set('CF_Authorization', 'valid-jwt-token');
 
         expect(response.status).toBe(200);
         expect(response.body).toEqual(deletedRecipe);
@@ -290,7 +310,11 @@ describe('Recipes API Authorization', () => {
     });
 
     describe('Generate Recipe from Likes', () => {
-      it('should require editor role for generating recipe from likes', async () => {
+      it('should require writer permissions for generating recipe from likes', async () => {
+        mockJwtVerify.mockResolvedValue({
+          payload: { email: 'viewer@example.com' }
+        });
+
         const requestData = {
           likedRecipeIds: ['recipe1', 'recipe2'],
           passedRecipeIds: ['recipe3'],
@@ -298,14 +322,18 @@ describe('Recipes API Authorization', () => {
 
         const response = await request(app)
           .post('/api/recipes/generate-from-likes')
-          .set('CF_Authorization', 'test-user:viewer')
+          .set('CF_Authorization', 'valid-jwt-token')
           .send(requestData);
 
         expect(response.status).toBe(403);
         expect(response.body.error).toBe('Insufficient permissions');
       });
 
-      it('should allow generating recipe from likes for editor role', async () => {
+      it('should allow generating recipe from likes for writer users', async () => {
+        mockJwtVerify.mockResolvedValue({
+          payload: { email: 'editor@example.com' }
+        });
+
         const requestData = {
           likedRecipeIds: ['recipe1', 'recipe2'],
           passedRecipeIds: ['recipe3'],
@@ -323,7 +351,7 @@ describe('Recipes API Authorization', () => {
 
         const response = await request(app)
           .post('/api/recipes/generate-from-likes')
-          .set('CF_Authorization', 'test-user:editor')
+          .set('CF_Authorization', 'valid-jwt-token')
           .send(requestData);
 
         expect(response.status).toBe(201);
@@ -335,21 +363,27 @@ describe('Recipes API Authorization', () => {
 
   describe('Error Handling', () => {
     it('should handle invalid authorization header format', async () => {
+      mockJwtVerify.mockRejectedValue(new Error('Invalid token'));
+
       const response = await request(app)
         .post('/api/recipes')
-        .set('CF_Authorization', '{"invalid": json}')
+        .set('CF_Authorization', 'invalid-jwt-token')
         .send({ name: 'Test' });
 
       expect(response.status).toBe(401);
-      expect(response.body.error).toBe('Invalid CF_Authorization header format');
+      expect(response.body.error).toBe('Invalid CF_Authorization header');
     });
 
     it('should handle database errors gracefully for authorized requests', async () => {
+      mockJwtVerify.mockResolvedValue({
+        payload: { email: 'editor@example.com' }
+      });
+
       (database.createRecipe as any).mockRejectedValue(new Error('Database error'));
 
       const response = await request(app)
         .post('/api/recipes')
-        .set('CF_Authorization', 'test-user:editor')
+        .set('CF_Authorization', 'valid-jwt-token')
         .send({
           name: 'Test Recipe',
           ingredients: [{ name: 'Test', amount: 1, unit: 'oz' }],
@@ -364,7 +398,8 @@ describe('Recipes API Authorization', () => {
 
   afterEach(() => {
     // Clean up environment variables
-    delete process.env.CLOUDFLARE_PUBLIC_SIGNING_KEY_URL;
+    delete process.env.CLOUDFLARE_TEAM_DOMAIN;
+    delete process.env.WRITER_USERS;
     
     // Reset mocks
     vi.clearAllMocks();
