@@ -198,9 +198,6 @@ function TinderPage() {
             {/* Swipe hints */}
             <div className="text-center mt-4 text-sm text-muted-foreground">
               <p>Swipe right to ❤️ like • Swipe left to 👋 pass</p>
-              <p>
-                {currentIndex + 1} of {shuffledRecipes.length}
-              </p>
             </div>
           </div>
         </div>
