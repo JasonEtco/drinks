@@ -2,9 +2,12 @@ import type { UIMessage } from "ai";
 import { MemoizedMarkdown } from "./MemoizedMarkdown";
 import type { UseChatHelpers } from "@ai-sdk/react";
 
-const formatTime = (date: Date) => {
+function formatTime(date: Date | string): string {
+  if (typeof date === "string") {
+    date = new Date(date);
+  }
   return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-};
+}
 
 export function ChatMessage({
   message,
