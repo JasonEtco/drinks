@@ -409,9 +409,10 @@ const RecipeForm: React.FC<RecipeFormProps> = React.memo(
                   <SelectValue placeholder="Select a glass type">
                     {glass && (
                       <div className="flex items-center">
-                        <div className="mr-4 w-2">
-                          <GlassIcon glassType={glass} />
-                        </div>
+                        <GlassIcon
+                          glassType={glass}
+                          className="mr-2 size-6 text-primary"
+                        />
                         <span>{glass}</span>
                       </div>
                     )}
@@ -421,9 +422,10 @@ const RecipeForm: React.FC<RecipeFormProps> = React.memo(
                   {GLASS_TYPES.map((glassType) => (
                     <SelectItem key={glassType} value={glassType}>
                       <div className="flex items-center">
-                        <div className="mr-2 w-4">
-                          <GlassIcon glassType={glassType as GlassType} />
-                        </div>
+                        <GlassIcon
+                          glassType={glassType}
+                          className="mr-2 text-primary size-6"
+                        />
                         <span>{glassType}</span>
                       </div>
                     </SelectItem>

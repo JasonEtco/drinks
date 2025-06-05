@@ -20,9 +20,9 @@ export function RecipeListItem({ recipe, isLast }: RecipeListItemProps) {
         !isLast ? "border-b" : ""
       }`}
     >
-      <div className="flex w-full sm:items-center items-start">
+      <div className="flex w-full sm:items-start items-start">
         {/* Glass Icon */}
-        <div className="sm:w-8 w-6 mr-4 flex-shrink-0 mt-1 sm:mt-0 text-primary">
+        <div className="sm:w-14 w-6 mr-4 flex-shrink-0 mt-1 sm:mt-0 text-primary">
           <GlassIcon glassType={recipe.glass} />
         </div>
 
@@ -43,18 +43,20 @@ export function RecipeListItem({ recipe, isLast }: RecipeListItemProps) {
         )}
       </div>
 
-      <div className="flex items-center gap-2 mt-4 sm:pl-12 pl-10 ">
-        {recipe.tags.slice(0, 3).map((tag) => (
-          <Badge key={tag} variant="outline" className="text-xs">
-            {tag}
-          </Badge>
-        ))}
-        {recipe.tags.length > 3 && (
-          <Badge variant="outline" className="text-xs">
-            +{recipe.tags.length - 3}
-          </Badge>
-        )}
-      </div>
+      {recipe.tags.length > 0 && (
+        <div className="flex items-center gap-2 mt-2 sm:pl-18 pl-10 ">
+          {recipe.tags.slice(0, 3).map((tag) => (
+            <Badge key={tag} variant="outline" className="text-xs">
+              {tag}
+            </Badge>
+          ))}
+          {recipe.tags.length > 3 && (
+            <Badge variant="outline" className="text-xs">
+              +{recipe.tags.length - 3}
+            </Badge>
+          )}
+        </div>
+      )}
     </Link>
   );
 }

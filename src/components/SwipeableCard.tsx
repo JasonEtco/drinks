@@ -199,7 +199,7 @@ const SwipeableCard: React.FC<SwipeableCardProps> = ({
           <div className="grid grid-cols-2 gap-4">
             {recipe.glass && (
               <div className="flex items-center space-x-2">
-                <div className="h-5 w-5 text-primary">
+                <div className="w-10 text-primary">
                   <GlassIcon glassType={recipe.glass} />
                 </div>
                 <div>

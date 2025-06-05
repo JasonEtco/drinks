@@ -53,7 +53,7 @@ function getGlassIcon(
   }
 }
 
-export function GlassIcon({ glassType }: GlassIconProps) {
-  const GlassIcon = getGlassIcon(glassType);
-  return <GlassIcon className="w-full h-full" fill="currentColor" />;
+export function GlassIcon({ glassType, className }: GlassIconProps) {
+  const Icon = getGlassIcon(glassType);
+  return <Icon fill="currentColor" className={className} />;
 }

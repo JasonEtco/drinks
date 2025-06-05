@@ -159,7 +159,7 @@ function RecipePage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {recipe.glass && (
             <div className="flex items-center space-x-3">
-              <div className="text-primary h-8 w-8">
+              <div className="text-primary w-12">
                 <GlassIcon glassType={recipe.glass} />
               </div>
               <div>
