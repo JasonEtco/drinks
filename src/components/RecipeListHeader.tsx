@@ -44,7 +44,7 @@ export function RecipeListHeader({
             size="sm"
             onClick={() => handleSortChange("name")}
             className={cn(
-              "hidden sm:inline",
+              "hidden sm:flex",
               sortField === "name" ? "border-primary" : ""
             )}
           >
@@ -62,7 +62,7 @@ export function RecipeListHeader({
             size="sm"
             onClick={() => handleSortChange("created")}
             className={cn(
-              "hidden sm:inline",
+              "hidden sm:flex",
               sortField === "created" ? "border-primary" : ""
             )}
           >

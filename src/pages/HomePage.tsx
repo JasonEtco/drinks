@@ -14,5 +14,9 @@ export default function HomePage() {
     );
   }
 
-  return <RecipeList recipes={recipes} />;
+  return (
+    <div className="container max-w-4xl">
+      <RecipeList recipes={recipes} />
+    </div>
+  );
 }

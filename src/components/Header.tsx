@@ -7,7 +7,7 @@ export default function Header() {
   const location = useLocation();
 
   return (
-    <header className="mb-4 flex sm:flex-row flex-col items-center justify-between">
+    <header className="container max-w-4xl mx-auto sm:py-4 py-2 mb-2 flex sm:flex-row flex-col items-center justify-between">
       <Link
         to="/"
         className="block sm:mb-0 mb-2 text-xl font-bold font-serif uppercase"

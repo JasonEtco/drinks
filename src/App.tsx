@@ -13,7 +13,7 @@ function App() {
   return (
     <RecipeProvider>
       <Router>
-        <div className="container max-w-4xl  mx-auto sm:py-8 py-4 px-4">
+        <div className="h-screen flex flex-col">
           <Header />
           <Routes>
             <Route path="/" element={<HomePage />} />

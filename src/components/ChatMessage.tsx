@@ -19,7 +19,7 @@ export function ChatMessage({
 }) {
   let content = message.content;
 
-  if (content === "") {
+  if (content === "" && message.role === "assistant") {
     for (const part of message.parts) {
       // If part is a tool invocation result, use its message content
       if (isToolCallResult(part)) {
@@ -41,7 +41,7 @@ export function ChatMessage({
             : "w-full flex-1"
         }`}
       >
-        <div className="prose w-full">
+        <div className="prose max-w-full w-full">
           <MemoizedMarkdown id={message.id} content={content} />
         </div>
 

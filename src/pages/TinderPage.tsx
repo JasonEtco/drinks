@@ -130,65 +130,56 @@ function TinderPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="text-center space-y-2">
-        <h1 className="text-xl md:text-4xl font-bold mb-0">Drink Tinder</h1>
-        <p className="text-muted-foreground text-sm">
-          Swipe through drinks and find your next favorite cocktail
-        </p>
+    <div className="h-full flex flex-col">
+      <div className="max-w-md mx-auto flex-1 px-2">
+        <SwipeableCard
+          recipe={currentRecipe}
+          onSwipeLeft={handlePass}
+          onSwipeRight={handleLike}
+        />
       </div>
 
-      {currentRecipe && (
-        <div className="max-w-md mx-auto">
-          <SwipeableCard
-            recipe={currentRecipe}
-            onSwipeLeft={handlePass}
-            onSwipeRight={handleLike}
-          />
+      {/* Action Buttons */}
+      <div className="max-w-md mx-auto px-4 pb-6">
+        <div className="flex items-center justify-center gap-2 mt-6">
+          <Button
+            variant="outline"
+            size="lg"
+            onClick={handlePass}
+            className="rounded-full w-16 h-16 border-red-200 hover:border-red-300 hover:bg-red-50"
+          >
+            <XIcon className="h-6 w-6 text-red-500" />
+          </Button>
 
-          {/* Action Buttons */}
-          <div className="fixed bottom-6 left-0 right-0 max-w-md mx-auto px-4">
-            <div className="flex items-center justify-center gap-2 mt-6">
-              <Button
-                variant="outline"
-                size="lg"
-                onClick={handlePass}
-                className="rounded-full w-16 h-16 border-red-200 hover:border-red-300 hover:bg-red-50"
-              >
-                <XIcon className="h-6 w-6 text-red-500" />
-              </Button>
+          {/* Generate Recipe Button - Show when user has liked some recipes */}
+          <Button
+            onClick={handleGenerateFromLikes}
+            disabled={likedRecipes.length === 0}
+            size="sm"
+            className="disabled:bg-purple-200 rounded-full border w-10 h-10 bg-purple-500 border-purple-200 hover:border-purple-300 hover:bg-purple-700"
+            aria-disabled={likedRecipes.length === 0}
+          >
+            {isGenerating ? (
+              <SpinnerIcon className="h-6 w-6 animate-spin" />
+            ) : (
+              <SparkleIcon className="h-6 w-6" />
+            )}
+          </Button>
 
-              {/* Generate Recipe Button - Show when user has liked some recipes */}
-              <Button
-                onClick={handleGenerateFromLikes}
-                disabled={likedRecipes.length === 0}
-                size="sm"
-                className="disabled:bg-purple-200 rounded-full border w-10 h-10 bg-purple-500 border-purple-200 hover:border-purple-300 hover:bg-purple-700"
-                aria-disabled={likedRecipes.length === 0}
-              >
-                {isGenerating ? (
-                  <SpinnerIcon className="h-6 w-6 animate-spin" />
-                ) : (
-                  <SparkleIcon className="h-6 w-6" />
-                )}
-              </Button>
-
-              <Button
-                size="lg"
-                onClick={handleLike}
-                className="rounded-full w-16 h-16 bg-green-600 hover:bg-green-700"
-              >
-                <HeartIcon className="h-6 w-6 text-white" />
-              </Button>
-            </div>
-
-            {/* Swipe hints */}
-            <div className="text-center mt-4 text-sm text-muted-foreground">
-              <p>Swipe right to ❤️ like • Swipe left to 👋 pass</p>
-            </div>
-          </div>
+          <Button
+            size="lg"
+            onClick={handleLike}
+            className="rounded-full w-16 h-16 bg-green-600 hover:bg-green-700"
+          >
+            <HeartIcon className="h-6 w-6 text-white" />
+          </Button>
         </div>
-      )}
+
+        {/* Swipe hints */}
+        <div className="text-center mt-4 text-sm text-muted-foreground">
+          <p>Swipe right to ❤️ like • Swipe left to 👋 pass</p>
+        </div>
+      </div>
     </div>
   );
 }

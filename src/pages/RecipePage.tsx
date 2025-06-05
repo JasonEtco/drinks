@@ -77,7 +77,7 @@ function RecipePage() {
   };
 
   return (
-    <>
+    <div className="container max-w-4xl">
       <div className="space-y-12">
         {/* Title and Description */}
         <div className="space-y-4">
@@ -235,7 +235,7 @@ function RecipePage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </>
+    </div>
   );
 }
 
