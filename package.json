@@ -16,7 +16,7 @@
         "kill": "fuser -k 5000/tcp",
         "optimize": "vite optimize",
         "preview": "vite preview",
-        "test": "vitest run",
+        "test": "vitest run --silent",
         "test:watch": "vitest"
     },
     "dependencies": {

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import request from 'supertest';
 import express from 'express';
 import { GlassType } from '../lib/types';
@@ -24,6 +24,19 @@ vi.mock('../lib/validation.js', () => ({
   },
   UpdateRecipeSchema: {
     parse: vi.fn((data) => data),
+  },
+}));
+
+// Mock fetch for Cloudflare public key
+global.fetch = vi.fn();
+
+// Mock crypto module
+vi.mock('crypto', () => ({
+  default: {
+    createVerify: vi.fn(() => ({
+      update: vi.fn(),
+      verify: vi.fn(() => true), // Default to valid signature
+    })),
   },
 }));
 
@@ -68,6 +81,15 @@ describe('Recipes API Authorization', () => {
     app = express();
     app.use(express.json());
     app.use('/api/recipes', recipesRouter());
+    
+    // Mock environment variables for auth
+    process.env.CLOUDFLARE_PUBLIC_SIGNING_KEY_URL = 'https://example.com/public-key';
+    
+    // Mock fetch to return a valid public key
+    (global.fetch as any).mockResolvedValue({
+      ok: true,
+      text: () => Promise.resolve('-----BEGIN PUBLIC KEY-----\nMOCK_PUBLIC_KEY\n-----END PUBLIC KEY-----'),
+    });
     
     // Reset all mocks
     vi.clearAllMocks();
@@ -293,7 +315,7 @@ describe('Recipes API Authorization', () => {
         const likedRecipe2 = createTestRecipe({ id: 'recipe2', name: 'Liked Recipe 2' });
         const generatedRecipe = createTestRecipe({ name: 'Generated Recipe' });
 
-        database.getRecipeById
+        (database.getRecipeById as any)
           .mockResolvedValueOnce(likedRecipe1)
           .mockResolvedValueOnce(likedRecipe2)
           .mockResolvedValueOnce(null); // passed recipe not found
@@ -338,5 +360,13 @@ describe('Recipes API Authorization', () => {
       expect(response.status).toBe(500);
       expect(response.body.error).toBe('Failed to create recipe');
     });
+  });
+
+  afterEach(() => {
+    // Clean up environment variables
+    delete process.env.CLOUDFLARE_PUBLIC_SIGNING_KEY_URL;
+    
+    // Reset mocks
+    vi.clearAllMocks();
   });
 });

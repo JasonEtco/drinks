@@ -1,7 +1,20 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import request from 'supertest';
 import express from 'express';
 import { UserRole, authenticateUser, requireEditor, requireEditorAuth } from '../server/auth';
+
+// Mock fetch for Cloudflare public key
+global.fetch = vi.fn();
+
+// Mock crypto module
+vi.mock('crypto', () => ({
+  default: {
+    createVerify: vi.fn(() => ({
+      update: vi.fn(),
+      verify: vi.fn(() => true), // Default to valid signature
+    })),
+  },
+}));
 
 describe('Authorization Middleware', () => {
   let app: express.Application;
@@ -9,6 +22,15 @@ describe('Authorization Middleware', () => {
   beforeEach(() => {
     app = express();
     app.use(express.json());
+    
+    // Mock environment variables
+    process.env.CLOUDFLARE_PUBLIC_SIGNING_KEY_URL = 'https://example.com/public-key';
+    
+    // Mock fetch to return a valid public key
+    (global.fetch as any).mockResolvedValue({
+      ok: true,
+      text: () => Promise.resolve('-----BEGIN PUBLIC KEY-----\nMOCK_PUBLIC_KEY\n-----END PUBLIC KEY-----'),
+    });
     
     // Test endpoints with different auth requirements
     app.get('/public', (req, res) => {
@@ -42,6 +64,9 @@ describe('Authorization Middleware', () => {
         user: req.user 
       });
     });
+    
+    // Reset mocks
+    vi.clearAllMocks();
   });
 
   describe('Public Endpoints', () => {
@@ -84,6 +109,127 @@ describe('Authorization Middleware', () => {
       expect(response.status).toBe(200);
       expect(response.body.user.id).toBe('test-user');
       expect(response.body.user.role).toBe(UserRole.EDITOR);
+    });
+
+    it('should parse valid JWT token', async () => {
+      // Create a mock JWT token (header.payload.signature)
+      const header = btoa(JSON.stringify({ alg: 'RS256', typ: 'JWT' }));
+      const payload = btoa(JSON.stringify({ 
+        sub: 'jwt-user', 
+        role: 'editor',
+        exp: Math.floor(Date.now() / 1000) + 3600 // expires in 1 hour
+      }));
+      const signature = 'mock-signature';
+      const jwtToken = `${header}.${payload}.${signature}`;
+
+      const response = await request(app)
+        .get('/authenticated')
+        .set('CF_Authorization', jwtToken);
+
+      expect(response.status).toBe(200);
+      expect(response.body.user.id).toBe('jwt-user');
+      expect(response.body.user.role).toBe(UserRole.EDITOR);
+    });
+
+    it('should reject JWT with invalid signature', async () => {
+      // Mock crypto to return false for signature verification
+      const crypto = await import('crypto');
+      const mockVerify = vi.fn().mockReturnValue(false);
+      crypto.default.createVerify = vi.fn(() => ({
+        update: vi.fn(),
+        verify: mockVerify,
+      })) as any;
+
+      const header = btoa(JSON.stringify({ alg: 'RS256', typ: 'JWT' }));
+      const payload = btoa(JSON.stringify({ 
+        sub: 'jwt-user', 
+        role: 'editor',
+        exp: Math.floor(Date.now() / 1000) + 3600
+      }));
+      const signature = 'invalid-signature';
+      const jwtToken = `${header}.${payload}.${signature}`;
+
+      const response = await request(app)
+        .get('/authenticated')
+        .set('CF_Authorization', jwtToken);
+
+      expect(response.status).toBe(401);
+      expect(response.body.error).toBe('Invalid CF_Authorization header format');
+    });
+
+    it('should reject expired JWT token', async () => {
+      const header = btoa(JSON.stringify({ alg: 'RS256', typ: 'JWT' }));
+      const payload = btoa(JSON.stringify({ 
+        sub: 'jwt-user', 
+        role: 'editor',
+        exp: Math.floor(Date.now() / 1000) - 3600 // expired 1 hour ago
+      }));
+      const signature = 'mock-signature';
+      const jwtToken = `${header}.${payload}.${signature}`;
+
+      const response = await request(app)
+        .get('/authenticated')
+        .set('CF_Authorization', jwtToken);
+
+      expect(response.status).toBe(401);
+      expect(response.body.error).toBe('Invalid CF_Authorization header format');
+    });
+
+    it('should handle JWT with unsupported algorithm', async () => {
+      const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' })); // Wrong algorithm
+      const payload = btoa(JSON.stringify({ 
+        sub: 'jwt-user', 
+        role: 'editor',
+        exp: Math.floor(Date.now() / 1000) + 3600
+      }));
+      const signature = 'mock-signature';
+      const jwtToken = `${header}.${payload}.${signature}`;
+
+      const response = await request(app)
+        .get('/authenticated')
+        .set('CF_Authorization', jwtToken);
+
+      expect(response.status).toBe(401);
+      expect(response.body.error).toBe('Invalid CF_Authorization header format');
+    });
+
+    it('should handle JWT with missing user identifier', async () => {
+      const header = btoa(JSON.stringify({ alg: 'RS256', typ: 'JWT' }));
+      const payload = btoa(JSON.stringify({ 
+        role: 'editor',
+        exp: Math.floor(Date.now() / 1000) + 3600
+        // No sub, email, preferred_username, or name
+      }));
+      const signature = 'mock-signature';
+      const jwtToken = `${header}.${payload}.${signature}`;
+
+      const response = await request(app)
+        .get('/authenticated')
+        .set('CF_Authorization', jwtToken);
+
+      expect(response.status).toBe(401);
+      expect(response.body.error).toBe('Invalid CF_Authorization header format');
+    });
+
+    it('should handle failure to fetch Cloudflare public key', async () => {
+      // Mock fetch to fail
+      (global.fetch as any).mockRejectedValue(new Error('Network error'));
+
+      const header = btoa(JSON.stringify({ alg: 'RS256', typ: 'JWT' }));
+      const payload = btoa(JSON.stringify({ 
+        sub: 'jwt-user', 
+        role: 'editor',
+        exp: Math.floor(Date.now() / 1000) + 3600
+      }));
+      const signature = 'mock-signature';
+      const jwtToken = `${header}.${payload}.${signature}`;
+
+      const response = await request(app)
+        .get('/authenticated')
+        .set('CF_Authorization', jwtToken);
+
+      expect(response.status).toBe(401);
+      expect(response.body.error).toBe('Invalid CF_Authorization header format');
     });
 
     it('should handle invalid JSON gracefully', async () => {
@@ -210,5 +356,14 @@ describe('Authorization Middleware', () => {
       
       delete process.env.USER_ROLE_MAPPING;
     });
+  });
+
+  afterEach(() => {
+    // Clean up environment variables
+    delete process.env.CLOUDFLARE_PUBLIC_SIGNING_KEY_URL;
+    delete process.env.USER_ROLE_MAPPING;
+    
+    // Reset mocks
+    vi.clearAllMocks();
   });
 });
