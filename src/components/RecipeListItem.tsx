@@ -22,13 +22,13 @@ export function RecipeListItem({ recipe, isLast }: RecipeListItemProps) {
     >
       <div className="flex w-full sm:items-start items-start">
         {/* Glass Icon */}
-        <div className="sm:w-14 w-6 mr-4 flex-shrink-0 mt-1 sm:mt-0 text-primary">
+        <div className="sm:w-14 w-12 sm:mr-4 mr-2 flex-shrink-0 text-primary">
           <GlassIcon glassType={recipe.glass} />
         </div>
 
         {/* Recipe Info */}
         <div className="min-w-0 flex-1 flex flex-col">
-          <h2 className="text-lg">{recipe.name}</h2>
+          <h2 className="text-lg leading-tight mb-1 sm:mb-0">{recipe.name}</h2>
 
           <p className="lowercase text-sm text-muted-foreground max-w-140">
             {recipe.ingredients.map((ing) => ing.name).join(", ")}
@@ -44,7 +44,7 @@ export function RecipeListItem({ recipe, isLast }: RecipeListItemProps) {
       </div>
 
       {recipe.tags.length > 0 && (
-        <div className="flex items-center gap-2 mt-2 sm:pl-18 pl-10 ">
+        <div className="flex items-center gap-2 mt-2 sm:pl-18 pl-14 ">
           {recipe.tags.slice(0, 3).map((tag) => (
             <Badge key={tag} variant="outline" className="text-xs">
               {tag}

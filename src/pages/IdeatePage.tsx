@@ -1,16 +1,18 @@
 import { useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
 import {
   PaperPlaneRightIcon,
   SparkleIcon,
   TrashIcon,
 } from "@phosphor-icons/react";
-import Header from "@/components/Header";
 import { useChat } from "@ai-sdk/react";
 import { ChatMessage } from "@/components/ChatMessage";
 import { useRecipes } from "@/contexts/RecipeContext";
+import {
+  saveChatHistory,
+  loadChatHistory,
+  clearChatHistory,
+} from "@/lib/storage";
 
 export default function IdeatePage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -26,6 +28,21 @@ export default function IdeatePage() {
     setMessages,
   } = useChat();
 
+  // Load chat history on component mount
+  useEffect(() => {
+    const savedHistory = loadChatHistory();
+    if (savedHistory.length > 0) {
+      setMessages(savedHistory);
+    }
+  }, [setMessages]);
+
+  // Save chat history whenever messages change
+  useEffect(() => {
+    if (messages.length > 0) {
+      saveChatHistory(messages);
+    }
+  }, [messages]);
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
@@ -39,20 +56,32 @@ export default function IdeatePage() {
     // Check the latest message for tool call results
     if (messages.length > 0) {
       const latestMessage = messages[messages.length - 1];
-      
+
       // Only process assistant messages that have parts with tool invocations
-      if (latestMessage.role === 'assistant' && latestMessage.parts) {
+      if (latestMessage.role === "assistant" && latestMessage.parts) {
         for (const part of latestMessage.parts) {
-          if (part.toolInvocation && part.toolInvocation.result) {
+          if (
+            part.type === "tool-invocation" &&
+            part.toolInvocation &&
+            part.toolInvocation.result
+          ) {
             const result = part.toolInvocation.result;
-            
+
             // Check if this was a successful recipe creation
-            if (part.toolInvocation.toolName === 'create_recipe' && result.success && result.recipe) {
+            if (
+              part.toolInvocation.toolName === "create_recipe" &&
+              result.success &&
+              result.recipe
+            ) {
               addGeneratedRecipe(result.recipe);
             }
-            
+
             // Check if this was a successful recipe edit (also add to context as it may be a new version)
-            if (part.toolInvocation.toolName === 'edit_recipe' && result.success && result.recipe) {
+            if (
+              part.toolInvocation.toolName === "edit_recipe" &&
+              result.success &&
+              result.recipe
+            ) {
               addGeneratedRecipe(result.recipe);
             }
           }
@@ -74,7 +103,22 @@ export default function IdeatePage() {
 
   const handleClearChat = () => {
     setMessages([]);
+    clearChatHistory();
     inputRef.current?.focus();
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      if (
+        input.trim() &&
+        input.length <= 1000 &&
+        status !== "streaming" &&
+        status !== "submitted"
+      ) {
+        handleSubmit(e as any);
+      }
+    }
   };
 
   return (
@@ -95,7 +139,7 @@ export default function IdeatePage() {
           <ChatMessage message={message} status={status} />
         ))}
 
-        {status === "streaming" &&
+        {(status === "streaming" || status === "submitted") &&
           messages.length > 0 &&
           messages[messages.length - 1].role === "user" && (
             <div className="flex justify-start">
@@ -112,7 +156,9 @@ export default function IdeatePage() {
                       style={{ animationDelay: "0.4s" }}
                     ></div>
                   </div>
-                  <span className="text-sm">Thinking...</span>
+                  <span className="text-sm">
+                    {status === "submitted" ? "Sending..." : "Thinking..."}
+                  </span>
                 </div>
               </div>
             </div>
@@ -124,16 +170,17 @@ export default function IdeatePage() {
       <div className="fixed z-50 bg-background bottom-6 left-0 right-0">
         <form
           onSubmit={handleSubmit}
-          className="container max-w-2xl mx-auto p-4 shadow-md border-2 border-muted ring-1 ring-muted-foreground/20 rounded-md focus-within:ring-primary focus-within:ring-2 transition-all"
+          className="container max-w-4xl mx-auto p-4 shadow-md border-2 border-muted ring-1 ring-muted-foreground/20 rounded-md focus-within:ring-primary focus-within:ring-2 transition-all"
         >
           <div className="flex gap-2">
             <textarea
               ref={inputRef}
               value={input}
               onChange={handleInputChange}
+              onKeyDown={handleKeyDown}
               placeholder="Ask for cocktail ideas..."
               disabled={status === "streaming" || status === "submitted"}
-              className="flex-1 text-lg border-0 focus:ring-0 focus:border-0 focus:outline-none resize-none"
+              className="flex-1 text-base border-0 focus:ring-0 focus:border-0 focus:outline-none resize-none"
               maxLength={1000}
               autoFocus
             />
