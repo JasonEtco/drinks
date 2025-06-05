@@ -1,5 +1,48 @@
 # Drinks
 
+A cocktail recipe management application with AI-powered features and role-based authorization.
+
+## Authorization
+
+The Drinks API implements role-based authorization using Cloudflare's `CF_Authorization` header. This header must be included in requests to modify recipes (create, update, delete operations).
+
+### User Roles
+
+- **Editor**: Can create, update, and delete recipes, as well as read all recipes
+- **Viewer**: Can only read recipes (GET operations)
+
+### CF_Authorization Header Format
+
+The `CF_Authorization` header supports multiple formats:
+
+1. **Simple user identifier**: `username`
+2. **User with role**: `username:role` (e.g., `admin:editor`)
+3. **JSON format**: `{"user": "username", "role": "editor"}`
+
+### API Endpoints Authorization
+
+- **Read Operations** (No authentication required):
+  - `GET /api/recipes` - List all recipes
+  - `GET /api/recipes/search` - Search recipes
+  - `GET /api/recipes/:id` - Get recipe by ID
+  - `GET /api/health` - Health check
+
+- **Write Operations** (Editor role required):
+  - `POST /api/recipes` - Create new recipe
+  - `PUT /api/recipes/:id` - Update recipe
+  - `DELETE /api/recipes/:id` - Delete recipe
+  - `POST /api/recipes/generate-from-likes` - Generate recipe from likes
+
+### Role Configuration
+
+User roles can be configured via the `USER_ROLE_MAPPING` environment variable:
+
+```bash
+USER_ROLE_MAPPING='{"admin": "editor", "guest": "viewer", "user1": "editor"}'
+```
+
+If no role is specified in the header or mapping, users default to the `viewer` role.
+
 A modern cocktail recipe management application with a React frontend and Express.js backend.
 
 ## Features
