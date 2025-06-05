@@ -1,19 +1,34 @@
 import { useState, useCallback, useMemo } from "react";
 import { useRecipes } from "../contexts/RecipeContext";
 import { Button } from "@/components/ui/button";
-import { HeartIcon, XIcon, ArrowClockwiseIcon } from "@phosphor-icons/react";
+import {
+  HeartIcon,
+  XIcon,
+  ArrowClockwiseIcon,
+  SparkleIcon,
+  SpinnerIcon,
+} from "@phosphor-icons/react";
 import SwipeableCard from "@/components/SwipeableCard";
+import { ApiService } from "../lib/api";
+import { Recipe } from "../lib/types";
 
 function TinderPage() {
   const { recipes, isLoading } = useRecipes();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [likedRecipes, setLikedRecipes] = useState<string[]>([]);
   const [passedRecipes, setPassedRecipes] = useState<string[]>([]);
+  const [generatedRecipes, setGeneratedRecipes] = useState<Recipe[]>([]);
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  // Combine original recipes with generated ones
+  const allRecipes = useMemo(() => {
+    return [...recipes, ...generatedRecipes];
+  }, [recipes, generatedRecipes]);
 
   // Shuffle recipes to make it more interesting
   const shuffledRecipes = useMemo(() => {
-    return [...recipes].sort(() => Math.random() - 0.5);
-  }, [recipes]);
+    return [...allRecipes].sort(() => Math.random() - 0.5);
+  }, [allRecipes]);
 
   const currentRecipe = shuffledRecipes[currentIndex];
 
@@ -35,7 +50,38 @@ function TinderPage() {
     setCurrentIndex(0);
     setLikedRecipes([]);
     setPassedRecipes([]);
+    setGeneratedRecipes([]);
   }, []);
+
+  /**
+   * Generate a new recipe based on the user's liked recipes
+   * Uses the LLM to create a personalized cocktail recommendation
+   */
+  const handleGenerateFromLikes = useCallback(async () => {
+    if (likedRecipes.length === 0) {
+      return;
+    }
+
+    setIsGenerating(true);
+    try {
+      const generatedRecipe = await ApiService.generateRecipeFromLikes(
+        likedRecipes,
+        passedRecipes
+      );
+
+      // Add the generated recipe to our state
+      setGeneratedRecipes((prev) => [...prev, generatedRecipe]);
+      setCurrentIndex(shuffledRecipes.length); // Move to the end of the list
+
+      // Optionally, move to the new recipe immediately
+      // setCurrentIndex(shuffledRecipes.length);
+    } catch (error) {
+      console.error("Error generating recipe:", error);
+      // You could add a toast notification here to show the error to the user
+    } finally {
+      setIsGenerating(false);
+    }
+  }, [likedRecipes, passedRecipes]);
 
   if (isLoading) {
     return (
@@ -59,10 +105,23 @@ function TinderPage() {
             <p className="text-sm">❤️ Liked: {likedRecipes.length} drinks</p>
             <p className="text-sm">👋 Passed: {passedRecipes.length} drinks</p>
           </div>
-          <Button onClick={handleReset} className="mt-4">
-            <ArrowClockwiseIcon className="h-4 w-4 mr-2" />
-            Start Over
-          </Button>
+          <div className="flex flex-col gap-3 mt-4">
+            {likedRecipes.length > 0 && (
+              <Button
+                onClick={handleGenerateFromLikes}
+                disabled={isGenerating}
+                variant="outline"
+                className="border-purple-200 hover:border-purple-300 hover:bg-purple-50"
+              >
+                <SparkleIcon className="h-4 w-4 mr-2" />
+                {isGenerating ? "Generating..." : "Generate Recipe from Likes"}
+              </Button>
+            )}
+            <Button onClick={handleReset}>
+              <ArrowClockwiseIcon className="h-4 w-4 mr-2" />
+              Start Over
+            </Button>
+          </div>
         </div>
       </div>
     );
@@ -86,44 +145,45 @@ function TinderPage() {
           />
 
           {/* Action Buttons */}
-          <div className="flex justify-center gap-4 mt-6">
-            <Button
-              variant="outline"
-              size="lg"
-              onClick={handlePass}
-              className="rounded-full w-16 h-16 border-red-200 hover:border-red-300 hover:bg-red-50"
-            >
-              <XIcon className="h-6 w-6 text-red-500" />
-            </Button>
-            <Button
-              size="lg"
-              onClick={handleLike}
-              className="rounded-full w-16 h-16 bg-green-600 hover:bg-green-700"
-            >
-              <HeartIcon className="h-6 w-6 text-white" />
-            </Button>
-          </div>
+          <div className="fixed bottom-6 left-0 right-0 max-w-md mx-auto px-4">
+            <div className="flex items-center justify-center gap-2 mt-6">
+              <Button
+                variant="outline"
+                size="lg"
+                onClick={handlePass}
+                className="rounded-full w-16 h-16 border-red-200 hover:border-red-300 hover:bg-red-50"
+              >
+                <XIcon className="h-6 w-6 text-red-500" />
+              </Button>
 
-          {/* Progress indicator */}
-          <div className="mt-4">
-            <div className="w-full bg-muted rounded-full h-2">
-              <div
-                className="bg-primary h-2 rounded-full transition-all duration-300"
-                style={{
-                  width: `${
-                    ((currentIndex + 1) / shuffledRecipes.length) * 100
-                  }%`,
-                }}
-              />
+              {/* Generate Recipe Button - Show when user has liked some recipes */}
+              <Button
+                onClick={handleGenerateFromLikes}
+                disabled={likedRecipes.length === 0}
+                size="sm"
+                className="disabled:bg-purple-200 rounded-full border w-10 h-10 bg-purple-500 border-purple-200 hover:border-purple-300 hover:bg-purple-700"
+                aria-disabled={likedRecipes.length === 0}
+              >
+                {isGenerating ? (
+                  <SpinnerIcon className="h-6 w-6 animate-spin" />
+                ) : (
+                  <SparkleIcon className="h-6 w-6" />
+                )}
+              </Button>
+
+              <Button
+                size="lg"
+                onClick={handleLike}
+                className="rounded-full w-16 h-16 bg-green-600 hover:bg-green-700"
+              >
+                <HeartIcon className="h-6 w-6 text-white" />
+              </Button>
             </div>
-          </div>
 
-          {/* Swipe hints */}
-          <div className="text-center mt-4 text-sm text-muted-foreground">
-            <p>Swipe right to ❤️ like • Swipe left to 👋 pass</p>
-            <p>
-              {currentIndex + 1} of {shuffledRecipes.length}
-            </p>
+            {/* Swipe hints */}
+            <div className="text-center mt-4 text-sm text-muted-foreground">
+              <p>Swipe right to ❤️ like • Swipe left to 👋 pass</p>
+            </div>
           </div>
         </div>
       )}

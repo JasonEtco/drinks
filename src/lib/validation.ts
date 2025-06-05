@@ -20,7 +20,12 @@ export const CreateRecipeSchema = z.object({
   glass: GlassTypeSchema.optional(),
   garnish: z.string().optional(),
   tags: z.array(z.string()).default([]),
-});
+}).required({
+  name: true,
+  ingredients: true,
+  instructions: true,
+  tags: true,
+}).strict();
 
 // Zod schema for Recipe update (all fields optional)
 export const UpdateRecipeSchema = z.object({

@@ -83,6 +83,17 @@ export class ApiService {
     });
   }
 
+  // Generate recipe from liked recipes
+  static async generateRecipeFromLikes(
+    likedRecipeIds: string[],
+    passedRecipeIds: string[] = []
+  ): Promise<Recipe> {
+    return this.request<Recipe>("/recipes/generate-from-likes", {
+      method: "POST",
+      body: JSON.stringify({ likedRecipeIds, passedRecipeIds }),
+    });
+  }
+
   // Chat with AI for cocktail ideas with streaming support
   static async chatStream(
     message: string, 

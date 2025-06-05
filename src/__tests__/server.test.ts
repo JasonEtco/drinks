@@ -124,6 +124,45 @@ const createTestApp = (mockDb: MockDatabase) => {
     }
   });
 
+  // Generate recipe from likes (must come before /:recipeId route)
+  app.post('/api/recipes/generate-from-likes', async (req: Request, res: Response) => {
+    try {
+      const { likedRecipeIds, passedRecipeIds = [] } = req.body;
+
+      if (!likedRecipeIds || !Array.isArray(likedRecipeIds) || likedRecipeIds.length === 0) {
+        res.status(400).json({ error: 'likedRecipeIds array is required and must not be empty' });
+        return;
+      }
+
+      // Fetch the actual recipe objects for liked recipes
+      const likedRecipes: Recipe[] = [];
+      for (const id of likedRecipeIds) {
+        const recipe = await mockDb.getRecipeById(id);
+        if (recipe) {
+          likedRecipes.push(recipe);
+        }
+      }
+
+      if (likedRecipes.length === 0) {
+        res.status(400).json({ error: 'No valid liked recipes found' });
+        return;
+      }
+
+      // Mock generated recipe for testing
+      const generatedRecipe = createTestRecipe({
+        id: 'generated-recipe',
+        name: 'Generated Test Cocktail',
+        description: 'AI generated cocktail based on preferences'
+      });
+
+      // Create the recipe in the database
+      const newRecipe = await mockDb.createRecipe(generatedRecipe);
+      res.status(201).json(newRecipe);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to generate recipe from likes' });
+    }
+  });
+
   // Create new recipe
   app.post('/api/recipes', async (req: Request, res: Response) => {
     try {
@@ -546,6 +585,58 @@ describe('Server API Endpoints', () => {
       expect(response.body.status).toBe('ok');
       expect(response.body.recipesCount).toBe(0);
       expect(response.body.timestamp).toBeDefined();
+    });
+  });
+
+  describe('POST /api/recipes/generate-from-likes', () => {
+    it('should return 400 when likedRecipeIds is missing', async () => {
+      const response = await request(app)
+        .post('/api/recipes/generate-from-likes')
+        .send({});
+
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual({ error: 'likedRecipeIds array is required and must not be empty' });
+    });
+
+    it('should return 400 when likedRecipeIds is empty', async () => {
+      const response = await request(app)
+        .post('/api/recipes/generate-from-likes')
+        .send({ likedRecipeIds: [] });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual({ error: 'likedRecipeIds array is required and must not be empty' });
+    });
+
+    it('should return 400 when no valid liked recipes found', async () => {
+      (mockDb.getRecipeById as ReturnType<typeof vi.fn>).mockResolvedValue(null);
+
+      const response = await request(app)
+        .post('/api/recipes/generate-from-likes')
+        .send({ likedRecipeIds: ['invalid-id'] });
+
+      expect(response.status).toBe(400);
+      expect(response.body).toEqual({ error: 'No valid liked recipes found' });
+    });
+
+    it('should generate recipe successfully with valid liked recipes', async () => {
+      const mockLikedRecipe = createTestRecipe({ id: 'recipe1' });
+      const mockGeneratedRecipe = createTestRecipe({ 
+        id: 'generated-recipe', 
+        name: 'Generated Test Cocktail',
+        description: 'AI generated cocktail based on preferences'
+      });
+      
+      (mockDb.getRecipeById as ReturnType<typeof vi.fn>).mockResolvedValue(mockLikedRecipe);
+      (mockDb.createRecipe as ReturnType<typeof vi.fn>).mockResolvedValue(mockGeneratedRecipe);
+
+      const response = await request(app)
+        .post('/api/recipes/generate-from-likes')
+        .send({ likedRecipeIds: ['recipe1'] });
+
+      expect(response.status).toBe(201);
+      expect(response.body).toEqual(mockGeneratedRecipe);
+      expect(mockDb.getRecipeById).toHaveBeenCalledWith('recipe1');
+      expect(mockDb.createRecipe).toHaveBeenCalled();
     });
   });
 });
