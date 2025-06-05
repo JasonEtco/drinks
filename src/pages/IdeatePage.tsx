@@ -10,10 +10,12 @@ import {
 import Header from "@/components/Header";
 import { useChat } from "@ai-sdk/react";
 import { ChatMessage } from "@/components/ChatMessage";
+import { useRecipes } from "@/contexts/RecipeContext";
 
 export default function IdeatePage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const { addGeneratedRecipe } = useRecipes();
 
   const {
     messages,
@@ -31,6 +33,33 @@ export default function IdeatePage() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Monitor messages for successful recipe creation/editing via tool calls
+  useEffect(() => {
+    // Check the latest message for tool call results
+    if (messages.length > 0) {
+      const latestMessage = messages[messages.length - 1];
+      
+      // Only process assistant messages that have parts with tool invocations
+      if (latestMessage.role === 'assistant' && latestMessage.parts) {
+        for (const part of latestMessage.parts) {
+          if (part.toolInvocation && part.toolInvocation.result) {
+            const result = part.toolInvocation.result;
+            
+            // Check if this was a successful recipe creation
+            if (part.toolInvocation.toolName === 'create_recipe' && result.success && result.recipe) {
+              addGeneratedRecipe(result.recipe);
+            }
+            
+            // Check if this was a successful recipe edit (also add to context as it may be a new version)
+            if (part.toolInvocation.toolName === 'edit_recipe' && result.success && result.recipe) {
+              addGeneratedRecipe(result.recipe);
+            }
+          }
+        }
+      }
+    }
+  }, [messages, addGeneratedRecipe]);
 
   // Focus input on component mount and after submission
   useEffect(() => {
