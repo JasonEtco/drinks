@@ -1,6 +1,8 @@
 import { Recipe } from "./types";
+import type { UIMessage } from "ai";
 
 const RECIPES_KEY = "cocktail-recipes";
+const CHAT_HISTORY_KEY = "cocktail-chat-history";
 
 // Save recipes to localStorage
 export const saveRecipes = (recipes: Recipe[]): void => {
@@ -144,4 +146,33 @@ export const importRecipes = (file: File): Promise<boolean> => {
 
     reader.readAsText(file);
   });
+};
+
+// Save chat history to localStorage
+export const saveChatHistory = (messages: UIMessage[]): void => {
+  try {
+    localStorage.setItem(CHAT_HISTORY_KEY, JSON.stringify(messages));
+  } catch (error) {
+    console.error("Error saving chat history:", error);
+  }
+};
+
+// Load chat history from localStorage
+export const loadChatHistory = (): UIMessage[] => {
+  try {
+    const history = localStorage.getItem(CHAT_HISTORY_KEY);
+    return history ? JSON.parse(history) : [];
+  } catch (error) {
+    console.error("Error loading chat history:", error);
+    return [];
+  }
+};
+
+// Clear chat history from localStorage
+export const clearChatHistory = (): void => {
+  try {
+    localStorage.removeItem(CHAT_HISTORY_KEY);
+  } catch (error) {
+    console.error("Error clearing chat history:", error);
+  }
 };
