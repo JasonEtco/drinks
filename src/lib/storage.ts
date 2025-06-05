@@ -47,7 +47,7 @@ export const updateRecipe = (updatedRecipe: Recipe): boolean => {
 
     recipes[index] = {
       ...updatedRecipe,
-      updated: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
 
     saveRecipes(recipes);

@@ -1,6 +1,7 @@
 import type { UIMessage } from "ai";
 import { MemoizedMarkdown } from "./MemoizedMarkdown";
 import type { UseChatHelpers } from "@ai-sdk/react";
+import { isToolCallResult } from "@/lib/utils";
 
 function formatTime(date: Date | string): string {
   if (typeof date === "string") {
@@ -18,11 +19,14 @@ export function ChatMessage({
 }) {
   let content = message.content;
 
-  if (content === "" && message.parts && message.parts.length > 0) {
-    // If message has parts, join them into a single string
-    content = message.parts
-      .map((p: any) => p.toolInvocation?.result?.message)
-      .join("");
+  if (content === "") {
+    for (const part of message.parts) {
+      // If part is a tool invocation result, use its message content
+      if (isToolCallResult(part)) {
+        content = part.toolInvocation?.result?.message || "";
+        break; // Use the first valid tool invocation result
+      }
+    }
   }
 
   return (

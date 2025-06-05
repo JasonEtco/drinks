@@ -13,11 +13,12 @@ import {
   loadChatHistory,
   clearChatHistory,
 } from "@/lib/storage";
+import { isToolCallResult } from "@/lib/utils";
 
 export default function IdeatePage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
-  const { addGeneratedRecipe } = useRecipes();
+  const { addGeneratedRecipe, updateExistingRecipe } = useRecipes();
 
   const {
     messages,
@@ -60,11 +61,7 @@ export default function IdeatePage() {
       // Only process assistant messages that have parts with tool invocations
       if (latestMessage.role === "assistant" && latestMessage.parts) {
         for (const part of latestMessage.parts) {
-          if (
-            part.type === "tool-invocation" &&
-            part.toolInvocation &&
-            part.toolInvocation.result
-          ) {
+          if (isToolCallResult(part)) {
             const result = part.toolInvocation.result;
 
             // Check if this was a successful recipe creation
@@ -82,13 +79,13 @@ export default function IdeatePage() {
               result.success &&
               result.recipe
             ) {
-              addGeneratedRecipe(result.recipe);
+              updateExistingRecipe(result.recipe);
             }
           }
         }
       }
     }
-  }, [messages, addGeneratedRecipe]);
+  }, [messages, addGeneratedRecipe, updateExistingRecipe]);
 
   // Focus input on component mount and after submission
   useEffect(() => {
@@ -136,7 +133,7 @@ export default function IdeatePage() {
         )}
 
         {messages.map((message) => (
-          <ChatMessage message={message} status={status} />
+          <ChatMessage key={message.id} message={message} status={status} />
         ))}
 
         {(status === "streaming" || status === "submitted") &&
