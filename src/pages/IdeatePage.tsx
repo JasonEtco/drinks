@@ -10,6 +10,7 @@ import {
 import Header from "@/components/Header";
 import { useChat } from "@ai-sdk/react";
 import { ChatMessage } from "@/components/ChatMessage";
+import { saveChatHistory, loadChatHistory, clearChatHistory } from "@/lib/storage";
 
 export default function IdeatePage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -23,6 +24,21 @@ export default function IdeatePage() {
     status,
     setMessages,
   } = useChat();
+
+  // Load chat history on component mount
+  useEffect(() => {
+    const savedHistory = loadChatHistory();
+    if (savedHistory.length > 0) {
+      setMessages(savedHistory);
+    }
+  }, [setMessages]);
+
+  // Save chat history whenever messages change
+  useEffect(() => {
+    if (messages.length > 0) {
+      saveChatHistory(messages);
+    }
+  }, [messages]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -45,6 +61,7 @@ export default function IdeatePage() {
 
   const handleClearChat = () => {
     setMessages([]);
+    clearChatHistory();
     inputRef.current?.focus();
   };
 
