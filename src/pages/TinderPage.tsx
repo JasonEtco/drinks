@@ -13,7 +13,7 @@ import { ApiService } from "../lib/api";
 import { Recipe } from "../lib/types";
 
 function TinderPage() {
-  const { recipes, isLoading } = useRecipes();
+  const { recipes, isLoading, addGeneratedRecipe } = useRecipes();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [likedRecipes, setLikedRecipes] = useState<string[]>([]);
   const [passedRecipes, setPassedRecipes] = useState<string[]>([]);
@@ -69,8 +69,10 @@ function TinderPage() {
         passedRecipes
       );
 
-      // Add the generated recipe to our state
+      // Add the generated recipe to local state
       setGeneratedRecipes((prev) => [...prev, generatedRecipe]);
+      // Also add it to the recipe context so it's available throughout the app
+      addGeneratedRecipe(generatedRecipe);
       setCurrentIndex(shuffledRecipes.length); // Move to the end of the list
 
       // Optionally, move to the new recipe immediately
@@ -81,7 +83,7 @@ function TinderPage() {
     } finally {
       setIsGenerating(false);
     }
-  }, [likedRecipes, passedRecipes]);
+  }, [likedRecipes, passedRecipes, addGeneratedRecipe]);
 
   if (isLoading) {
     return (

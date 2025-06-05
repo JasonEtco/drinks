@@ -14,6 +14,7 @@ import { getUniqueIngredients } from "../lib/recipe-utils";
 interface RecipeContextType {
   recipes: Recipe[];
   addNewRecipe: (recipe: Recipe) => void;
+  addGeneratedRecipe: (recipe: Recipe) => void;
   updateExistingRecipe: (recipe: Recipe) => void;
   removeRecipe: (recipeId: string) => void;
   getRecipe: (recipeId: string) => Recipe | undefined;
@@ -67,6 +68,10 @@ export const RecipeProvider: React.FC<{ children: ReactNode }> = ({
     [],
   );
 
+  const addGeneratedRecipe = useCallback((recipe: Recipe) => {
+    setRecipes((prevRecipes) => [...prevRecipes, recipe]);
+  }, []);
+
   const updateExistingRecipe = useCallback(async (recipe: Recipe) => {
     try {
       const updatedRecipe = await ApiService.updateRecipe(recipe.id, recipe);
@@ -101,6 +106,7 @@ export const RecipeProvider: React.FC<{ children: ReactNode }> = ({
     () => ({
       recipes,
       addNewRecipe,
+      addGeneratedRecipe,
       updateExistingRecipe,
       removeRecipe,
       getRecipe,
@@ -110,6 +116,7 @@ export const RecipeProvider: React.FC<{ children: ReactNode }> = ({
     [
       recipes,
       addNewRecipe,
+      addGeneratedRecipe,
       updateExistingRecipe,
       removeRecipe,
       getRecipe,
