@@ -1,8 +1,8 @@
 import { createOpenAI } from "@ai-sdk/openai";
 import { generateObject, generateText } from "ai";
-import zod from "zod";
+import z from "zod";
 import { Ingredient, Recipe } from "../lib/types";
-import { CreateRecipeSchema } from "@/lib/validation";
+import { GlassTypeSchema, IngredientSchema } from "@/lib/validation";
 
 export function createGitHubModels() {
   const githubToken = process.env.GITHUB_TOKEN;
@@ -40,8 +40,8 @@ export async function generateRecipeTags({
     model: githubModels(process.env.CHAT_MODEL || "openai/gpt-4.1-nano"),
     system: systemPrompt,
     prompt: userPrompt,
-    schema: zod.object({
-      tags: zod.array(zod.string().min(1)),
+    schema: z.object({
+      tags: z.array(z.string().min(1)),
     }),
   });
 
@@ -59,6 +59,7 @@ export async function generateRecipeDescription({
   name?: string;
 }): Promise<string> {
   const githubModels = createGitHubModels();
+
   // Create ingredient list for prompt
   const ingredientsList = ingredients
     .map((ing) => `${ing.amount} ${ing.unit} ${ing.name}`)
@@ -151,7 +152,14 @@ Create a new recipe that would appeal to someone who liked these drinks.`;
     model: githubModels(process.env.CHAT_MODEL || "openai/gpt-4.1-nano"),
     system: systemPrompt,
     prompt: userPrompt,
-    schema: CreateRecipeSchema,
+    schema: z.object({
+      name: z.string().min(1, "Recipe name is required"),
+      description: z.string(),
+      ingredients: z.array(IngredientSchema).min(1, "At least one ingredient is required"),
+      instructions: z.string().min(1, "Instructions are required"),
+      glass: GlassTypeSchema,
+      garnish: z.string(),
+    }),
     maxTokens: 500,
     temperature: 0.8,
   });
@@ -167,6 +175,6 @@ Create a new recipe that would appeal to someone who liked these drinks.`;
     instructions: result.object.instructions,
     glass: result.object.glass as any, // Will be validated by the schema
     garnish: result.object.garnish,
-    tags: result.object.tags,
+    tags: [],
   };
 }
