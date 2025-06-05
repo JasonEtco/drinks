@@ -7,6 +7,7 @@ import {
   PlusIcon,
 } from "@phosphor-icons/react";
 import { Link } from "react-router-dom";
+import { cn } from "@/lib/utils";
 
 export function RecipeListHeader({
   searchTerm,
@@ -23,7 +24,7 @@ export function RecipeListHeader({
 }) {
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap gap-4 items-end">
+      <div className="flex flex-wrap sm:gap-4 gap-1 items-end">
         <div className="flex-1 space-y-2">
           <div className="relative">
             <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
@@ -42,7 +43,10 @@ export function RecipeListHeader({
             variant="outline"
             size="sm"
             onClick={() => handleSortChange("name")}
-            className={sortField === "name" ? "border-primary" : ""}
+            className={cn(
+              "hidden sm:inline",
+              sortField === "name" ? "border-primary" : ""
+            )}
           >
             Name
             {sortField === "name" &&
@@ -57,7 +61,10 @@ export function RecipeListHeader({
             variant="outline"
             size="sm"
             onClick={() => handleSortChange("created")}
-            className={sortField === "created" ? "border-primary" : ""}
+            className={cn(
+              "hidden sm:inline",
+              sortField === "created" ? "border-primary" : ""
+            )}
           >
             Date
             {sortField === "created" &&
@@ -75,7 +82,7 @@ export function RecipeListHeader({
         >
           <Link to="/recipes/new">
             <PlusIcon className="h-4 w-4" />
-            New Recipe
+            <span className="hidden sm:inline">New Recipe</span>
           </Link>
         </Button>
       </div>

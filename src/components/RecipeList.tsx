@@ -72,7 +72,7 @@ function RecipeList({ recipes }: RecipeListProps) {
   }, [recipes, searchTerm, sortField, sortOrder]);
 
   return (
-    <div className="space-y-6">
+    <div className="sm:space-y-6">
       <RecipeListHeader
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}

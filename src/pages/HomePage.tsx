@@ -14,11 +14,5 @@ export default function HomePage() {
     );
   }
 
-  return (
-    <div className="space-y-6">
-      <div className="space-y-4 mt-4">
-        <RecipeList recipes={recipes} />
-      </div>
-    </div>
-  );
+  return <RecipeList recipes={recipes} />;
 }

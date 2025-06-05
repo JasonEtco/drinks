@@ -132,14 +132,14 @@ function RecipePage() {
             <h3>Ingredients</h3>
             <Badge variant="outline">{totalVolume.toFixed(1)} oz total</Badge>
           </div>
-          <ul className="space-y-2">
+          <ul>
             {recipe.ingredients.map((ingredient, index) => (
               <li
                 key={index}
                 className="flex justify-between items-center py-2 border-b border-muted even:bg-muted -mx-2 px-2"
               >
-                <span className="font-medium">{ingredient.name}</span>
-                <span className="text-muted-foreground">
+                <span>{ingredient.name}</span>
+                <span>
                   {ingredient.amount} {ingredient.unit}
                 </span>
               </li>
