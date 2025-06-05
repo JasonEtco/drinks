@@ -6,6 +6,7 @@ import {
   XIcon,
   ArrowClockwiseIcon,
   SparkleIcon,
+  SpinnerIcon,
 } from "@phosphor-icons/react";
 import SwipeableCard from "@/components/SwipeableCard";
 import { ApiService } from "../lib/api";
@@ -145,7 +146,7 @@ function TinderPage() {
 
           {/* Action Buttons */}
           <div className="fixed bottom-6 left-0 right-0 max-w-md mx-auto px-4">
-            <div className="flex justify-center gap-4 mt-6">
+            <div className="flex items-center justify-center gap-2 mt-6">
               <Button
                 variant="outline"
                 size="lg"
@@ -154,6 +155,22 @@ function TinderPage() {
               >
                 <XIcon className="h-6 w-6 text-red-500" />
               </Button>
+
+              {/* Generate Recipe Button - Show when user has liked some recipes */}
+              <Button
+                onClick={handleGenerateFromLikes}
+                disabled={likedRecipes.length === 0}
+                size="sm"
+                className="disabled:bg-purple-200 rounded-full border w-10 h-10 bg-purple-500 border-purple-200 hover:border-purple-300 hover:bg-purple-700"
+                aria-disabled={likedRecipes.length === 0}
+              >
+                {isGenerating ? (
+                  <SpinnerIcon className="h-6 w-6 animate-spin" />
+                ) : (
+                  <SparkleIcon className="h-6 w-6" />
+                )}
+              </Button>
+
               <Button
                 size="lg"
                 onClick={handleLike}
@@ -161,38 +178,6 @@ function TinderPage() {
               >
                 <HeartIcon className="h-6 w-6 text-white" />
               </Button>
-            </div>
-
-            {/* Generate Recipe Button - Show when user has liked some recipes */}
-            {likedRecipes.length > 0 && (
-              <div className="flex justify-center mt-4">
-                <Button
-                  onClick={handleGenerateFromLikes}
-                  disabled={isGenerating}
-                  variant="outline"
-                  size="sm"
-                  className="border-purple-200 hover:border-purple-300 hover:bg-purple-50"
-                >
-                  <SparkleIcon className="h-4 w-4 mr-2" />
-                  {isGenerating
-                    ? "Generating..."
-                    : "Generate Recipe from Likes"}
-                </Button>
-              </div>
-            )}
-
-            {/* Progress indicator */}
-            <div className="mt-4">
-              <div className="w-full bg-muted rounded-full h-2">
-                <div
-                  className="bg-primary h-2 rounded-full transition-all duration-300"
-                  style={{
-                    width: `${
-                      ((currentIndex + 1) / shuffledRecipes.length) * 100
-                    }%`,
-                  }}
-                />
-              </div>
             </div>
 
             {/* Swipe hints */}
