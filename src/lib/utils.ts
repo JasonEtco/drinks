@@ -27,7 +27,7 @@ export function isToolCallResult(
 }
 
 export type RecipeToolCallInvocationResult = ToolResult<
-  "created_recipe" | "edited_recipe",
+  "create_recipe" | "edit_recipe",
   any,
   RecipeToolCallResult
 >;
@@ -44,7 +44,7 @@ export function isRecipeToolCallResult(
 ): part is RecipeToolInvocationUIPart {
   return (
     part.toolInvocation.state === "result" &&
-    (part.toolInvocation.toolName === "created_recipe" ||
-      part.toolInvocation.toolName === "edited_recipe")
+    (part.toolInvocation.toolName === "create_recipe" ||
+      part.toolInvocation.toolName === "edit_recipe")
   );
 }

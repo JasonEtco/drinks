@@ -60,6 +60,7 @@ export function ChatMessage({
     for (const part of message.parts) {
       // If part is a tool invocation result, use its message content
       if (isToolCallResult(part)) {
+        console.log(part);
         if (isRecipeToolCallResult(part)) {
           if (!part.toolInvocation.result.success) {
             return (
