@@ -9,7 +9,7 @@ import {
   loadChatHistory,
   clearChatHistory,
 } from "@/lib/storage";
-import { isToolCallResult } from "@/lib/utils";
+import { isToolCallResult, RecipeToolCallInvocationResult } from "@/lib/utils";
 
 export default function IdeatePage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -58,7 +58,9 @@ export default function IdeatePage() {
       if (latestMessage.role === "assistant" && latestMessage.parts) {
         for (const part of latestMessage.parts) {
           if (isToolCallResult(part)) {
-            const result = part.toolInvocation.result;
+            const result = (
+              part.toolInvocation as RecipeToolCallInvocationResult
+            ).result;
 
             // Check if this was a successful recipe creation
             if (

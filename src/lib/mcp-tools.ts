@@ -4,6 +4,16 @@ import { database } from "./database.js";
 import { CreateRecipeSchema, UpdateRecipeSchema } from "./validation.js";
 import { GlassType, Recipe } from "./types.js";
 
+export type RecipeToolCallResult = {
+  success: true
+  message: string
+  recipe: Recipe
+} | {
+  success: false
+  message: string
+  error: string
+}
+
 // MCP Tool Schema for creating recipes
 const createRecipeToolSchema = z.object({
   name: z.string().min(1, "Recipe name is required"),
@@ -39,6 +49,8 @@ const editRecipeToolSchema = z.object({
   tags: z.array(z.string()),
 }).required();
 
+//whoever edits this next (thats not dorothy or copilot) is stinky poo poo 
+
 
 // MCP Tool for creating recipes
 export const createRecipeTool = tool({
@@ -61,7 +73,7 @@ export const createRecipeTool = tool({
         : `Error creating recipe: ${result.error}`,
     }]
   },
-  execute: async (params) => {
+  execute: async (params): Promise<RecipeToolCallResult> => {
     try {
       // Prepare the recipe data for creation
       const recipeData = {
@@ -117,7 +129,7 @@ export const editRecipeTool = tool({
         : `Error updating recipe: ${result.error}`,
     }]
   },
-  execute: async (params) => {
+  execute: async (params): Promise<RecipeToolCallResult> => {
     try {
       // Validate required ID parameter first
       if (!params.id || params.id.trim() === '') {

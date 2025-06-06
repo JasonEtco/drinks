@@ -1,7 +1,8 @@
 import type { UIMessage } from "ai";
 import { MemoizedMarkdown } from "./MemoizedMarkdown";
 import type { UseChatHelpers } from "@ai-sdk/react";
-import { isToolCallResult } from "@/lib/utils";
+import { isRecipeToolCallResult, isToolCallResult } from "@/lib/utils";
+import { WarningIcon } from "@phosphor-icons/react";
 
 function formatTime(date: Date | string): string {
   if (typeof date === "string") {
@@ -10,25 +11,13 @@ function formatTime(date: Date | string): string {
   return date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
-export function ChatMessage({
+function BasicChatMessage({
   message,
   status,
 }: {
   message: UIMessage;
   status: UseChatHelpers["status"];
 }) {
-  let content = message.content;
-
-  if (content === "" && message.role === "assistant") {
-    for (const part of message.parts) {
-      // If part is a tool invocation result, use its message content
-      if (isToolCallResult(part)) {
-        content = part.toolInvocation?.result?.message || "";
-        break; // Use the first valid tool invocation result
-      }
-    }
-  }
-
   return (
     <div
       key={message.id}
@@ -42,7 +31,7 @@ export function ChatMessage({
         }`}
       >
         <div className="prose max-w-full w-full">
-          <MemoizedMarkdown id={message.id} content={content} />
+          <MemoizedMarkdown id={message.id} content={message.content} />
         </div>
 
         {message.role === "assistant" &&
@@ -58,4 +47,34 @@ export function ChatMessage({
       </div>
     </div>
   );
+}
+
+export function ChatMessage({
+  message,
+  status,
+}: {
+  message: UIMessage;
+  status: UseChatHelpers["status"];
+}) {
+  if (message.role === "assistant") {
+    for (const part of message.parts) {
+      // If part is a tool invocation result, use its message content
+      if (isToolCallResult(part)) {
+        if (isRecipeToolCallResult(part)) {
+          if (!part.toolInvocation.result.success) {
+            return (
+              <div>
+                <WarningIcon /> Something bad happened!
+              </div>
+            );
+          }
+
+          console.log(part.toolInvocation.result);
+          return <div>{part.toolInvocation.result.recipe.name}</div>;
+        }
+      }
+    }
+  }
+
+  return <BasicChatMessage message={message} status={status} />;
 }
