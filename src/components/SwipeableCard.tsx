@@ -180,14 +180,17 @@ const SwipeableCard: React.FC<SwipeableCardProps> = ({
 
           <div>
             <div className="flex justify-between items-center mb-3">
-              <h3 className="font-semibold">Ingredients</h3>
+              <h3>Ingredients</h3>
               <Badge variant="outline">{totalVolume.toFixed(1)} oz total</Badge>
             </div>
 
-            <ul className="space-y-2 text-xs">
+            <ul className="space-y-1 text-xs">
               {recipe.ingredients.map((ingredient, index) => (
-                <li key={index} className="flex justify-between">
-                  <span className="font-medium">{ingredient.name}</span>
+                <li
+                  key={index}
+                  className="flex justify-between even:bg-muted p-1"
+                >
+                  <span>{ingredient.name}</span>
                   <span className="text-muted-foreground">
                     {ingredient.amount} {ingredient.unit}
                   </span>
