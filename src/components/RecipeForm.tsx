@@ -91,7 +91,7 @@ const RecipeForm: React.FC<RecipeFormProps> = React.memo(
       setNewIngredientUnit("oz");
     }, [newIngredientName, newIngredientAmount, newIngredientUnit]);
 
-    const handleRemoveIngredient = useCallback((id: string) => {
+    const handleRemoveIngredient = useCallback((name: string) => {
       setIngredients((prev) => prev.filter((i) => i.name !== name));
     }, []);
 
@@ -218,7 +218,7 @@ const RecipeForm: React.FC<RecipeFormProps> = React.memo(
     );
 
     return (
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="container max-w-4xl">
         <h2 className="text-2xl font-semibold mb-6">
           {initialRecipe ? "Edit" : "Create"} Recipe
         </h2>
