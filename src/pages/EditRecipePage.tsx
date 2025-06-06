@@ -51,7 +51,7 @@ export default function EditRecipePage() {
   // If recipe doesn't exist, redirect to home
   if (id && !editingRecipe) {
     return (
-      <div className="space-y-6">
+      <div className="container max-w-4xl space-y-6">
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-semibold">Recipe Not Found</h2>
         </div>
