@@ -164,10 +164,10 @@ export default function IdeatePage() {
         </div>
       </div>
 
-      <div className="p-2">
+      <div className="container sm:max-w-4xl pb-4">
         <form
           onSubmit={handleSubmit}
-          className="container sm:max-w-4xl w-full bg-background mx-auto p-4 shadow-md border-2 border-muted ring-1 ring-muted-foreground/20 rounded-md focus-within:ring-primary focus-within:ring-2 transition-all"
+          className="bg-background mx-auto p-4 shadow-md border-2 border-muted ring-1 ring-muted-foreground/20 rounded-md focus-within:ring-primary focus-within:ring-2 transition-all"
         >
           <div className="flex gap-2">
             <textarea

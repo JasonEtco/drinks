@@ -3,6 +3,8 @@ import { MemoizedMarkdown } from "./MemoizedMarkdown";
 import type { UseChatHelpers } from "@ai-sdk/react";
 import { isRecipeToolCallResult, isToolCallResult } from "@/lib/utils";
 import { WarningIcon } from "@phosphor-icons/react";
+import { Link } from "react-router-dom";
+import { RecipeListItem } from "./RecipeListItem";
 
 function formatTime(date: Date | string): string {
   if (typeof date === "string") {
@@ -24,7 +26,7 @@ function BasicChatMessage({
       className={`${message.role === "user" ? "flex justify-end" : "w-full"}`}
     >
       <div
-        className={` rounded-lg px-6 py-4 ${
+        className={`rounded-lg px-6 py-4 ${
           message.role === "user"
             ? "max-w-[80%] bg-muted text-muted-foregroud"
             : "w-full flex-1"
@@ -60,7 +62,6 @@ export function ChatMessage({
     for (const part of message.parts) {
       // If part is a tool invocation result, use its message content
       if (isToolCallResult(part)) {
-        console.log(part);
         if (isRecipeToolCallResult(part)) {
           if (!part.toolInvocation.result.success) {
             return (
@@ -70,8 +71,15 @@ export function ChatMessage({
             );
           }
 
-          console.log(part.toolInvocation.result);
-          return <div>{part.toolInvocation.result.recipe.name}</div>;
+          const recipe = part.toolInvocation.result.recipe;
+          return (
+            <Link
+              to={`/recipes/${recipe.id}`}
+              className="block rounded-lg border mt-6 mb-2 shadow-md border-muted hover:border-primary transition-colors"
+            >
+              <RecipeListItem recipe={recipe} isLast />
+            </Link>
+          );
         }
       }
     }
