@@ -7,7 +7,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { CheckCircleIcon } from "@phosphor-icons/react";
 
-const NewRecipePage = () => {
+function NewRecipePage() {
   const { addNewRecipe } = useRecipes();
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [submittedRecipe, setSubmittedRecipe] = useState<Recipe | null>(null);
@@ -45,6 +45,6 @@ const NewRecipePage = () => {
   }
 
   return <RecipeForm onSubmit={handleRecipeSubmit} cancelLinkTo="/" />;
-};
+}
 
 export default NewRecipePage;

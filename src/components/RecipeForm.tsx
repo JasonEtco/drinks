@@ -218,7 +218,7 @@ const RecipeForm: React.FC<RecipeFormProps> = React.memo(
     );
 
     return (
-      <form onSubmit={handleSubmit} className="container max-w-4xl">
+      <form onSubmit={handleSubmit} className="container max-w-4xl pb-6">
         <h2 className="text-2xl font-semibold mb-6">
           {initialRecipe ? "Edit" : "Create"} Recipe
         </h2>
@@ -446,7 +446,7 @@ const RecipeForm: React.FC<RecipeFormProps> = React.memo(
           </div>
         </div>
 
-        <footer className="flex justify-between">
+        <footer className="flex justify-between mt-2">
           <Button asChild type="button" variant="outline">
             <Link to={cancelLinkTo}>Cancel</Link>
           </Button>
