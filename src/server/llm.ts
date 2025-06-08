@@ -178,3 +178,54 @@ Create a new recipe that would appeal to someone who liked these drinks.`;
     tags: [],
   };
 }
+
+/**
+ * Generate alternative ingredients for a given ingredient using LLM
+ * @param ingredientName - The name of the ingredient to find alternatives for
+ * @returns Promise<string[]> - A list of alternative ingredients sorted by relevance
+ */
+export async function generateIngredientAlternatives({
+  ingredientName,
+}: {
+  ingredientName: string;
+}): Promise<string[]> {
+  const githubModels = createGitHubModels();
+
+  // Create system prompt for ingredient alternatives generation
+  const systemPrompt = `You are an expert cocktail sommelier and mixologist. Generate a list of alternative ingredients that could substitute for a given ingredient in cocktail recipes.
+
+Guidelines:
+- Provide ingredients that have similar flavor profiles, characteristics, or usage in cocktails
+- Focus on realistic substitutions that a bartender would actually use
+- Consider both direct substitutes and creative alternatives
+- Prioritize ingredients that are commonly available
+- Return 5-8 alternatives maximum, ordered by relevance/similarity
+- Do not include the original ingredient in the list
+- Use proper ingredient names (e.g., "Cointreau" not "orange liqueur")
+- Include both exact substitutes and creative alternatives that would work well`;
+
+  const userPrompt = `Generate alternative ingredients for: ${ingredientName}
+
+Consider:
+- Direct substitutes with similar flavor profiles
+- Ingredients that serve similar functions in cocktails
+- Creative alternatives that would complement similar cocktail styles
+- Both premium and accessible options`;
+
+  const result = await generateObject({
+    model: githubModels(process.env.CHAT_MODEL || "openai/gpt-4.1-nano"),
+    system: systemPrompt,
+    prompt: userPrompt,
+    schema: z.object({
+      alternatives: z.array(z.string().min(1)).max(8, "Maximum 8 alternatives"),
+    }),
+    maxTokens: 300,
+    temperature: 0.7, // Some creativity but stay focused
+  });
+
+  if (!result || !result.object) {
+    throw new Error("Failed to generate ingredient alternatives from LLM");
+  }
+
+  return result.object.alternatives;
+}

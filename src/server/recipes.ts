@@ -2,7 +2,7 @@ import { Request, Response, Router } from "express";
 import { database } from "../lib/database.js";
 import { CreateRecipeSchema, UpdateRecipeSchema } from "../lib/validation.js";
 import { Ingredient, Recipe } from "../lib/types.js";
-import { createGitHubModels, generateRecipeTags, generateRecipeFromLikes } from "./llm.js";
+import { createGitHubModels, generateRecipeTags, generateRecipeFromLikes, generateIngredientAlternatives } from "./llm.js";
 import { generateObject } from "ai";
 import zod from "zod";
 
@@ -83,6 +83,40 @@ export function recipesRouter(): Router {
     } catch (error) {
       console.error("Error generating recipe from likes:", error);
       res.status(500).json({ error: "Failed to generate recipe from likes" });
+    }
+  });
+
+  // Generate ingredient alternatives (must come before /:recipeId route)
+  router.get("/ingredients/:ingredientName/alternatives", async (req: Request, res: Response) => {
+    try {
+      const { ingredientName } = req.params;
+
+      if (!ingredientName || ingredientName.trim().length === 0) {
+        res.status(400).json({ error: "Ingredient name is required" });
+        return;
+      }
+
+      // Decode URL-encoded ingredient name with error handling
+      let decodedIngredientName: string;
+      try {
+        decodedIngredientName = decodeURIComponent(ingredientName);
+      } catch (error) {
+        res.status(400).json({ error: "Invalid ingredient name encoding" });
+        return;
+      }
+
+      // Generate alternatives using LLM
+      const alternatives = await generateIngredientAlternatives({
+        ingredientName: decodedIngredientName,
+      });
+
+      res.json({ 
+        ingredient: decodedIngredientName,
+        alternatives 
+      });
+    } catch (error) {
+      console.error("Error generating ingredient alternatives:", error);
+      res.status(500).json({ error: "Failed to generate ingredient alternatives" });
     }
   });
 
