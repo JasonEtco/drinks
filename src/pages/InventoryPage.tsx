@@ -3,19 +3,23 @@ import { useInventory } from "../contexts/InventoryContext";
 import { Button } from "@/components/ui/button";
 import { PlusIcon, MagnifyingGlassIcon, QrCodeIcon, TrashIcon, PencilIcon } from "@phosphor-icons/react";
 import InventoryForm from "../components/InventoryForm";
+import BarcodeScanner from "../components/BarcodeScanner";
+import RecipeAvailability from "../components/RecipeAvailability";
 import { InventoryItem } from "../lib/types";
+import { toast } from "sonner";
 
 type SortField = 'name' | 'quantity' | 'category' | 'updatedAt';
 type SortDirection = 'asc' | 'desc';
 
 export default function InventoryPage() {
-  const { inventory, isLoading, deleteInventoryItem } = useInventory();
+  const { inventory, isLoading, deleteInventoryItem, getInventoryByBarcode } = useInventory();
   const [showForm, setShowForm] = useState(false);
   const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [sortField, setSortField] = useState<SortField>('name');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
   const [showBarcodeScanner, setShowBarcodeScanner] = useState(false);
+  const [scannedBarcode, setScannedBarcode] = useState<string>("");
 
   // Filter and sort inventory
   const filteredAndSortedInventory = useMemo(() => {
@@ -82,6 +86,37 @@ export default function InventoryPage() {
   const handleFormClose = () => {
     setShowForm(false);
     setEditingItem(null);
+    setScannedBarcode("");
+  };
+
+  const handleBarcodeDetected = async (barcode: string) => {
+    setShowBarcodeScanner(false);
+    
+    try {
+      const existingItem = await getInventoryByBarcode(barcode);
+      
+      if (existingItem) {
+        // Item exists, ask user if they want to edit it
+        const shouldEdit = window.confirm(
+          `Found existing item: "${existingItem.name}". Would you like to edit it?`
+        );
+        
+        if (shouldEdit) {
+          setEditingItem(existingItem);
+          setShowForm(true);
+        }
+      } else {
+        // Item doesn't exist, create new item with scanned barcode
+        setScannedBarcode(barcode);
+        setShowForm(true);
+        toast.info("Barcode not found in inventory. Creating new item...");
+      }
+    } catch (error) {
+      // If there's an error checking the barcode, still allow creation
+      setScannedBarcode(barcode);
+      setShowForm(true);
+      toast.info("Creating new item with scanned barcode...");
+    }
   };
 
   if (isLoading) {
@@ -98,6 +133,7 @@ export default function InventoryPage() {
     return (
       <InventoryForm
         item={editingItem}
+        initialBarcode={scannedBarcode}
         onClose={handleFormClose}
         onSuccess={handleFormClose}
       />
@@ -127,6 +163,12 @@ export default function InventoryPage() {
               Add Item
             </Button>
           </div>
+        </div>
+
+        {/* Recipe Availability */}
+        <div className="bg-white border rounded-lg p-6">
+          <h2 className="text-xl font-semibold mb-4">Recipe Availability</h2>
+          <RecipeAvailability />
         </div>
 
         {/* Search and filters */}
@@ -258,24 +300,12 @@ export default function InventoryPage() {
           </div>
         )}
 
-        {/* Barcode Scanner Modal (placeholder for now) */}
+        {/* Barcode Scanner Modal */}
         {showBarcodeScanner && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded-lg max-w-md w-full mx-4">
-              <h3 className="text-lg font-medium mb-4">Barcode Scanner</h3>
-              <p className="text-muted-foreground mb-4">
-                Barcode scanner integration will be implemented here.
-              </p>
-              <div className="flex gap-2 justify-end">
-                <Button
-                  onClick={() => setShowBarcodeScanner(false)}
-                  variant="outline"
-                >
-                  Cancel
-                </Button>
-              </div>
-            </div>
-          </div>
+          <BarcodeScanner
+            onClose={() => setShowBarcodeScanner(false)}
+            onBarcodeDetected={handleBarcodeDetected}
+          />
         )}
       </div>
     </div>

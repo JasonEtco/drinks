@@ -7,11 +7,12 @@ import { toast } from "sonner";
 
 interface InventoryFormProps {
   item?: InventoryItem | null;
+  initialBarcode?: string;
   onClose: () => void;
   onSuccess: () => void;
 }
 
-export default function InventoryForm({ item, onClose, onSuccess }: InventoryFormProps) {
+export default function InventoryForm({ item, initialBarcode, onClose, onSuccess }: InventoryFormProps) {
   const { addInventoryItem, updateInventoryItem } = useInventory();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -40,8 +41,13 @@ export default function InventoryForm({ item, onClose, onSuccess }: InventoryFor
         cost: item.cost?.toString() || "",
         notes: item.notes || "",
       });
+    } else if (initialBarcode) {
+      setFormData(prev => ({
+        ...prev,
+        barcode: initialBarcode,
+      }));
     }
-  }, [item]);
+  }, [item, initialBarcode]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
