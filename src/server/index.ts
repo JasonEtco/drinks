@@ -11,6 +11,7 @@ import { fileURLToPath } from "url";
 import { database } from "../lib/database.js";
 import { recipesRouter } from "./recipes.js";
 import { chatRouter } from "./chat.js";
+import { inventoryRouter } from "./inventory.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -23,22 +24,26 @@ app.use(express.json());
 
 app.use("/api/recipes", recipesRouter());
 app.use("/api/chat", chatRouter());
+app.use("/api/inventory", inventoryRouter());
 
 // Health check endpoint
 app.get("/api/health", async (req: Request, res: Response) => {
   try {
     const recipesCount = await database.getRecipeCount();
+    const inventoryCount = await database.getInventoryCount();
     res.json({
       status: "ok",
       timestamp: new Date().toISOString(),
       recipesCount,
+      inventoryCount,
     });
   } catch (error) {
-    console.error("Error getting recipe count:", error);
+    console.error("Error getting counts:", error);
     res.json({
       status: "ok",
       timestamp: new Date().toISOString(),
       recipesCount: 0,
+      inventoryCount: 0,
     });
   }
 });

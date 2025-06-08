@@ -1,4 +1,4 @@
-import { Recipe } from "./types";
+import { Recipe, InventoryItem } from "./types";
 
 const API_BASE_URL = "/api";
 
@@ -183,16 +183,70 @@ export class ApiService {
     });
   }
 
+  // === INVENTORY METHODS ===
+
+  // Get all inventory items
+  static async listInventory(): Promise<InventoryItem[]> {
+    return this.request<InventoryItem[]>("/inventory");
+  }
+
+  // Get inventory item by ID
+  static async getInventoryItem(id: string): Promise<InventoryItem> {
+    return this.request<InventoryItem>(`/inventory/${id}`);
+  }
+
+  // Get inventory item by barcode
+  static async getInventoryByBarcode(barcode: string): Promise<InventoryItem> {
+    return this.request<InventoryItem>(`/inventory/barcode/${barcode}`);
+  }
+
+  // Create new inventory item
+  static async createInventoryItem(
+    item: Omit<InventoryItem, "id" | "createdAt" | "updatedAt">,
+  ): Promise<InventoryItem> {
+    return this.request<InventoryItem>("/inventory", {
+      method: "POST",
+      body: JSON.stringify(item),
+    });
+  }
+
+  // Update inventory item
+  static async updateInventoryItem(
+    id: string,
+    item: Partial<InventoryItem>,
+  ): Promise<InventoryItem> {
+    return this.request<InventoryItem>(`/inventory/${id}`, {
+      method: "PUT",
+      body: JSON.stringify(item),
+    });
+  }
+
+  // Delete inventory item
+  static async deleteInventoryItem(id: string): Promise<InventoryItem> {
+    return this.request<InventoryItem>(`/inventory/${id}`, {
+      method: "DELETE",
+    });
+  }
+
+  // Search inventory items
+  static async searchInventory(query: string): Promise<InventoryItem[]> {
+    return this.request<InventoryItem[]>(
+      `/inventory/search/${encodeURIComponent(query)}`,
+    );
+  }
+
   // Health check
   static async healthCheck(): Promise<{
     status: string;
     timestamp: string;
     recipesCount: number;
+    inventoryCount: number;
   }> {
     return this.request<{
       status: string;
       timestamp: string;
       recipesCount: number;
+      inventoryCount: number;
     }>("/health");
   }
 }
