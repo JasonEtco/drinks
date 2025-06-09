@@ -2,7 +2,7 @@ import { Request, Response, Router } from "express";
 import { database } from "../lib/database.js";
 import { CreateRecipeSchema, UpdateRecipeSchema } from "../lib/validation.js";
 import { Ingredient, Recipe } from "../lib/types.js";
-import { createGitHubModels, generateRecipeTags, generateRecipeFromLikes } from "./llm.js";
+import { createGitHubModels, generateRecipeTags, generateRecipeFromLikes, generateIngredientAlternatives } from "./llm.js";
 import { generateObject } from "ai";
 import zod from "zod";
 
@@ -83,6 +83,38 @@ export function recipesRouter(): Router {
     } catch (error) {
       console.error("Error generating recipe from likes:", error);
       res.status(500).json({ error: "Failed to generate recipe from likes" });
+    }
+  });
+
+  // Generate ingredient alternatives (must come before /:recipeId route)
+  router.post("/ingredients/alternatives", async (req: Request, res: Response) => {
+    try {
+      const { ingredient, recipeId } = req.body;
+
+      if (!ingredient || ingredient.trim().length === 0) {
+        res.status(400).json({ error: "Ingredient name is required" });
+        return;
+      }
+
+      const recipe = await database.getRecipeById(recipeId);
+      if (!recipe) {
+        res.status(404).json({ error: "Recipe not found" });
+        return;
+      }
+
+      // Generate alternatives using LLM
+      const alternatives = await generateIngredientAlternatives({
+        ingredient,
+        recipe,
+      });
+
+      res.json({ 
+        ingredient,
+        alternatives 
+      });
+    } catch (error) {
+      console.error("Error generating ingredient alternatives:", error);
+      res.status(500).json({ error: "Failed to generate ingredient alternatives" });
     }
   });
 

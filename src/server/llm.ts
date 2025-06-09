@@ -109,10 +109,10 @@ export async function generateRecipeFromLikes({
   const githubModels = createGitHubModels();
 
   // Analyze liked recipes to understand preferences
-  const likedIngredients = likedRecipes.flatMap(recipe => 
-    recipe.ingredients.map(ing => ing.name)
+  const likedIngredients = likedRecipes.flatMap((recipe) =>
+    recipe.ingredients.map((ing) => ing.name)
   );
-  const likedTags = likedRecipes.flatMap(recipe => recipe.tags || []);
+  const likedTags = likedRecipes.flatMap((recipe) => recipe.tags || []);
 
   // Create system prompt for recipe generation
   const systemPrompt = `You are an expert cocktail sommelier and recipe creator. Generate a new cocktail recipe based on the user's preferences from their liked recipes.
@@ -130,20 +130,34 @@ Guidelines:
   const userPrompt = `Based on these liked recipes, create a new cocktail recipe:
 
 Liked Recipes:
-${likedRecipes.map(recipe => `
-- ${recipe.name}: ${recipe.ingredients.map(ing => `${ing.amount} ${ing.unit} ${ing.name}`).join(", ")}
+${likedRecipes
+  .map(
+    (recipe) => `
+- ${recipe.name}: ${recipe.ingredients
+      .map((ing) => `${ing.amount} ${ing.unit} ${ing.name}`)
+      .join(", ")}
   Glass: ${recipe.glass || "Not specified"}
   Tags: ${recipe.tags?.join(", ") || "None"}
-`).join("")}
+`
+  )
+  .join("")}
 
 Disliked Recipes:
-${passedRecipes.map(recipe => `
-- ${recipe.name}: ${recipe.ingredients.map(ing => `${ing.amount} ${ing.unit} ${ing.name}`).join(", ")}
+${passedRecipes
+  .map(
+    (recipe) => `
+- ${recipe.name}: ${recipe.ingredients
+      .map((ing) => `${ing.amount} ${ing.unit} ${ing.name}`)
+      .join(", ")}
   Glass: ${recipe.glass || "Not specified"}
   Tags: ${recipe.tags?.join(", ") || "None"}
-`).join("")}
+`
+  )
+  .join("")}
 
-Common ingredients in liked recipes: ${[...new Set(likedIngredients)].slice(0, 10).join(", ")}
+Common ingredients in liked recipes: ${[...new Set(likedIngredients)]
+    .slice(0, 10)
+    .join(", ")}
 Common tags: ${[...new Set(likedTags)].slice(0, 5).join(", ")}
 
 Create a new recipe that would appeal to someone who liked these drinks.`;
@@ -155,7 +169,9 @@ Create a new recipe that would appeal to someone who liked these drinks.`;
     schema: z.object({
       name: z.string().min(1, "Recipe name is required"),
       description: z.string(),
-      ingredients: z.array(IngredientSchema).min(1, "At least one ingredient is required"),
+      ingredients: z
+        .array(IngredientSchema)
+        .min(1, "At least one ingredient is required"),
       instructions: z.string().min(1, "Instructions are required"),
       glass: GlassTypeSchema,
       garnish: z.string(),
@@ -177,4 +193,66 @@ Create a new recipe that would appeal to someone who liked these drinks.`;
     garnish: result.object.garnish,
     tags: [],
   };
+}
+
+/**
+ * Generate alternative ingredients for a given ingredient using LLM
+ * @param ingredient - The name of the ingredient to find alternatives for
+ * @returns Promise<string[]> - A list of alternative ingredients sorted by relevance
+ */
+export async function generateIngredientAlternatives({
+  ingredient,
+  recipe,
+}: {
+  ingredient: string;
+  recipe: Recipe;
+}): Promise<string[]> {
+  const githubModels = createGitHubModels();
+
+  // Create system prompt for ingredient alternatives generation
+  const systemPrompt = `You are an expert cocktail sommelier and mixologist. Generate a list of alternative ingredients that could substitute for a given ingredient in cocktail recipes.
+
+Guidelines:
+- Provide ingredients that have similar flavor profiles, characteristics, or usage in cocktails
+- Focus on realistic substitutions that a bartender would actually use
+- Consider both direct substitutes and creative alternatives
+- Prioritize ingredients that are commonly available
+- Return 3-5 alternatives maximum, ordered by relevance/similarity
+- Do not include the original ingredient in the list
+- Use proper ingredient names (e.g., "Cointreau" not "orange liqueur")
+- Include both exact substitutes and creative alternatives that would work well`;
+
+  const userPrompt = `Generate alternative ingredients for: ${ingredient}
+
+Consider:
+- Direct substitutes with similar flavor profiles
+- Ingredients that serve similar functions in cocktails
+- Creative alternatives that would complement similar cocktail styles
+- Both premium and accessible options
+
+This ingredient is used in the following recipe:
+
+Name: ${recipe.name}
+Description: ${recipe.description || "No description provided"}
+Ingredients: ${recipe.ingredients
+    .map((ing) => `${ing.amount} ${ing.unit} ${ing.name}`)
+    .join(", ")}
+`;
+
+  const result = await generateObject({
+    model: githubModels(process.env.CHAT_MODEL || "openai/gpt-4.1-nano"),
+    system: systemPrompt,
+    prompt: userPrompt,
+    schema: z.object({
+      alternatives: z.array(z.string().min(1)).max(5, "Maximum 5 alternatives"),
+    }),
+    maxTokens: 300,
+    temperature: 0.7, // Some creativity but stay focused
+  });
+
+  if (!result || !result.object) {
+    throw new Error("Failed to generate ingredient alternatives from LLM");
+  }
+
+  return result.object.alternatives;
 }

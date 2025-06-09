@@ -8,6 +8,9 @@ import {
   TrashIcon,
   CalculatorIcon,
   FunnelIcon,
+  CaretDownIcon,
+  CaretRightIcon,
+  SpinnerIcon,
 } from "@phosphor-icons/react";
 import { GlassIcon } from "@/components/GlassIcon";
 import { calculateTotalVolume } from "../lib/recipe-utils";
@@ -34,6 +37,17 @@ function RecipePage() {
   const [showBatchCalculator, setShowBatchCalculator] = useState(false);
   const [showClarificationCalculator, setShowClarificationCalculator] =
     useState(false);
+
+  // State for ingredient alternatives
+  const [ingredientAlternatives, setIngredientAlternatives] = useState<
+    Record<string, string[]>
+  >({});
+  const [loadingAlternatives, setLoadingAlternatives] = useState<
+    Record<string, boolean>
+  >({});
+  const [expandedIngredients, setExpandedIngredients] = useState<
+    Record<string, boolean>
+  >({});
 
   const recipe = id ? getRecipe(id) : undefined;
 
@@ -74,6 +88,69 @@ function RecipePage() {
       toast.error("Failed to delete recipe. Please try again.");
     }
     setShowDeleteDialog(false);
+  };
+
+  const fetchIngredientAlternatives = useCallback(
+    async (ingredientName: string) => {
+      if (
+        ingredientAlternatives[ingredientName] ||
+        loadingAlternatives[ingredientName]
+      ) {
+        return; // Already loaded or loading
+      }
+
+      setLoadingAlternatives((prev) => ({ ...prev, [ingredientName]: true }));
+
+      try {
+        const response = await fetch(`/api/recipes/ingredients/alternatives`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ingredient: ingredientName,
+            recipeId: recipe.id,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(
+            `Failed to fetch alternatives: ${response.statusText}`
+          );
+        }
+
+        const data = await response.json();
+        setIngredientAlternatives((prev) => ({
+          ...prev,
+          [ingredientName]: data.alternatives,
+        }));
+      } catch (error) {
+        console.error("Error fetching ingredient alternatives:", error);
+        toast.error(
+          "Failed to load ingredient alternatives. Please try again."
+        );
+      } finally {
+        setLoadingAlternatives((prev) => ({
+          ...prev,
+          [ingredientName]: false,
+        }));
+      }
+    },
+    [ingredientAlternatives, loadingAlternatives]
+  );
+
+  const toggleIngredientExpansion = (ingredientName: string) => {
+    const isExpanded = expandedIngredients[ingredientName];
+
+    if (!isExpanded) {
+      // Fetch alternatives when expanding
+      fetchIngredientAlternatives(ingredientName);
+    }
+
+    setExpandedIngredients((prev) => ({
+      ...prev,
+      [ingredientName]: !isExpanded,
+    }));
   };
 
   return (
@@ -132,19 +209,74 @@ function RecipePage() {
             <h3>Ingredients</h3>
             <Badge variant="outline">{totalVolume.toFixed(1)} oz total</Badge>
           </div>
-          <ul>
-            {recipe.ingredients.map((ingredient, index) => (
-              <li
-                key={index}
-                className="flex justify-between items-center py-2 border-b border-muted even:bg-muted -mx-2 px-2"
-              >
-                <span>{ingredient.name}</span>
-                <span>
-                  {ingredient.amount} {ingredient.unit}
-                </span>
-              </li>
-            ))}
-          </ul>
+          <div className="space-y-2">
+            {recipe.ingredients.map((ingredient, index) => {
+              const isExpanded = expandedIngredients[ingredient.name];
+              const isLoading = loadingAlternatives[ingredient.name];
+              const alternatives = ingredientAlternatives[ingredient.name];
+
+              return (
+                <div
+                  key={index}
+                  className="even:bg-muted rounded-lg py-3 px-4 -mx-4"
+                >
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-2">
+                      <span>{ingredient.name}</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() =>
+                          toggleIngredientExpansion(ingredient.name)
+                        }
+                        className="h-6 w-6 p-0"
+                        title="Show alternatives"
+                      >
+                        {isExpanded ? (
+                          <CaretDownIcon className="size-4" />
+                        ) : (
+                          <CaretRightIcon className="size-4" />
+                        )}
+                      </Button>
+                    </div>
+                    <span className="text-muted-foreground">
+                      {ingredient.amount} {ingredient.unit}
+                    </span>
+                  </div>
+
+                  {isExpanded && (
+                    <div className="border-t border-muted px-4 py-3 bg-muted/20">
+                      <div className="text-sm font-medium text-muted-foreground mb-2">
+                        Alternative ingredients:
+                      </div>
+                      {isLoading ? (
+                        <div className="text-sm text-muted-foreground flex items-center">
+                          <SpinnerIcon className="h-6 w-6 animate-spin" />{" "}
+                          Loading alternatives...
+                        </div>
+                      ) : alternatives && alternatives.length > 0 ? (
+                        <div className="flex flex-wrap gap-2">
+                          {alternatives.map((alternative, altIndex) => (
+                            <Badge
+                              key={altIndex}
+                              variant="outline"
+                              className="text-xs"
+                            >
+                              {alternative}
+                            </Badge>
+                          ))}
+                        </div>
+                      ) : (
+                        <div className="text-sm text-muted-foreground">
+                          No alternatives found.
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         </div>
 
         {/* Instructions */}
@@ -189,7 +321,7 @@ function RecipePage() {
         )}
 
         {/* Metadata */}
-        <div className="pt-4 border-t border-muted">
+        <footer className="py-4 border-t border-muted">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-muted-foreground">
             <div>
               <span>Created: </span>
@@ -200,7 +332,7 @@ function RecipePage() {
               {new Date(recipe.updatedAt).toLocaleDateString()}
             </div>
           </div>
-        </div>
+        </footer>
       </div>
 
       <BatchCalculator
