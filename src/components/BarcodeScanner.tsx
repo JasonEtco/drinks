@@ -1,20 +1,25 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { XIcon, CameraIcon } from "@phosphor-icons/react";
+import { XIcon, CameraIcon, MagnifyingGlassIcon } from "@phosphor-icons/react";
 import { useInventory } from "../contexts/InventoryContext";
 import { toast } from "sonner";
+import { BrowserMultiFormatReader, Result } from "@zxing/library";
+import { productLookupService, ProductInfo } from "../lib/productLookup";
 
 interface BarcodeScannerProps {
   onClose: () => void;
-  onBarcodeDetected: (barcode: string) => void;
+  onBarcodeDetected: (barcode: string, productInfo?: ProductInfo) => void;
 }
 
 export default function BarcodeScanner({ onClose, onBarcodeDetected }: BarcodeScannerProps) {
   const [isScanning, setIsScanning] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [manualBarcode, setManualBarcode] = useState("");
+  const [isLookingUp, setIsLookingUp] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const codeReaderRef = useRef<BrowserMultiFormatReader | null>(null);
+  const scanningRef = useRef<boolean>(false);
   const { getInventoryByBarcode } = useInventory();
 
   const startCamera = async () => {
@@ -34,7 +39,32 @@ export default function BarcodeScanner({ onClose, onBarcodeDetected }: BarcodeSc
       
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
-        videoRef.current.play();
+        await videoRef.current.play();
+        
+        // Initialize barcode reader
+        codeReaderRef.current = new BrowserMultiFormatReader();
+        scanningRef.current = true;
+        
+        // Start continuous scanning
+        try {
+          await codeReaderRef.current.decodeFromVideoDevice(
+            undefined, // Use default video device
+            videoRef.current,
+            (result: Result | null, error?: any) => {
+              if (result && scanningRef.current) {
+                const barcode = result.getText();
+                if (barcode) {
+                  scanningRef.current = false; // Prevent multiple detections
+                  handleBarcodeDetected(barcode);
+                }
+              }
+              // Ignore decoding errors as they're common during scanning
+            }
+          );
+        } catch (err) {
+          console.error("Error starting barcode detection:", err);
+          // Continue with manual entry if barcode detection fails
+        }
       }
     } catch (err) {
       console.error("Error accessing camera:", err);
@@ -44,6 +74,13 @@ export default function BarcodeScanner({ onClose, onBarcodeDetected }: BarcodeSc
   };
 
   const stopCamera = () => {
+    scanningRef.current = false;
+    
+    if (codeReaderRef.current) {
+      codeReaderRef.current.reset();
+      codeReaderRef.current = null;
+    }
+    
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
@@ -59,20 +96,35 @@ export default function BarcodeScanner({ onClose, onBarcodeDetected }: BarcodeSc
   };
 
   const handleBarcodeDetected = async (barcode: string) => {
+    setIsLookingUp(true);
+    
     try {
       // First check if item exists in inventory
       const existingItem = await getInventoryByBarcode(barcode);
       
       if (existingItem) {
-        toast.success(`Found: ${existingItem.name}`);
+        toast.success(`Found in inventory: ${existingItem.name}`);
         onBarcodeDetected(barcode);
+        return;
+      }
+
+      // If not in inventory, look up product information
+      toast.info("Looking up product information...");
+      const productInfo = await productLookupService.lookupProduct(barcode);
+      
+      if (productInfo) {
+        toast.success(`Found product: ${productInfo.name}`);
+        onBarcodeDetected(barcode, productInfo);
       } else {
-        // Item not found, still pass the barcode for potential new item creation
+        toast.info("Product not found in database. You can add it manually.");
         onBarcodeDetected(barcode);
       }
     } catch (error) {
-      console.error("Error checking barcode:", error);
+      console.error("Error processing barcode:", error);
+      toast.error("Error processing barcode. You can add it manually.");
       onBarcodeDetected(barcode);
+    } finally {
+      setIsLookingUp(false);
     }
   };
 
@@ -125,7 +177,7 @@ export default function BarcodeScanner({ onClose, onBarcodeDetected }: BarcodeSc
                   />
                   <div className="absolute inset-0 border-2 border-red-500 border-dashed opacity-50 pointer-events-none">
                     <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-white text-sm bg-black bg-opacity-50 px-2 py-1 rounded">
-                      Position barcode in frame
+                      {isLookingUp ? "Looking up product..." : "Position barcode in frame"}
                     </div>
                   </div>
                 </div>
@@ -161,9 +213,16 @@ export default function BarcodeScanner({ onClose, onBarcodeDetected }: BarcodeSc
                 <Button
                   type="submit"
                   className="w-full"
-                  disabled={!manualBarcode.trim()}
+                  disabled={!manualBarcode.trim() || isLookingUp}
                 >
-                  Look Up Barcode
+                  {isLookingUp ? (
+                    <>
+                      <MagnifyingGlassIcon className="h-4 w-4 mr-2" />
+                      Looking up...
+                    </>
+                  ) : (
+                    "Look Up Barcode"
+                  )}
                 </Button>
               </form>
             </div>
@@ -172,10 +231,11 @@ export default function BarcodeScanner({ onClose, onBarcodeDetected }: BarcodeSc
             <div className="bg-blue-50 p-3 rounded-lg text-sm text-blue-800">
               <p className="font-medium mb-1">How to use:</p>
               <ul className="space-y-1 text-xs">
-                <li>• Point camera at barcode for automatic scanning</li>
+                <li>• Point camera at barcode for automatic detection</li>
                 <li>• Or manually enter the barcode number below</li>
-                <li>• Existing items will be found automatically</li>
-                <li>• New barcodes can be added to inventory</li>
+                <li>• Products will be looked up in online database</li>
+                <li>• Found products auto-fill name, category, and details</li>
+                <li>• Unknown barcodes can be added manually</li>
               </ul>
             </div>
           </div>

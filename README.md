@@ -110,7 +110,9 @@ The inventory tracker helps you manage your bar ingredients and see which recipe
 ### Features
 
 - **Inventory Management**: Add, edit, and delete ingredients with detailed information
-- **Barcode Scanner**: Scan ingredients directly into your inventory (camera permission required)
+- **Barcode Scanner**: Scan ingredients directly into your inventory with automatic product lookup
+- **Product Database Integration**: Automatically identifies products from barcodes using free APIs
+- **Smart Form Pre-filling**: Product information automatically populates name, category, and quantity
 - **Recipe Integration**: See which recipes you can make with current inventory
 - **Smart Suggestions**: Get recommendations for ingredients to expand your recipe options
 - **Search & Sort**: Find ingredients quickly with search and sortable columns
@@ -119,10 +121,22 @@ The inventory tracker helps you manage your bar ingredients and see which recipe
 ### Adding Ingredients
 
 1. **Manual Entry**: Click "Add Item" to create a new inventory entry
-2. **Barcode Scanning**: Use "Scan Barcode" to automatically identify products
+2. **Barcode Scanning**: Use "Scan Barcode" for automatic product identification
+   - **Camera Scanning**: Point camera at barcode for automatic detection
+   - **Product Lookup**: Found products auto-fill name, brand, category, and suggested quantities
+   - **Manual Entry**: Fallback option for manual barcode input
+   - **Smart Categories**: Automatically suggests appropriate categories (Spirits, Mixers, Garnishes)
 3. **Form Fields**:
    - **Required**: Name, Quantity, Unit
    - **Optional**: Category, Barcode, Purchase/Expiry dates, Cost, Notes
+
+### Product Database Integration
+
+The barcode scanner integrates with multiple free product databases:
+- **Open Food Facts**: Comprehensive food and beverage database
+- **UPC Item DB**: General product database with fallback support
+- **Smart Detection**: Automatic product matching with intelligent categorization
+- **Graceful Fallback**: Manual entry when products aren't found in databases
 
 ### Recipe Availability
 
@@ -133,9 +147,10 @@ The inventory page shows:
 
 ### Supported Data
 
-- **Categories**: Spirits, Liqueurs, Wine, Beer, Mixers, Garnish, Tools
-- **Units**: ml, l, oz, bottle, can, package, g, kg, piece
-- **Barcode Standards**: UPC, EAN (via camera scanning)
+- **Categories**: Spirits, Liqueurs, Wine, Beer, Mixers, Garnish, Tools (auto-suggested from product data)
+- **Units**: ml, l, oz, bottle, can, package, g, kg, piece (auto-suggested based on product type)
+- **Barcode Standards**: UPC, EAN (via camera scanning with ZXing library)
+- **Product Types**: Alcoholic beverages, mixers, garnishes, and bar tools
 
 ### Integration
 
@@ -144,6 +159,9 @@ The inventory system automatically:
 - Performs basic unit conversions (ml ↔ oz, l ↔ ml)
 - Suggests recipes based on available ingredients
 - Recommends ingredients that unlock the most recipes
+- Looks up product information from barcode databases
+- Pre-fills forms with intelligent category and quantity suggestions
+- Handles graceful fallbacks when products aren't found in databases
 
 ## 📡 API Endpoints
 

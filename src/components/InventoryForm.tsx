@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useInventory } from "../contexts/InventoryContext";
 import { InventoryItem } from "../lib/types";
+import { ProductInfo, suggestInventoryDetails } from "../lib/productLookup";
 import { Button } from "@/components/ui/button";
 import { ArrowLeftIcon, FloppyDiskIcon } from "@phosphor-icons/react";
 import { toast } from "sonner";
@@ -8,11 +9,12 @@ import { toast } from "sonner";
 interface InventoryFormProps {
   item?: InventoryItem | null;
   initialBarcode?: string;
+  productInfo?: ProductInfo | null;
   onClose: () => void;
   onSuccess: () => void;
 }
 
-export default function InventoryForm({ item, initialBarcode, onClose, onSuccess }: InventoryFormProps) {
+export default function InventoryForm({ item, initialBarcode, productInfo, onClose, onSuccess }: InventoryFormProps) {
   const { addInventoryItem, updateInventoryItem } = useInventory();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -41,13 +43,25 @@ export default function InventoryForm({ item, initialBarcode, onClose, onSuccess
         cost: item.cost?.toString() || "",
         notes: item.notes || "",
       });
+    } else if (productInfo) {
+      // Pre-fill form with product information
+      const suggestions = suggestInventoryDetails(productInfo);
+      setFormData(prev => ({
+        ...prev,
+        name: productInfo.name,
+        barcode: initialBarcode || "",
+        category: suggestions.category,
+        unit: suggestions.unit,
+        quantity: suggestions.defaultQuantity,
+        notes: productInfo.brand ? `Brand: ${productInfo.brand}` : "",
+      }));
     } else if (initialBarcode) {
       setFormData(prev => ({
         ...prev,
         barcode: initialBarcode,
       }));
     }
-  }, [item, initialBarcode]);
+  }, [item, initialBarcode, productInfo]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -123,6 +137,31 @@ export default function InventoryForm({ item, initialBarcode, onClose, onSuccess
             {item ? "Edit Inventory Item" : "Add Inventory Item"}
           </h1>
         </div>
+
+        {/* Product Info Banner */}
+        {productInfo && !item && (
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+            <div className="flex items-start gap-3">
+              {productInfo.imageUrl && (
+                <img 
+                  src={productInfo.imageUrl} 
+                  alt={productInfo.name}
+                  className="w-16 h-16 object-cover rounded-lg flex-shrink-0"
+                />
+              )}
+              <div className="flex-1">
+                <h3 className="font-medium text-green-900">Product Found!</h3>
+                <p className="text-sm text-green-700 mb-1">{productInfo.name}</p>
+                {productInfo.brand && (
+                  <p className="text-xs text-green-600">Brand: {productInfo.brand}</p>
+                )}
+                <p className="text-xs text-green-600 mt-2">
+                  Form has been pre-filled with product details. You can modify any field below.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-6">

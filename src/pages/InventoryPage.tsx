@@ -6,6 +6,7 @@ import InventoryForm from "../components/InventoryForm";
 import BarcodeScanner from "../components/BarcodeScanner";
 import RecipeAvailability from "../components/RecipeAvailability";
 import { InventoryItem } from "../lib/types";
+import { ProductInfo } from "../lib/productLookup";
 import { toast } from "sonner";
 
 type SortField = 'name' | 'quantity' | 'category' | 'updatedAt';
@@ -20,6 +21,7 @@ export default function InventoryPage() {
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
   const [showBarcodeScanner, setShowBarcodeScanner] = useState(false);
   const [scannedBarcode, setScannedBarcode] = useState<string>("");
+  const [scannedProductInfo, setScannedProductInfo] = useState<ProductInfo | null>(null);
 
   // Filter and sort inventory
   const filteredAndSortedInventory = useMemo(() => {
@@ -87,9 +89,10 @@ export default function InventoryPage() {
     setShowForm(false);
     setEditingItem(null);
     setScannedBarcode("");
+    setScannedProductInfo(null);
   };
 
-  const handleBarcodeDetected = async (barcode: string) => {
+  const handleBarcodeDetected = async (barcode: string, productInfo?: ProductInfo) => {
     setShowBarcodeScanner(false);
     
     try {
@@ -106,14 +109,21 @@ export default function InventoryPage() {
           setShowForm(true);
         }
       } else {
-        // Item doesn't exist, create new item with scanned barcode
+        // Item doesn't exist, create new item with scanned barcode and product info
         setScannedBarcode(barcode);
+        setScannedProductInfo(productInfo || null);
         setShowForm(true);
-        toast.info("Barcode not found in inventory. Creating new item...");
+        
+        if (productInfo) {
+          toast.success(`Found product: ${productInfo.name}. Pre-filling form...`);
+        } else {
+          toast.info("Barcode not found in product database. Creating new item...");
+        }
       }
     } catch (error) {
       // If there's an error checking the barcode, still allow creation
       setScannedBarcode(barcode);
+      setScannedProductInfo(productInfo || null);
       setShowForm(true);
       toast.info("Creating new item with scanned barcode...");
     }
@@ -134,6 +144,7 @@ export default function InventoryPage() {
       <InventoryForm
         item={editingItem}
         initialBarcode={scannedBarcode}
+        productInfo={scannedProductInfo}
         onClose={handleFormClose}
         onSuccess={handleFormClose}
       />
