@@ -87,31 +87,29 @@ export function recipesRouter(): Router {
   });
 
   // Generate ingredient alternatives (must come before /:recipeId route)
-  router.get("/ingredients/:ingredientName/alternatives", async (req: Request, res: Response) => {
+  router.post("/ingredients/alternatives", async (req: Request, res: Response) => {
     try {
-      const { ingredientName } = req.params;
+      const { ingredient, recipeId } = req.body;
 
-      if (!ingredientName || ingredientName.trim().length === 0) {
+      if (!ingredient || ingredient.trim().length === 0) {
         res.status(400).json({ error: "Ingredient name is required" });
         return;
       }
 
-      // Decode URL-encoded ingredient name with error handling
-      let decodedIngredientName: string;
-      try {
-        decodedIngredientName = decodeURIComponent(ingredientName);
-      } catch (error) {
-        res.status(400).json({ error: "Invalid ingredient name encoding" });
+      const recipe = await database.getRecipeById(recipeId);
+      if (!recipe) {
+        res.status(404).json({ error: "Recipe not found" });
         return;
       }
 
       // Generate alternatives using LLM
       const alternatives = await generateIngredientAlternatives({
-        ingredientName: decodedIngredientName,
+        ingredient,
+        recipe,
       });
 
       res.json({ 
-        ingredient: decodedIngredientName,
+        ingredient,
         alternatives 
       });
     } catch (error) {

@@ -10,6 +10,7 @@ import {
   FunnelIcon,
   CaretDownIcon,
   CaretRightIcon,
+  SpinnerIcon,
 } from "@phosphor-icons/react";
 import { GlassIcon } from "@/components/GlassIcon";
 import { calculateTotalVolume } from "../lib/recipe-utils";
@@ -36,11 +37,17 @@ function RecipePage() {
   const [showBatchCalculator, setShowBatchCalculator] = useState(false);
   const [showClarificationCalculator, setShowClarificationCalculator] =
     useState(false);
-  
+
   // State for ingredient alternatives
-  const [ingredientAlternatives, setIngredientAlternatives] = useState<Record<string, string[]>>({});
-  const [loadingAlternatives, setLoadingAlternatives] = useState<Record<string, boolean>>({});
-  const [expandedIngredients, setExpandedIngredients] = useState<Record<string, boolean>>({});
+  const [ingredientAlternatives, setIngredientAlternatives] = useState<
+    Record<string, string[]>
+  >({});
+  const [loadingAlternatives, setLoadingAlternatives] = useState<
+    Record<string, boolean>
+  >({});
+  const [expandedIngredients, setExpandedIngredients] = useState<
+    Record<string, boolean>
+  >({});
 
   const recipe = id ? getRecipe(id) : undefined;
 
@@ -83,45 +90,66 @@ function RecipePage() {
     setShowDeleteDialog(false);
   };
 
-  const fetchIngredientAlternatives = async (ingredientName: string) => {
-    if (ingredientAlternatives[ingredientName] || loadingAlternatives[ingredientName]) {
-      return; // Already loaded or loading
-    }
-
-    setLoadingAlternatives(prev => ({ ...prev, [ingredientName]: true }));
-
-    try {
-      const encodedIngredientName = encodeURIComponent(ingredientName);
-      const response = await fetch(`/api/recipes/ingredients/${encodedIngredientName}/alternatives`);
-      
-      if (!response.ok) {
-        throw new Error(`Failed to fetch alternatives: ${response.statusText}`);
+  const fetchIngredientAlternatives = useCallback(
+    async (ingredientName: string) => {
+      if (
+        ingredientAlternatives[ingredientName] ||
+        loadingAlternatives[ingredientName]
+      ) {
+        return; // Already loaded or loading
       }
-      
-      const data = await response.json();
-      setIngredientAlternatives(prev => ({ 
-        ...prev, 
-        [ingredientName]: data.alternatives 
-      }));
-    } catch (error) {
-      console.error("Error fetching ingredient alternatives:", error);
-      toast.error("Failed to load ingredient alternatives. Please try again.");
-    } finally {
-      setLoadingAlternatives(prev => ({ ...prev, [ingredientName]: false }));
-    }
-  };
+
+      setLoadingAlternatives((prev) => ({ ...prev, [ingredientName]: true }));
+
+      try {
+        const response = await fetch(`/api/recipes/ingredients/alternatives`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ingredient: ingredientName,
+            recipeId: recipe.id,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error(
+            `Failed to fetch alternatives: ${response.statusText}`
+          );
+        }
+
+        const data = await response.json();
+        setIngredientAlternatives((prev) => ({
+          ...prev,
+          [ingredientName]: data.alternatives,
+        }));
+      } catch (error) {
+        console.error("Error fetching ingredient alternatives:", error);
+        toast.error(
+          "Failed to load ingredient alternatives. Please try again."
+        );
+      } finally {
+        setLoadingAlternatives((prev) => ({
+          ...prev,
+          [ingredientName]: false,
+        }));
+      }
+    },
+    [ingredientAlternatives, loadingAlternatives]
+  );
 
   const toggleIngredientExpansion = (ingredientName: string) => {
     const isExpanded = expandedIngredients[ingredientName];
-    
+
     if (!isExpanded) {
       // Fetch alternatives when expanding
       fetchIngredientAlternatives(ingredientName);
     }
-    
-    setExpandedIngredients(prev => ({ 
-      ...prev, 
-      [ingredientName]: !isExpanded 
+
+    setExpandedIngredients((prev) => ({
+      ...prev,
+      [ingredientName]: !isExpanded,
     }));
   };
 
@@ -186,7 +214,7 @@ function RecipePage() {
               const isExpanded = expandedIngredients[ingredient.name];
               const isLoading = loadingAlternatives[ingredient.name];
               const alternatives = ingredientAlternatives[ingredient.name];
-              
+
               return (
                 <div key={index} className="border border-muted rounded-lg">
                   <div className="flex justify-between items-center py-3 px-4">
@@ -195,7 +223,9 @@ function RecipePage() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => toggleIngredientExpansion(ingredient.name)}
+                        onClick={() =>
+                          toggleIngredientExpansion(ingredient.name)
+                        }
                         className="h-6 w-6 p-0"
                         title="Show alternatives"
                       >
@@ -210,22 +240,23 @@ function RecipePage() {
                       {ingredient.amount} {ingredient.unit}
                     </span>
                   </div>
-                  
+
                   {isExpanded && (
                     <div className="border-t border-muted px-4 py-3 bg-muted/20">
                       <div className="text-sm font-medium text-muted-foreground mb-2">
                         Alternative ingredients:
                       </div>
                       {isLoading ? (
-                        <div className="text-sm text-muted-foreground">
+                        <div className="text-sm text-muted-foreground flex items-center">
+                          <SpinnerIcon className="h-6 w-6 animate-spin" />{" "}
                           Loading alternatives...
                         </div>
                       ) : alternatives && alternatives.length > 0 ? (
                         <div className="flex flex-wrap gap-2">
                           {alternatives.map((alternative, altIndex) => (
-                            <Badge 
-                              key={altIndex} 
-                              variant="secondary"
+                            <Badge
+                              key={altIndex}
+                              variant="outline"
                               className="text-xs"
                             >
                               {alternative}
