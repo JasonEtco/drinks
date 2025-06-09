@@ -216,10 +216,13 @@ function RecipePage() {
               const alternatives = ingredientAlternatives[ingredient.name];
 
               return (
-                <div key={index} className="border border-muted rounded-lg">
-                  <div className="flex justify-between items-center py-3 px-4">
+                <div
+                  key={index}
+                  className="even:bg-muted rounded-lg py-3 px-4 -mx-4"
+                >
+                  <div className="flex justify-between items-center">
                     <div className="flex items-center gap-2">
-                      <span className="font-medium">{ingredient.name}</span>
+                      <span>{ingredient.name}</span>
                       <Button
                         variant="ghost"
                         size="sm"
@@ -230,9 +233,9 @@ function RecipePage() {
                         title="Show alternatives"
                       >
                         {isExpanded ? (
-                          <CaretDownIcon className="h-4 w-4" />
+                          <CaretDownIcon className="size-4" />
                         ) : (
-                          <CaretRightIcon className="h-4 w-4" />
+                          <CaretRightIcon className="size-4" />
                         )}
                       </Button>
                     </div>
@@ -318,7 +321,7 @@ function RecipePage() {
         )}
 
         {/* Metadata */}
-        <div className="pt-4 border-t border-muted">
+        <footer className="py-4 border-t border-muted">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-muted-foreground">
             <div>
               <span>Created: </span>
@@ -329,7 +332,7 @@ function RecipePage() {
               {new Date(recipe.updatedAt).toLocaleDateString()}
             </div>
           </div>
-        </div>
+        </footer>
       </div>
 
       <BatchCalculator
