@@ -21,11 +21,26 @@ const mockGenerateIngredientAlternatives = generateIngredientAlternatives as any
 const mockGenerateObject = generateObject as any;
 
 describe('Ingredient Alternatives LLM', () => {
+  const mockRecipe = {
+    id: 'test-recipe-id',
+    name: 'Test Cocktail',
+    description: 'A test cocktail',
+    ingredients: [
+      { name: 'Orange Liqueur', amount: 1, unit: 'oz' },
+      { name: 'Vodka', amount: 2, unit: 'oz' }
+    ],
+    instructions: 'Mix and serve',
+    glass: 'Coupe',
+    tags: ['test'],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
     
     // Set up the actual implementation for testing
-    mockGenerateIngredientAlternatives.mockImplementation(async ({ ingredientName }) => {
+    mockGenerateIngredientAlternatives.mockImplementation(async ({ ingredient, recipe }) => {
       const mockResult = {
         object: {
           alternatives: [
@@ -49,7 +64,8 @@ describe('Ingredient Alternatives LLM', () => {
 
   it('should generate alternatives for a basic ingredient', async () => {
     const result = await generateIngredientAlternatives({
-      ingredientName: 'Orange Liqueur'
+      ingredient: 'Orange Liqueur',
+      recipe: mockRecipe
     });
 
     expect(result).toEqual([
@@ -59,7 +75,8 @@ describe('Ingredient Alternatives LLM', () => {
     ]);
 
     expect(mockGenerateIngredientAlternatives).toHaveBeenCalledWith({
-      ingredientName: 'Orange Liqueur'
+      ingredient: 'Orange Liqueur',
+      recipe: mockRecipe
     });
   });
 
@@ -73,7 +90,8 @@ describe('Ingredient Alternatives LLM', () => {
     ]);
 
     const result = await generateIngredientAlternatives({
-      ingredientName: 'Reposado Tequila'
+      ingredient: 'Reposado Tequila',
+      recipe: mockRecipe
     });
 
     expect(result).toEqual([
@@ -95,7 +113,8 @@ describe('Ingredient Alternatives LLM', () => {
     ]);
 
     const result = await generateIngredientAlternatives({
-      ingredientName: 'Fresh lime juice'
+      ingredient: 'Fresh lime juice',
+      recipe: mockRecipe
     });
 
     expect(result).toEqual([
@@ -113,7 +132,8 @@ describe('Ingredient Alternatives LLM', () => {
     );
 
     await expect(generateIngredientAlternatives({
-      ingredientName: 'Vodka'
+      ingredient: 'Vodka',
+      recipe: mockRecipe
     })).rejects.toThrow('Failed to generate ingredient alternatives from LLM');
   });
 
@@ -127,7 +147,8 @@ describe('Ingredient Alternatives LLM', () => {
     ]);
 
     const result = await generateIngredientAlternatives({
-      ingredientName: 'Campari'
+      ingredient: 'Campari',
+      recipe: mockRecipe
     });
 
     expect(result).toEqual([

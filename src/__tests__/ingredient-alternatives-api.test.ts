@@ -24,17 +24,36 @@ vi.mock('../lib/database.js', () => ({
 }));
 
 import { generateIngredientAlternatives } from '../server/llm.js';
+import { database } from '../lib/database.js';
 
 const mockGenerateIngredientAlternatives = generateIngredientAlternatives as any;
+const mockDatabase = database as any;
 
 describe('Ingredient Alternatives API', () => {
   let app: express.Application;
+  const mockRecipe = {
+    id: 'test-recipe-id',
+    name: 'Test Cocktail',
+    description: 'A test cocktail',
+    ingredients: [
+      { name: 'Orange Liqueur', amount: 1, unit: 'oz' },
+      { name: 'Vodka', amount: 2, unit: 'oz' }
+    ],
+    instructions: 'Mix and serve',
+    glass: 'Coupe',
+    tags: ['test'],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  };
 
   beforeEach(() => {
     vi.clearAllMocks();
     app = express();
     app.use(express.json());
     app.use('/api/recipes', recipesRouter());
+    
+    // Mock database to return a recipe
+    mockDatabase.getRecipeById.mockResolvedValue(mockRecipe);
   });
 
   it('should return alternatives for a valid ingredient', async () => {
@@ -49,7 +68,11 @@ describe('Ingredient Alternatives API', () => {
     mockGenerateIngredientAlternatives.mockResolvedValue(mockAlternatives);
 
     const response = await request(app)
-      .get('/api/recipes/ingredients/Orange%20Liqueur/alternatives')
+      .post('/api/recipes/ingredients/alternatives')
+      .send({
+        ingredient: 'Orange Liqueur',
+        recipeId: 'test-recipe-id'
+      })
       .expect(200);
 
     expect(response.body).toEqual({
@@ -58,11 +81,14 @@ describe('Ingredient Alternatives API', () => {
     });
 
     expect(mockGenerateIngredientAlternatives).toHaveBeenCalledWith({
-      ingredientName: 'Orange Liqueur'
+      ingredient: 'Orange Liqueur',
+      recipe: mockRecipe
     });
+    
+    expect(mockDatabase.getRecipeById).toHaveBeenCalledWith('test-recipe-id');
   });
 
-  it('should handle URL encoded ingredient names', async () => {
+  it('should handle various ingredient names', async () => {
     const mockAlternatives = [
       'Lemon juice',
       'Grapefruit juice',
@@ -72,7 +98,11 @@ describe('Ingredient Alternatives API', () => {
     mockGenerateIngredientAlternatives.mockResolvedValue(mockAlternatives);
 
     const response = await request(app)
-      .get('/api/recipes/ingredients/Fresh%20lime%20juice/alternatives')
+      .post('/api/recipes/ingredients/alternatives')
+      .send({
+        ingredient: 'Fresh lime juice',
+        recipeId: 'test-recipe-id'
+      })
       .expect(200);
 
     expect(response.body).toEqual({
@@ -81,13 +111,18 @@ describe('Ingredient Alternatives API', () => {
     });
 
     expect(mockGenerateIngredientAlternatives).toHaveBeenCalledWith({
-      ingredientName: 'Fresh lime juice'
+      ingredient: 'Fresh lime juice',
+      recipe: mockRecipe
     });
   });
 
   it('should return 400 for empty ingredient name', async () => {
     const response = await request(app)
-      .get('/api/recipes/ingredients/ /alternatives')
+      .post('/api/recipes/ingredients/alternatives')
+      .send({
+        ingredient: '   ',
+        recipeId: 'test-recipe-id'
+      })
       .expect(400);
 
     expect(response.body).toEqual({
@@ -99,8 +134,33 @@ describe('Ingredient Alternatives API', () => {
 
   it('should return 400 for missing ingredient name', async () => {
     const response = await request(app)
-      .get('/api/recipes/ingredients//alternatives')
-      .expect(404); // This will be a 404 because the route won't match
+      .post('/api/recipes/ingredients/alternatives')
+      .send({
+        recipeId: 'test-recipe-id'
+      })
+      .expect(400);
+
+    expect(response.body).toEqual({
+      error: 'Ingredient name is required'
+    });
+
+    expect(mockGenerateIngredientAlternatives).not.toHaveBeenCalled();
+  });
+
+  it('should return 404 for non-existent recipe', async () => {
+    mockDatabase.getRecipeById.mockResolvedValue(null);
+
+    const response = await request(app)
+      .post('/api/recipes/ingredients/alternatives')
+      .send({
+        ingredient: 'Vodka',
+        recipeId: 'non-existent-recipe'
+      })
+      .expect(404);
+
+    expect(response.body).toEqual({
+      error: 'Recipe not found'
+    });
 
     expect(mockGenerateIngredientAlternatives).not.toHaveBeenCalled();
   });
@@ -111,7 +171,11 @@ describe('Ingredient Alternatives API', () => {
     );
 
     const response = await request(app)
-      .get('/api/recipes/ingredients/Vodka/alternatives')
+      .post('/api/recipes/ingredients/alternatives')
+      .send({
+        ingredient: 'Vodka',
+        recipeId: 'test-recipe-id'
+      })
       .expect(500);
 
     expect(response.body).toEqual({
@@ -129,7 +193,11 @@ describe('Ingredient Alternatives API', () => {
     mockGenerateIngredientAlternatives.mockResolvedValue(mockAlternatives);
 
     const response = await request(app)
-      .get('/api/recipes/ingredients/Fern%C3%A9t-Branca/alternatives')
+      .post('/api/recipes/ingredients/alternatives')
+      .send({
+        ingredient: 'Fernét-Branca',
+        recipeId: 'test-recipe-id'
+      })
       .expect(200);
 
     expect(response.body.ingredient).toBe('Fernét-Branca');
@@ -146,22 +214,14 @@ describe('Ingredient Alternatives API', () => {
     mockGenerateIngredientAlternatives.mockResolvedValue(mockAlternatives);
 
     const response = await request(app)
-      .get('/api/recipes/ingredients/Agave%20Tequila/alternatives')
+      .post('/api/recipes/ingredients/alternatives')
+      .send({
+        ingredient: 'Agave Tequila',
+        recipeId: 'test-recipe-id'
+      })
       .expect(200);
 
     expect(response.body.ingredient).toBe('Agave Tequila');
     expect(response.body.alternatives).toEqual(mockAlternatives);
-  });
-
-  it('should handle invalid URL encoding gracefully', async () => {
-    const response = await request(app)
-      .get('/api/recipes/ingredients/100%25%25invalid/alternatives')
-      .expect(400);
-
-    expect(response.body).toEqual({
-      error: 'Invalid ingredient name encoding'
-    });
-
-    expect(mockGenerateIngredientAlternatives).not.toHaveBeenCalled();
   });
 });
