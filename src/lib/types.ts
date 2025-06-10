@@ -54,3 +54,13 @@ export interface MilkClarificationCalculation {
   milkAmount: number;
   totalVolume: number;
 }
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  provider: 'github' | 'google';
+  providerId: string;
+  createdAt: string;
+  updatedAt: string;
+}

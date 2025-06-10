@@ -1,5 +1,5 @@
 import sqlite3 from "sqlite3";
-import { GlassType, Recipe } from "./types.js";
+import { GlassType, Recipe, User } from "./types.js";
 import { generateId } from "./recipe-utils.js";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -29,7 +29,7 @@ class Database {
   }
 
   private initializeDatabase(): void {
-    const createTableSQL = `
+    const createRecipesTableSQL = `
       CREATE TABLE IF NOT EXISTS recipes (
         id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
@@ -44,12 +44,33 @@ class Database {
       )
     `;
 
-    this.db.run(createTableSQL, (err) => {
+    const createUsersTableSQL = `
+      CREATE TABLE IF NOT EXISTS users (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        email TEXT NOT NULL,
+        provider TEXT NOT NULL,
+        providerId TEXT NOT NULL,
+        createdAt TEXT NOT NULL,
+        updatedAt TEXT NOT NULL,
+        UNIQUE(provider, providerId)
+      )
+    `;
+
+    this.db.run(createRecipesTableSQL, (err) => {
       if (err) {
         console.error("Error creating recipes table:", err.message);
       } else {
         console.log("Recipes table ready");
-        this.migrateDatabase();
+        
+        this.db.run(createUsersTableSQL, (err) => {
+          if (err) {
+            console.error("Error creating users table:", err.message);
+          } else {
+            console.log("Users table ready");
+            this.migrateDatabase();
+          }
+        });
       }
     });
   }
@@ -359,6 +380,108 @@ class Database {
         }
       });
     });
+  }
+
+  // User management methods
+  async createUser(userData: Omit<User, "id" | "createdAt" | "updatedAt">): Promise<User> {
+    return new Promise((resolve, reject) => {
+      const id = generateId();
+      const now = new Date().toISOString();
+      const newUser: User = {
+        id,
+        ...userData,
+        createdAt: now,
+        updatedAt: now,
+      };
+
+      const sql = `
+        INSERT INTO users (id, name, email, provider, providerId, createdAt, updatedAt)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `;
+
+      this.db.run(
+        sql,
+        [newUser.id, newUser.name, newUser.email, newUser.provider, newUser.providerId, newUser.createdAt, newUser.updatedAt],
+        function (err) {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(newUser);
+          }
+        }
+      );
+    });
+  }
+
+  async getUserByProviderId(provider: string, providerId: string): Promise<User | null> {
+    return new Promise((resolve, reject) => {
+      const sql = "SELECT * FROM users WHERE provider = ? AND providerId = ?";
+      
+      this.db.get(sql, [provider, providerId], (err, row: any) => {
+        if (err) {
+          reject(err);
+        } else if (row) {
+          resolve(this.rowToUser(row));
+        } else {
+          resolve(null);
+        }
+      });
+    });
+  }
+
+  async getUserById(id: string): Promise<User | null> {
+    return new Promise((resolve, reject) => {
+      const sql = "SELECT * FROM users WHERE id = ?";
+      
+      this.db.get(sql, [id], (err, row: any) => {
+        if (err) {
+          reject(err);
+        } else if (row) {
+          resolve(this.rowToUser(row));
+        } else {
+          resolve(null);
+        }
+      });
+    });
+  }
+
+  async updateUser(id: string, updates: Partial<Omit<User, "id" | "createdAt" | "updatedAt">>): Promise<User> {
+    return new Promise((resolve, reject) => {
+      const updatedAt = new Date().toISOString();
+      const setClause = Object.keys(updates).map(key => `${key} = ?`).join(', ');
+      const values = [...Object.values(updates), updatedAt, id];
+
+      const sql = `UPDATE users SET ${setClause}, updatedAt = ? WHERE id = ?`;
+
+      this.db.run(sql, values, (err) => {
+        if (err) {
+          reject(err);
+        } else {
+          // Get the updated user
+          this.db.get("SELECT * FROM users WHERE id = ?", [id], (err, row: any) => {
+            if (err) {
+              reject(err);
+            } else if (row) {
+              resolve(this.rowToUser(row));
+            } else {
+              reject(new Error("User not found"));
+            }
+          });
+        }
+      });
+    });
+  }
+
+  private rowToUser(row: any): User {
+    return {
+      id: row.id,
+      name: row.name,
+      email: row.email,
+      provider: row.provider as 'github' | 'google',
+      providerId: row.providerId,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+    };
   }
 
   // Close database connection

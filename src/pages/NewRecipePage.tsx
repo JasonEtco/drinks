@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useRecipes } from "../contexts/RecipeContext";
+import { AuthGate } from "../components/AuthGate";
 import RecipeForm from "../components/RecipeForm";
 import { Recipe } from "../lib/types";
 import { toast } from "sonner";
@@ -19,32 +20,34 @@ function NewRecipePage() {
     toast.success("Recipe created successfully!");
   };
 
-  if (isSubmitted && submittedRecipe) {
-    return (
-      <div className="container max-w-4xl space-y-6">
-        <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-semibold">Recipe Created!</h2>
-        </div>
+  return (
+    <AuthGate>
+      {isSubmitted && submittedRecipe ? (
+        <div className="container max-w-4xl space-y-6">
+          <div className="flex justify-between items-center">
+            <h2 className="text-2xl font-semibold">Recipe Created!</h2>
+          </div>
 
-        <div className="mt-4 text-center space-y-4">
-          <CheckCircleIcon className="w-16 h-16 text-green-500 mx-auto" />
-          <p className="text-lg">
-            "{submittedRecipe.name}" has been created successfully!
-          </p>
-          <div className="flex gap-4 justify-center">
-            <Button asChild>
-              <Link to="/">Back to Recipes</Link>
-            </Button>
-            <Button asChild variant="outline">
-              <Link to={`/recipes/${submittedRecipe.id}`}>View Recipe</Link>
-            </Button>
+          <div className="mt-4 text-center space-y-4">
+            <CheckCircleIcon className="w-16 h-16 text-green-500 mx-auto" />
+            <p className="text-lg">
+              "{submittedRecipe.name}" has been created successfully!
+            </p>
+            <div className="flex gap-4 justify-center">
+              <Button asChild>
+                <Link to="/">Back to Recipes</Link>
+              </Button>
+              <Button asChild variant="outline">
+                <Link to={`/recipes/${submittedRecipe.id}`}>View Recipe</Link>
+              </Button>
+            </div>
           </div>
         </div>
-      </div>
-    );
-  }
-
-  return <RecipeForm onSubmit={handleRecipeSubmit} cancelLinkTo="/" />;
+      ) : (
+        <RecipeForm onSubmit={handleRecipeSubmit} cancelLinkTo="/" />
+      )}
+    </AuthGate>
+  );
 }
 
 export default NewRecipePage;

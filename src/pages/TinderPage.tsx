@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo } from "react";
 import { useRecipes } from "../contexts/RecipeContext";
+import { useAuth } from "../contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import {
   HeartIcon,
@@ -14,6 +15,7 @@ import { Recipe } from "../lib/types";
 
 function TinderPage() {
   const { recipes, isLoading, addGeneratedRecipe } = useRecipes();
+  const { user } = useAuth();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [likedRecipes, setLikedRecipes] = useState<string[]>([]);
   const [passedRecipes, setPassedRecipes] = useState<string[]>([]);
@@ -58,6 +60,11 @@ function TinderPage() {
    * Uses the LLM to create a personalized cocktail recommendation
    */
   const handleGenerateFromLikes = useCallback(async () => {
+    if (!user) {
+      // Don't show an error, just silently return as the button should be disabled
+      return;
+    }
+    
     if (likedRecipes.length === 0) {
       return;
     }
@@ -83,7 +90,7 @@ function TinderPage() {
     } finally {
       setIsGenerating(false);
     }
-  }, [likedRecipes, passedRecipes, addGeneratedRecipe]);
+  }, [likedRecipes, passedRecipes, addGeneratedRecipe, user]);
 
   if (isLoading) {
     return (
@@ -111,12 +118,13 @@ function TinderPage() {
             {likedRecipes.length > 0 && (
               <Button
                 onClick={handleGenerateFromLikes}
-                disabled={isGenerating}
+                disabled={isGenerating || !user}
                 variant="outline"
                 className="border-purple-200 hover:border-purple-300 hover:bg-purple-50"
+                title={!user ? "Sign in to generate recipes from your likes" : "Generate Recipe from Likes"}
               >
                 <SparkleIcon className="h-4 w-4 mr-2" />
-                {isGenerating ? "Generating..." : "Generate Recipe from Likes"}
+                {isGenerating ? "Generating..." : !user ? "Sign in to Generate" : "Generate Recipe from Likes"}
               </Button>
             )}
             <Button onClick={handleReset}>
@@ -154,10 +162,11 @@ function TinderPage() {
           {/* Generate Recipe Button - Show when user has liked some recipes */}
           <Button
             onClick={handleGenerateFromLikes}
-            disabled={likedRecipes.length === 0}
+            disabled={likedRecipes.length === 0 || !user}
             size="sm"
             className="disabled:bg-purple-200 rounded-full border w-10 h-10 bg-purple-500 border-purple-200 hover:border-purple-300 hover:bg-purple-700"
-            aria-disabled={likedRecipes.length === 0}
+            aria-disabled={likedRecipes.length === 0 || !user}
+            title={!user ? "Sign in to generate recipes" : likedRecipes.length === 0 ? "Like some recipes first" : "Generate recipe from likes"}
           >
             {isGenerating ? (
               <SpinnerIcon className="h-6 w-6 animate-spin" />

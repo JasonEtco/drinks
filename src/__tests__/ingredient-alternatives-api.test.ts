@@ -3,6 +3,16 @@ import request from 'supertest';
 import express from 'express';
 import { recipesRouter } from '../server/recipes.js';
 
+// Mock the authentication middleware
+vi.mock('../server/auth.js', () => ({
+  requireAuth: (req: any, res: any, next: any) => {
+    // Mock authenticated user
+    req.user = { id: 'test-user', name: 'Test User' };
+    req.isAuthenticated = () => true;
+    next();
+  },
+}));
+
 // Mock the LLM function
 vi.mock('../server/llm.js', () => ({
   generateIngredientAlternatives: vi.fn(),
