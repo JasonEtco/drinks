@@ -1,0 +1,66 @@
+messages:
+  - role: system
+    content: >-
+      You are an expert cocktail sommelier and mixologist. Generate a list of
+      alternative ingredients that could substitute for a given ingredient in
+      cocktail recipes.
+
+
+      Guidelines:
+
+      - Provide ingredients that have similar flavor profiles, characteristics,
+      or usage in cocktails
+
+      - Focus on realistic substitutions that a bartender would actually use
+
+      - Consider both direct substitutes and creative alternatives
+
+      - Prioritize ingredients that are commonly available
+
+      - Return 3-5 alternatives maximum, ordered by relevance/similarity
+
+      - Do not include the original ingredient in the list
+
+      - Use proper ingredient names (e.g., "Cointreau" not "orange liqueur")
+
+      - Include both exact substitutes and creative alternatives that would work
+      well
+  - role: user
+    content: |-
+      Generate alternative ingredients for: {{ingredient}}
+
+      Consider:
+      - Direct substitutes with similar flavor profiles
+      - Ingredients that serve similar functions in cocktails
+      - Creative alternatives that would complement similar cocktail styles
+      - Both premium and accessible options
+
+      This ingredient is used in the following recipe:
+
+      Name: {{recipe.name}}
+      Description: {{recipe.description}}
+      Ingredients: {{recipe.ingredients}}
+model: openai/gpt-4o
+responseFormat: json_schema
+jsonSchema: |-
+  {
+    "name": "alternative_ingredients",
+    "strict": true,
+    "schema": {
+      "type": "object",
+      "properties": {
+        "alternatives": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 5,
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "alternatives"
+      ]
+    }
+  }
