@@ -4,6 +4,7 @@ import { CreateRecipeSchema, UpdateRecipeSchema } from "../lib/validation.js";
 import { Ingredient, Recipe } from "../lib/types.js";
 import { createGitHubModels, generateRecipeTags, generateRecipeFromLikes, generateIngredientAlternatives } from "./llm.js";
 import { generateObject } from "ai";
+import { requireAuth } from "./auth.js";
 import zod from "zod";
 
 export function recipesRouter(): Router {
@@ -38,7 +39,7 @@ export function recipesRouter(): Router {
   });
 
   // Generate recipe from likes (must come before /:recipeId route)
-  router.post("/generate-from-likes", async (req: Request, res: Response) => {
+  router.post("/generate-from-likes", requireAuth, async (req: Request, res: Response) => {
     try {
       const { likedRecipeIds, passedRecipeIds = [] } = req.body;
 
@@ -87,7 +88,7 @@ export function recipesRouter(): Router {
   });
 
   // Generate ingredient alternatives (must come before /:recipeId route)
-  router.post("/ingredients/alternatives", async (req: Request, res: Response) => {
+  router.post("/ingredients/alternatives", requireAuth, async (req: Request, res: Response) => {
     try {
       const { ingredient, recipeId } = req.body;
 
@@ -119,7 +120,7 @@ export function recipesRouter(): Router {
   });
 
   // Create new recipe
-  router.post("/", async (req: Request, res: Response) => {
+  router.post("/", requireAuth, async (req: Request, res: Response) => {
     try {
       // Validate input using Zod schema
       const validatedData = CreateRecipeSchema.parse(req.body);
@@ -169,7 +170,7 @@ export function recipesRouter(): Router {
   });
 
   // Update recipe
-  router.put("/:recipeId", async (req: Request, res: Response) => {
+  router.put("/:recipeId", requireAuth, async (req: Request, res: Response) => {
     try {
       // Validate input using Zod schema
       const validatedData = UpdateRecipeSchema.parse(req.body);
@@ -208,7 +209,7 @@ export function recipesRouter(): Router {
   });
 
   // Delete recipe
-  router.delete("/:recipeId", async (req: Request, res: Response) => {
+  router.delete("/:recipeId", requireAuth, async (req: Request, res: Response) => {
     try {
       const deletedRecipe = await database.deleteRecipe(req.params.recipeId);
       if (!deletedRecipe) {

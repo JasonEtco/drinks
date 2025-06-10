@@ -85,21 +85,32 @@ The project is configured with Vite's Hot Module Reloading for optimal developme
 
 The server provides the following REST API endpoints:
 
+### Authentication
+- `GET /auth/github` - Initiate GitHub OAuth login
+- `GET /auth/github/callback` - GitHub OAuth callback
+- `GET /auth/google` - Initiate Google OAuth login  
+- `GET /auth/google/callback` - Google OAuth callback
+- `GET /auth/me` - Get current authenticated user
+- `POST /auth/logout` - Sign out current user
+
 ### Recipes
-- `GET /api/recipes` - Get all recipes
-- `GET /api/recipes/:id` - Get recipe by ID
-- `POST /api/recipes` - Create new recipe
-- `PUT /api/recipes/:id` - Update recipe
-- `DELETE /api/recipes/:id` - Delete recipe
+- `GET /api/recipes` - Get all recipes (public)
+- `GET /api/recipes/:id` - Get recipe by ID (public)
+- `POST /api/recipes` - Create new recipe (**requires authentication**)
+- `PUT /api/recipes/:id` - Update recipe (**requires authentication**)
+- `DELETE /api/recipes/:id` - Delete recipe (**requires authentication**)
 
 ### Search & Filter
-- `GET /api/recipes/search/:query` - Search recipes
+- `GET /api/recipes/search/:query` - Search recipes (public)
 
-### AI Chat
-- `POST /api/chat` - Get AI-powered cocktail suggestions (requires GITHUB_TOKEN)
+### AI Features (**requires authentication**)
+- `POST /api/chat` - Get AI-powered cocktail suggestions
+- `POST /api/recipes/generate-from-likes` - Generate recipe from liked recipes
+- `POST /api/recipes/ingredients/alternatives` - Get ingredient alternatives
+- `POST /api/chat/generate/description` - Generate recipe descriptions
 
 ### Health Check
-- `GET /api/health` - API health check
+- `GET /api/health` - API health check (public)
 
 ## Project Structure
 

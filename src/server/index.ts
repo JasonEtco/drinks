@@ -5,12 +5,15 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 import express, { Request, Response, NextFunction } from "express";
+import session from "express-session";
+import passport from "passport";
 import morgan from "morgan";
 import path from "path";
 import { fileURLToPath } from "url";
 import { database } from "../lib/database.js";
 import { recipesRouter } from "./recipes.js";
 import { chatRouter } from "./chat.js";
+import { authRouter } from "./auth.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -21,6 +24,22 @@ const PORT = process.env.PORT || 3000;
 app.use(morgan("combined"));
 app.use(express.json());
 
+// Session configuration
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'drinks-app-secret-key-change-in-production',
+  resave: false,
+  saveUninitialized: false,
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  }
+}));
+
+// Initialize Passport
+app.use(passport.initialize());
+app.use(passport.session());
+
+app.use("/auth", authRouter());
 app.use("/api/recipes", recipesRouter());
 app.use("/api/chat", chatRouter());
 

@@ -4,6 +4,7 @@ import { streamText, ChatRequest } from "ai"
 import { z } from "zod";
 import { mcpTools } from "../lib/mcp-tools.js";
 import { createGitHubModels, generateRecipeDescription } from "./llm.js";
+import { requireAuth } from "./auth.js";
 import { Ingredient } from "../lib/types.js";
 
 // Schema for generate description request
@@ -20,7 +21,7 @@ export function chatRouter(): Router {
   const router = Router();
 
   // Chat endpoint for AI cocktail ideas with streaming support
-  router.post("/", async (req: Request, res: Response) => {
+  router.post("/", requireAuth, async (req: Request, res: Response) => {
     try {
       const githubModels = createGitHubModels();
 
@@ -100,7 +101,7 @@ When using tools, always inform the user about what you're doing (e.g., "I'll sa
   });
 
   // Generate description endpoint
-  router.post("/generate/description", async (req: Request, res: Response) => {
+  router.post("/generate/description", requireAuth, async (req: Request, res: Response) => {
     try {
       const githubModels = createGitHubModels();
 

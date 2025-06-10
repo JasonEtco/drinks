@@ -1,5 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { WakeLockToggle } from "./WakeLockToggle";
+import { AuthButton } from "./AuthButton";
 import { Button } from "@/components/ui/button";
 import { SparkleIcon, HouseIcon, HeartIcon } from "@phosphor-icons/react";
 
@@ -47,6 +48,7 @@ export default function Header() {
             </Link>
           </Button>
         </nav>
+        <AuthButton />
         <WakeLockToggle />
       </div>
     </header>

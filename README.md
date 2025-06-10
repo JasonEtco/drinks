@@ -36,6 +36,82 @@ npm run build
 npm start
 ```
 
+## 🔐 Authentication Setup
+
+The Drinks app supports OAuth authentication with GitHub and Google for accessing protected features like recipe creation, editing, and AI-powered suggestions.
+
+### Required OAuth Credentials
+
+#### GitHub OAuth App
+1. Go to [GitHub Settings > Developer settings > OAuth Apps](https://github.com/settings/applications/new)
+2. Create a new OAuth App with these settings:
+   - **Application name**: Your app name (e.g., "Drinks App")
+   - **Homepage URL**: `http://localhost:3000` (for development)
+   - **Authorization callback URL**: `http://localhost:3000/auth/github/callback`
+3. Save your `Client ID` and `Client Secret`
+
+#### Google OAuth App
+1. Go to the [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project or select an existing one
+3. Enable the Google+ API
+4. Go to "Credentials" and create a new "OAuth client ID"
+5. Choose "Web application" and add these URLs:
+   - **Authorized JavaScript origins**: `http://localhost:3000`
+   - **Authorized redirect URIs**: `http://localhost:3000/auth/google/callback`
+6. Save your `Client ID` and `Client Secret`
+
+### Environment Variables
+
+Copy `.env.example` to `.env` and fill in your OAuth credentials:
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` with your credentials:
+```env
+# Session secret (change this in production!)
+SESSION_SECRET=your-super-secret-session-key-change-in-production
+
+# GitHub OAuth App settings
+GITHUB_CLIENT_ID=your_github_oauth_client_id
+GITHUB_CLIENT_SECRET=your_github_oauth_client_secret
+GITHUB_CALLBACK_URL=http://localhost:3000/auth/github/callback
+
+# Google OAuth settings  
+GOOGLE_CLIENT_ID=your_google_oauth_client_id
+GOOGLE_CLIENT_SECRET=your_google_oauth_client_secret
+GOOGLE_CALLBACK_URL=http://localhost:3000/auth/google/callback
+
+# GitHub token for AI features (optional)
+GITHUB_TOKEN=your_github_personal_access_token_here
+```
+
+### Production Setup
+
+For production deployment:
+
+1. **Update OAuth callback URLs** to your production domain:
+   - GitHub: `https://yourdomain.com/auth/github/callback`
+   - Google: `https://yourdomain.com/auth/google/callback`
+
+2. **Secure session secret**: Generate a strong random string for `SESSION_SECRET`
+
+3. **HTTPS required**: OAuth providers require HTTPS in production
+
+### Features Requiring Authentication
+
+- ✨ Recipe creation and editing
+- 🤖 AI-powered recipe generation and suggestions  
+- 💬 Chat with AI for cocktail ideas
+- 🏷️ Automatic recipe tagging
+- 🔄 Recipe generation from liked recipes (Tinder mode)
+
+Public features (no authentication required):
+- 📖 Browse and view recipes
+- 🔍 Search recipes
+- 📊 Batch calculator and clarification tools
+
 ## 🐳 Docker Container
 
 This application is containerized and automatically published to GitHub Container Registry.
