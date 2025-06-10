@@ -15,7 +15,7 @@ export default function HomePage() {
   }
 
   return (
-    <div className="container max-w-4xl">
+    <div className="container max-w-4xl sm:px-8 px-4">
       <RecipeList recipes={recipes} />
     </div>
   );
