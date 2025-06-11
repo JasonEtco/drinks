@@ -1,5 +1,5 @@
 import sqlite3 from "sqlite3";
-import { GlassType, Recipe } from "./types.js";
+import { GlassType, Recipe, InventoryItem } from "./types.js";
 import { generateId } from "./recipe-utils.js";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -44,12 +44,38 @@ class Database {
       )
     `;
 
+    const createInventoryTableSQL = `
+      CREATE TABLE IF NOT EXISTS inventory (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        quantity REAL NOT NULL,
+        unit TEXT NOT NULL,
+        barcode TEXT,
+        category TEXT,
+        expiryDate TEXT,
+        purchaseDate TEXT,
+        cost REAL,
+        notes TEXT,
+        createdAt TEXT NOT NULL,
+        updatedAt TEXT NOT NULL
+      )
+    `;
+
     this.db.run(createTableSQL, (err) => {
       if (err) {
         console.error("Error creating recipes table:", err.message);
       } else {
         console.log("Recipes table ready");
-        this.migrateDatabase();
+        
+        // Create inventory table
+        this.db.run(createInventoryTableSQL, (err) => {
+          if (err) {
+            console.error("Error creating inventory table:", err.message);
+          } else {
+            console.log("Inventory table ready");
+            this.migrateDatabase();
+          }
+        });
       }
     });
   }
@@ -352,6 +378,244 @@ class Database {
   async getRecipeCount(): Promise<number> {
     return new Promise((resolve, reject) => {
       this.db.get("SELECT COUNT(*) as count FROM recipes", (err, row: any) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(row.count);
+        }
+      });
+    });
+  }
+
+  // === INVENTORY METHODS ===
+
+  // Convert InventoryItem object to database row
+  private inventoryToRow(item: InventoryItem): any {
+    return {
+      id: item.id,
+      name: item.name,
+      quantity: item.quantity,
+      unit: item.unit,
+      barcode: item.barcode || null,
+      category: item.category || null,
+      expiryDate: item.expiryDate || null,
+      purchaseDate: item.purchaseDate || null,
+      cost: item.cost || null,
+      notes: item.notes || null,
+      createdAt: item.createdAt,
+      updatedAt: item.updatedAt,
+    };
+  }
+
+  // Convert database row to InventoryItem object
+  private rowToInventory(row: any): InventoryItem {
+    return {
+      id: row.id,
+      name: row.name,
+      quantity: row.quantity,
+      unit: row.unit,
+      barcode: row.barcode,
+      category: row.category,
+      expiryDate: row.expiryDate,
+      purchaseDate: row.purchaseDate,
+      cost: row.cost,
+      notes: row.notes,
+      createdAt: row.createdAt,
+      updatedAt: row.updatedAt,
+    };
+  }
+
+  // Get all inventory items
+  async listInventory(): Promise<InventoryItem[]> {
+    return new Promise((resolve, reject) => {
+      this.db.all(
+        "SELECT * FROM inventory ORDER BY name ASC",
+        (err, rows) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(rows.map((row) => this.rowToInventory(row)));
+          }
+        },
+      );
+    });
+  }
+
+  // Get inventory item by ID
+  async getInventoryById(id: string): Promise<InventoryItem | null> {
+    return new Promise((resolve, reject) => {
+      this.db.get("SELECT * FROM inventory WHERE id = ?", [id], (err, row) => {
+        if (err) {
+          reject(err);
+        } else if (row) {
+          resolve(this.rowToInventory(row));
+        } else {
+          resolve(null);
+        }
+      });
+    });
+  }
+
+  // Get inventory item by barcode
+  async getInventoryByBarcode(barcode: string): Promise<InventoryItem | null> {
+    return new Promise((resolve, reject) => {
+      this.db.get("SELECT * FROM inventory WHERE barcode = ?", [barcode], (err, row) => {
+        if (err) {
+          reject(err);
+        } else if (row) {
+          resolve(this.rowToInventory(row));
+        } else {
+          resolve(null);
+        }
+      });
+    });
+  }
+
+  // Create new inventory item
+  async createInventoryItem(
+    item: Omit<InventoryItem, "id" | "createdAt" | "updatedAt">,
+  ): Promise<InventoryItem> {
+    const newItem: InventoryItem = {
+      ...item,
+      id: Date.now().toString(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    return new Promise((resolve, reject) => {
+      const row = this.inventoryToRow(newItem);
+      const sql = `
+        INSERT INTO inventory (id, name, quantity, unit, barcode, category, expiryDate, purchaseDate, cost, notes, createdAt, updatedAt)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `;
+
+      this.db.run(
+        sql,
+        [
+          row.id,
+          row.name,
+          row.quantity,
+          row.unit,
+          row.barcode,
+          row.category,
+          row.expiryDate,
+          row.purchaseDate,
+          row.cost,
+          row.notes,
+          row.createdAt,
+          row.updatedAt,
+        ],
+        function (err) {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(newItem);
+          }
+        },
+      );
+    });
+  }
+
+  // Update inventory item
+  async updateInventoryItem(
+    id: string,
+    updates: Partial<InventoryItem>,
+  ): Promise<InventoryItem | null> {
+    const existingItem = await this.getInventoryById(id);
+    if (!existingItem) {
+      return null;
+    }
+
+    const updatedItem: InventoryItem = {
+      ...existingItem,
+      ...updates,
+      id, // Ensure ID doesn't change
+      updatedAt: new Date().toISOString(),
+    };
+
+    return new Promise((resolve, reject) => {
+      const row = this.inventoryToRow(updatedItem);
+      const sql = `
+        UPDATE inventory 
+        SET name = ?, quantity = ?, unit = ?, barcode = ?, category = ?, 
+            expiryDate = ?, purchaseDate = ?, cost = ?, notes = ?, updatedAt = ?
+        WHERE id = ?
+      `;
+
+      this.db.run(
+        sql,
+        [
+          row.name,
+          row.quantity,
+          row.unit,
+          row.barcode,
+          row.category,
+          row.expiryDate,
+          row.purchaseDate,
+          row.cost,
+          row.notes,
+          row.updatedAt,
+          id,
+        ],
+        function (err) {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(updatedItem);
+          }
+        },
+      );
+    });
+  }
+
+  // Delete inventory item
+  async deleteInventoryItem(id: string): Promise<InventoryItem | null> {
+    const item = await this.getInventoryById(id);
+    if (!item) {
+      return null;
+    }
+
+    return new Promise((resolve, reject) => {
+      this.db.run("DELETE FROM inventory WHERE id = ?", [id], function (err) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(item);
+        }
+      });
+    });
+  }
+
+  // Search inventory items
+  async searchInventory(query: string): Promise<InventoryItem[]> {
+    return new Promise((resolve, reject) => {
+      const searchTerm = `%${query.toLowerCase()}%`;
+      const sql = `
+        SELECT * FROM inventory 
+        WHERE LOWER(name) LIKE ? 
+           OR LOWER(category) LIKE ? 
+           OR LOWER(notes) LIKE ?
+        ORDER BY name ASC
+      `;
+
+      this.db.all(
+        sql,
+        [searchTerm, searchTerm, searchTerm],
+        (err, rows) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(rows.map((row) => this.rowToInventory(row)));
+          }
+        },
+      );
+    });
+  }
+
+  // Get inventory count
+  async getInventoryCount(): Promise<number> {
+    return new Promise((resolve, reject) => {
+      this.db.get("SELECT COUNT(*) as count FROM inventory", (err, row: any) => {
         if (err) {
           reject(err);
         } else {

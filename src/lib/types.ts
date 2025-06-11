@@ -54,3 +54,18 @@ export interface MilkClarificationCalculation {
   milkAmount: number;
   totalVolume: number;
 }
+
+export interface InventoryItem {
+  id: string;
+  name: string;
+  quantity: number;
+  unit: string;
+  barcode?: string;
+  category?: string;
+  expiryDate?: string;
+  purchaseDate?: string;
+  cost?: number;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
