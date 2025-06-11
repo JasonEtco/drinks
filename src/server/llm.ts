@@ -3,7 +3,7 @@ import { generateObject, generateText } from "ai";
 import z from "zod";
 import { Ingredient, Recipe } from "../lib/types.js";
 import { GlassTypeSchema, IngredientSchema } from "../lib/validation.js";
-import { PromptBuilder } from "./prompts/prompt-to-ai-call.js";
+import { PromptBuilder } from "./prompts/builder.js";
 
 const pb = new PromptBuilder({})
 const githubModels = createGitHubModels();
