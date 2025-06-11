@@ -3,6 +3,10 @@ import { generateObject, generateText } from "ai";
 import z from "zod";
 import { Ingredient, Recipe } from "../lib/types.js";
 import { GlassTypeSchema, IngredientSchema } from "../lib/validation.js";
+import { PromptBuilder } from "./prompts/prompt-to-ai-call.js";
+
+const pb = new PromptBuilder({})
+const githubModels = createGitHubModels();
 
 export function createGitHubModels() {
   const githubToken = process.env.GITHUB_TOKEN;
@@ -207,45 +211,18 @@ export async function generateIngredientAlternatives({
   ingredient: string;
   recipe: Recipe;
 }): Promise<string[]> {
-  const githubModels = createGitHubModels();
-
-  // Create system prompt for ingredient alternatives generation
-  const systemPrompt = `You are an expert cocktail sommelier and mixologist. Generate a list of alternative ingredients that could substitute for a given ingredient in cocktail recipes.
-
-Guidelines:
-- Provide ingredients that have similar flavor profiles, characteristics, or usage in cocktails
-- Focus on realistic substitutions that a bartender would actually use
-- Consider both direct substitutes and creative alternatives
-- Prioritize ingredients that are commonly available
-- Return 3-5 alternatives maximum, ordered by relevance/similarity
-- Do not include the original ingredient in the list
-- Use proper ingredient names (e.g., "Cointreau" not "orange liqueur")
-- Include both exact substitutes and creative alternatives that would work well`;
-
-  const userPrompt = `Generate alternative ingredients for: ${ingredient}
-
-Consider:
-- Direct substitutes with similar flavor profiles
-- Ingredients that serve similar functions in cocktails
-- Creative alternatives that would complement similar cocktail styles
-- Both premium and accessible options
-
-This ingredient is used in the following recipe:
-
-Name: ${recipe.name}
-Description: ${recipe.description || "No description provided"}
-Ingredients: ${recipe.ingredients
-    .map((ing) => `${ing.amount} ${ing.unit} ${ing.name}`)
-    .join(", ")}
-`;
-
+  const p = await pb.readFile("ingredient-alternatives");
   const result = await generateObject({
-    model: githubModels(process.env.CHAT_MODEL || "openai/gpt-4.1-nano"),
-    system: systemPrompt,
-    prompt: userPrompt,
-    schema: z.object({
-      alternatives: z.array(z.string().min(1)).max(5, "Maximum 5 alternatives"),
+    model: githubModels(process.env.CHAT_MODEL || p.prompt.model),
+    messages: p.messages({
+      ingredient,
+      "recipe.name": recipe.name,
+      "recipe.description": recipe.description || "",
+      "recipe.ingredients": recipe.ingredients
+        .map((ing) => `${ing.amount} ${ing.unit} ${ing.name}`)
+        .join(", "),
     }),
+    schema: p.schema,
     maxTokens: 300,
     temperature: 0.7, // Some creativity but stay focused
   });
