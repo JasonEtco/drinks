@@ -1,8 +1,6 @@
 import { createOpenAI } from "@ai-sdk/openai";
 import { generateObject, generateText } from "ai";
-import z from "zod";
 import { Ingredient, Recipe } from "../lib/types.js";
-import { GlassTypeSchema, IngredientSchema } from "../lib/validation.js";
 import { PromptBuilder } from "./prompts/builder.js";
 
 const pb = new PromptBuilder({})
@@ -27,25 +25,19 @@ export async function generateRecipeTags({
   ingredients: Ingredient[];
 }): Promise<string[]> {
   const githubModels = createGitHubModels();
-  const systemPrompt = `You are an expert cocktail sommelier. Generate a list of relevant tags for a cocktail recipe based on its ingredients and name.
-  Guidelines:
-  - Focus on flavor profiles, ingredients, and cocktail types
-  - Keep it concise, 3-5 tags maximum
-  - Avoid generic tags like "cocktail" or "drink"
-  - Use lowercase, no spaces, separate with commas
-  - Do not include the name of the cocktail in the tags`;
-
-  const userPrompt = `Generate tags for a cocktail recipe with these ingredients: ${ingredients
+  const p = await pb.readFile("recipe-tags");
+  
+  const ingredientsList = ingredients
     .map((ing) => `${ing.amount} ${ing.unit} ${ing.name}`)
-    .join(", ")}${name ? ` and name "${name}"` : ""}`;
+    .join(", ");
 
   const result = await generateObject({
-    model: githubModels(process.env.CHAT_MODEL || "openai/gpt-4.1-nano"),
-    system: systemPrompt,
-    prompt: userPrompt,
-    schema: z.object({
-      tags: z.array(z.string().min(1)),
+    model: githubModels(process.env.CHAT_MODEL || p.prompt.model),
+    messages: p.messages({
+      ingredients: ingredientsList,
+      name_context: name ? ` and name "${name}"` : "",
     }),
+    schema: p.schema,
   });
 
   if (!result && !result.object) {
@@ -62,33 +54,19 @@ export async function generateRecipeDescription({
   name?: string;
 }): Promise<string> {
   const githubModels = createGitHubModels();
+  const p = await pb.readFile("recipe-description");
 
   // Create ingredient list for prompt
   const ingredientsList = ingredients
     .map((ing) => `${ing.amount} ${ing.unit} ${ing.name}`)
     .join(", ");
 
-  // Create system prompt for description generation
-  const systemPrompt = `You are an expert cocktail sommelier and writer. Generate a simple description for a cocktail based on its ingredients. 
-
-Guidelines:
-- Focus on flavor profiles rather than exact measurements
-- Highlight the most interesting or premium ingredients
-- Keep it to 1-2 sentences maximum
-- Do not be verbose. Be concise.
-- Don't mention specific amounts or measurements
-- Make it sound appealing and interesting
-- DO NOT make it sound pretentious.
-- Don't include the name of the cocktail in the description`;
-
-  const userPrompt = `Create a description for a cocktail${
-    name ? ` called "${name}"` : ""
-  } with these ingredients: ${ingredientsList}`;
-
   const result = await generateText({
-    model: githubModels(process.env.CHAT_MODEL || "openai/gpt-4.1-nano"),
-    system: systemPrompt,
-    prompt: userPrompt,
+    model: githubModels(process.env.CHAT_MODEL || p.prompt.model),
+    messages: p.messages({
+      ingredients: ingredientsList,
+      name_context: name ? ` called "${name}"` : "",
+    }),
     maxTokens: 150,
     temperature: 0.9, // Add some creativity
   });
@@ -110,6 +88,7 @@ export async function generateRecipeFromLikes({
   passedRecipes: Recipe[];
 }): Promise<Omit<Recipe, "id" | "createdAt" | "updatedAt">> {
   const githubModels = createGitHubModels();
+  const p = await pb.readFile("recipe-from-likes");
 
   // Analyze liked recipes to understand preferences
   const likedIngredients = likedRecipes.flatMap((recipe) =>
@@ -117,68 +96,41 @@ export async function generateRecipeFromLikes({
   );
   const likedTags = likedRecipes.flatMap((recipe) => recipe.tags || []);
 
-  // Create system prompt for recipe generation
-  const systemPrompt = `You are an expert cocktail sommelier and recipe creator. Generate a new cocktail recipe based on the user's preferences from their liked recipes.
-
-Guidelines:
-- Create a unique, well-balanced cocktail recipe
-- Use ingredients and flavor profiles similar to their liked recipes
-- Include name, description, ingredients with measurements, instructions, glass type, and garnish
-- Make the recipe creative but realistic and mixable
-- Focus on quality and balance, not just novelty
-- Generate appropriate tags based on the recipe
-- Ensure measurements are practical (use common bar measurements like 0.5, 0.75, 1, 1.5, 2 oz, etc.)
-- Instructions should be clear and professional`;
-
-  const userPrompt = `Based on these liked recipes, create a new cocktail recipe:
-
-Liked Recipes:
-${likedRecipes
-  .map(
-    (recipe) => `
+  // Format liked recipes for prompt
+  const likedRecipesList = likedRecipes
+    .map(
+      (recipe) => `
 - ${recipe.name}: ${recipe.ingredients
-      .map((ing) => `${ing.amount} ${ing.unit} ${ing.name}`)
-      .join(", ")}
+        .map((ing) => `${ing.amount} ${ing.unit} ${ing.name}`)
+        .join(", ")}
   Glass: ${recipe.glass || "Not specified"}
-  Tags: ${recipe.tags?.join(", ") || "None"}
-`
-  )
-  .join("")}
+  Tags: ${recipe.tags?.join(", ") || "None"}`
+    )
+    .join("");
 
-Disliked Recipes:
-${passedRecipes
-  .map(
-    (recipe) => `
+  // Format disliked recipes for prompt
+  const dislikedRecipesList = passedRecipes
+    .map(
+      (recipe) => `
 - ${recipe.name}: ${recipe.ingredients
-      .map((ing) => `${ing.amount} ${ing.unit} ${ing.name}`)
-      .join(", ")}
+        .map((ing) => `${ing.amount} ${ing.unit} ${ing.name}`)
+        .join(", ")}
   Glass: ${recipe.glass || "Not specified"}
-  Tags: ${recipe.tags?.join(", ") || "None"}
-`
-  )
-  .join("")}
-
-Common ingredients in liked recipes: ${[...new Set(likedIngredients)]
-    .slice(0, 10)
-    .join(", ")}
-Common tags: ${[...new Set(likedTags)].slice(0, 5).join(", ")}
-
-Create a new recipe that would appeal to someone who liked these drinks.`;
+  Tags: ${recipe.tags?.join(", ") || "None"}`
+    )
+    .join("");
 
   const result = await generateObject({
-    model: githubModels(process.env.CHAT_MODEL || "openai/gpt-4.1-nano"),
-    system: systemPrompt,
-    prompt: userPrompt,
-    schema: z.object({
-      name: z.string().min(1, "Recipe name is required"),
-      description: z.string(),
-      ingredients: z
-        .array(IngredientSchema)
-        .min(1, "At least one ingredient is required"),
-      instructions: z.string().min(1, "Instructions are required"),
-      glass: GlassTypeSchema,
-      garnish: z.string(),
+    model: githubModels(process.env.CHAT_MODEL || p.prompt.model),
+    messages: p.messages({
+      liked_recipes: likedRecipesList,
+      disliked_recipes: dislikedRecipesList,
+      common_ingredients: [...new Set(likedIngredients)]
+        .slice(0, 10)
+        .join(", "),
+      common_tags: [...new Set(likedTags)].slice(0, 5).join(", "),
     }),
+    schema: p.schema,
     maxTokens: 500,
     temperature: 0.8,
   });

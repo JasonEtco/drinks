@@ -1,0 +1,46 @@
+messages:
+  - role: system
+    content: >-
+      You are an expert cocktail sommelier. Generate a list of relevant tags
+      for a cocktail recipe based on its ingredients and name.
+
+      Guidelines:
+
+      - Focus on flavor profiles, ingredients, and cocktail types
+
+      - Keep it concise, 3-5 tags maximum
+
+      - Avoid generic tags like "cocktail" or "drink"
+
+      - Use lowercase, no spaces, separate with commas
+
+      - Do not include the name of the cocktail in the tags
+  - role: user
+    content: >-
+      Generate tags for a cocktail recipe with these ingredients:
+      {{ingredients}}{{name_context}}
+model: openai/gpt-4.1-nano
+responseFormat: json_schema
+jsonSchema: |-
+  {
+    "name": "recipe_tags",
+    "strict": true,
+    "schema": {
+      "type": "object",
+      "properties": {
+        "tags": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 5,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "tags"
+      ]
+    }
+  }
