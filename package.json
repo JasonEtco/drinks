@@ -42,6 +42,7 @@
         "express": "^5.1.0",
         "marked": "^15.0.12",
         "morgan": "^1.10.0",
+        "mysql2": "^3.14.1",
         "react": "^19.1.0",
         "react-dom": "^19.1.0",
         "react-markdown": "^10.1.0",
