@@ -1,0 +1,42 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "containerAppName": {
+      "value": "drinks-prod"
+    },
+    "containerAppEnvironmentName": {
+      "value": "drinks-prod-env"
+    },
+    "logAnalyticsWorkspaceName": {
+      "value": "drinks-prod-logs"
+    },
+    "containerImage": {
+      "value": "ghcr.io/jasonetco/drinks:latest"
+    },
+    "environmentType": {
+      "value": "production"
+    },
+    "githubToken": {
+      "value": ""
+    },
+    "chatModel": {
+      "value": "openai/gpt-4o-mini"
+    },
+    "minReplicas": {
+      "value": 1
+    },
+    "maxReplicas": {
+      "value": 10
+    },
+    "mysqlAdminLogin": {
+      "value": "drinks_admin"
+    },
+    "mysqlAdminPassword": {
+      "value": ""
+    },
+    "mysqlDatabaseName": {
+      "value": "drinks_db"
+    }
+  }
+}

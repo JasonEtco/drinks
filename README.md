@@ -1,6 +1,6 @@
 # 🍹 Drinks
 
-A full-stack cocktail recipe management application built with React, TypeScript, Express.js, and SQLite.
+A full-stack cocktail recipe management application built with React, TypeScript, Express.js, and database persistence.
 
 ## ✨ Features
 
@@ -8,13 +8,33 @@ A full-stack cocktail recipe management application built with React, TypeScript
 - **Batch Calculator**: Scale recipes for events and large parties  
 - **Clarification Tools**: Professional clarification calculations for crystal-clear cocktails
 - **Search & Filter**: Find recipes by name, ingredient, or glass type
-- **Persistent Storage**: SQLite database for reliable data persistence
+- **Persistent Storage**: SQLite (development) and MySQL (production) database support
 - **REST API**: Full backend API for recipe operations
 - **Mobile Sleep Prevention**: Toggle to keep mobile screens awake while viewing recipes
+- **Cloud Deployment**: Ready for Azure Container Apps with managed MySQL
 
 ## 🚀 Quick Start
 
-### Development
+### Local Development
+
+Choose your preferred database setup:
+
+#### SQLite (Lightweight)
+```bash
+# Install dependencies
+npm install
+
+# Start development with SQLite
+./script/dev-setup.fish sqlite
+```
+
+#### MySQL (Production-like)
+```bash
+# Install dependencies and start with MySQL
+./script/dev-setup.fish mysql
+```
+
+### Manual Development Setup
 ```bash
 # Install dependencies
 npm install
@@ -36,19 +56,43 @@ npm run build
 npm start
 ```
 
-## 🐳 Docker Container
+## ☁️ Azure Cloud Deployment
 
-This application is containerized and automatically published to GitHub Container Registry.
+Deploy to Azure Container Apps with managed MySQL database:
 
-### Basic Usage
 ```bash
-# Run with ephemeral storage
-docker run -p 3000:3000 ghcr.io/jasonetco/drinks:latest
+# Follow the complete setup guide
+open AZURE_SETUP.md
 ```
 
-### With Persistent Database (Recommended)
+**Quick Azure Setup:**
+1. Create Azure service principal
+2. Add GitHub secrets (Azure credentials + MySQL password)
+3. Push to main branch → automatic deployment!
+
+## 🐳 Docker Container
+
+### Local MySQL Testing
 ```bash
-# Mount the recipes.db file directly
+# Start with MySQL database
+docker-compose up
+
+# Or SQLite only
+docker-compose --profile sqlite up drinks-app-sqlite
+```
+
+### Production Container
+```bash
+# Run with MySQL
+docker run -p 3000:3000 \
+  -e DATABASE_URL="mysql://user:pass@host:3306/db" \
+  ghcr.io/jasonetco/drinks:latest
+
+# Run with SQLite (development)
+docker run -p 3000:3000 \
+  -v ./recipes.db:/app/recipes.db \
+  ghcr.io/jasonetco/drinks:latest
+```
 docker run -p 3000:3000 \
   -v $(pwd)/recipes.db:/app/recipes.db \
   ghcr.io/jasonetco/drinks:latest
