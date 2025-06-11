@@ -6,7 +6,6 @@ import { GlassTypeSchema, IngredientSchema } from "../lib/validation.js";
 import { PromptBuilder } from "./prompts/builder.js";
 
 const pb = new PromptBuilder({})
-const githubModels = createGitHubModels();
 
 export function createGitHubModels() {
   const githubToken = process.env.GITHUB_TOKEN;
@@ -211,6 +210,7 @@ export async function generateIngredientAlternatives({
   ingredient: string;
   recipe: Recipe;
 }): Promise<string[]> {
+  const githubModels = createGitHubModels();
   const p = await pb.readFile("ingredient-alternatives");
   const result = await generateObject({
     model: githubModels(process.env.CHAT_MODEL || p.prompt.model),
