@@ -46,12 +46,12 @@ RUN mkdir -p /app/data && chown -R drinks:nodejs /app/data
 # Switch to non-root user
 USER drinks
 
-# Expose port
+# Expose port (Azure Container Apps expects this)
 EXPOSE 3000
 
-# Health check
+# Health check - use the PORT environment variable or default to 3000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3000/api/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) }).on('error', () => process.exit(1))"
+  CMD node -e "const port = process.env.PORT || 3000; require('http').get(\`http://localhost:\${port}/api/health\`, (res) => { process.exit(res.statusCode === 200 ? 0 : 1) }).on('error', () => process.exit(1))"
 
 # Use dumb-init to handle signals properly
 ENTRYPOINT ["dumb-init", "--"]
