@@ -22,17 +22,23 @@ After completing this setup:
 
 ## 🚀 Quick Setup (5 minutes)
 
-### Step 1: Create Azure Service Principal
+### Step 1: Create Azure Service Principal with Federated Identity
 
-Run this command to create a service principal for GitHub Actions:
+This setup uses OpenID Connect (OIDC) for secure authentication without storing secrets.
 
 ```bash
 # Replace {subscription-id} with your Azure subscription ID
+# Replace {github-username} with your GitHub username
+# Replace {repo-name} with your repository name
+
+# Create the service principal
 az ad sp create-for-rbac \
   --name "drinks-github-actions" \
   --role contributor \
   --scopes /subscriptions/{subscription-id} \
   --json-auth
+
+# Note the clientId from the output, you'll need it for the next command
 ```
 
 This will output JSON like:
@@ -44,6 +50,39 @@ This will output JSON like:
   "tenantId": "xxxxxxxxx"
 }
 ```
+
+**Important**: Save the `clientId`, `subscriptionId`, and `tenantId` - you'll need them for GitHub secrets.
+
+Now configure federated identity credentials:
+
+```bash
+# Replace {client-id} with the clientId from above
+# Replace {github-username} and {repo-name} with your values
+
+# For main branch deployments
+az ad app federated-credential create \
+  --id {client-id} \
+  --parameters '{
+    "name": "drinks-main-branch",
+    "issuer": "https://token.actions.githubusercontent.com",
+    "subject": "repo:{github-username}/{repo-name}:ref:refs/heads/main",
+    "description": "Production deployments from main branch",
+    "audiences": ["api://AzureADTokenExchange"]
+  }'
+
+# For pull request deployments  
+az ad app federated-credential create \
+  --id {client-id} \
+  --parameters '{
+    "name": "drinks-pull-requests",
+    "issuer": "https://token.actions.githubusercontent.com", 
+    "subject": "repo:{github-username}/{repo-name}:pull_request",
+    "description": "PR preview deployments",
+    "audiences": ["api://AzureADTokenExchange"]
+  }'
+```
+
+> **Note**: If you see an error about "environment:pr-X" in the assertion subject, it means GitHub environments are being used in the workflow. The federated identity credentials above are configured for workflows without environments, which is simpler and more flexible.
 
 ### Step 2: Configure GitHub Secrets
 
@@ -58,7 +97,7 @@ Add these **Repository secrets**:
 | `AZURE_SUBSCRIPTION_ID` | `subscriptionId` from Step 1 | Azure subscription ID |
 | `GH_TOKEN_AI` | Your GitHub PAT | For AI features (optional) |
 
-> **Note**: The `GITHUB_TOKEN` secret is automatically provided by GitHub Actions and is used for pulling the private container image from GitHub Container Registry.
+> **Note**: With federated identity credentials, you don't need to store the `clientSecret` in GitHub - the authentication is handled securely via OIDC tokens.
 
 ### Step 3: Deploy!
 
@@ -131,6 +170,88 @@ az containerapp show \
 ```
 
 ## 🚨 Troubleshooting
+
+### "No matching federated identity record found" Error
+If you see an error mentioning `environment:pr-X` in the assertion subject:
+```
+No matching federated identity record found for presented assertion subject 'repo:user/repo:environment:pr-82'
+```
+
+This happens when GitHub environments are used in the workflow. You have two options:
+
+**Option A: Remove environments from workflow (recommended)**
+The workflow has been updated to not use environments for PR deployments, which simplifies the federated identity setup.
+
+**Option B: Add specific environment credentials**
+If you want to keep environments, add a credential for each possible environment pattern:
+```bash
+# For a specific PR (you'd need to do this for each PR number)
+az ad app federated-credential create \
+  --id {client-id} \
+  --parameters '{
+    "name": "drinks-pr-environments",
+    "issuer": "https://token.actions.githubusercontent.com",
+    "subject": "repo:{github-username}/{repo-name}:environment:pr-82",
+    "description": "Specific PR environment",
+    "audiences": ["api://AzureADTokenExchange"]
+  }'
+```
+
+### "No configured federated identity credentials" Error
+If you see this error:
+```
+AADSTS70025: The client has no configured federated identity credentials
+```
+
+This means your service principal was created without federated identity credentials. You have two options:
+
+**Option A: Add federated identity credentials (recommended)**
+```bash
+# Get your service principal's client ID (you should have this from Step 1)
+# Replace {client-id}, {github-username}, and {repo-name} with your values
+
+# For main branch
+az ad app federated-credential create \
+  --id {client-id} \
+  --parameters '{
+    "name": "drinks-main-branch",
+    "issuer": "https://token.actions.githubusercontent.com",
+    "subject": "repo:{github-username}/{repo-name}:ref:refs/heads/main",
+    "description": "Production deployments from main branch",
+    "audiences": ["api://AzureADTokenExchange"]
+  }'
+
+# For pull requests
+az ad app federated-credential create \
+  --id {client-id} \
+  --parameters '{
+    "name": "drinks-pull-requests", 
+    "issuer": "https://token.actions.githubusercontent.com",
+    "subject": "repo:{github-username}/{repo-name}:pull_request",
+    "description": "PR preview deployments",
+    "audiences": ["api://AzureADTokenExchange"]
+  }'
+```
+
+**Option B: Use client secret authentication (less secure)**
+If you prefer to use client secrets, add `AZURE_CLIENT_SECRET` to your GitHub secrets and update the Azure login step in `.github/workflows/azure-deploy.yml`:
+
+```yaml
+- name: Azure Login
+  uses: azure/login@v1
+  with:
+    creds: ${{ secrets.AZURE_CREDENTIALS }}
+```
+
+Where `AZURE_CREDENTIALS` is a JSON secret containing:
+```json
+{
+  "clientId": "your-client-id",
+  "clientSecret": "your-client-secret", 
+  "subscriptionId": "your-subscription-id",
+  "tenantId": "your-tenant-id"
+}
+```
 
 ### Deployment Fails
 1. Check GitHub Actions logs for error details

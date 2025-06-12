@@ -125,9 +125,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: build
     if: github.event_name == 'pull_request' && github.event.action != 'closed'
-    environment:
-      name: pr-${{ github.event.number }}
-      url: ${{ steps.deploy.outputs.url }}
     permissions:
       contents: read
       id-token: write
