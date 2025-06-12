@@ -8,10 +8,10 @@ A full-stack cocktail recipe management application built with React, TypeScript
 - **Batch Calculator**: Scale recipes for events and large parties  
 - **Clarification Tools**: Professional clarification calculations for crystal-clear cocktails
 - **Search & Filter**: Find recipes by name, ingredient, or glass type
-- **Persistent Storage**: SQLite (development) and MySQL (production) database support
+- **Persistent Storage**: SQLite (development) and CosmosDB (production) database support
 - **REST API**: Full backend API for recipe operations
 - **Mobile Sleep Prevention**: Toggle to keep mobile screens awake while viewing recipes
-- **Cloud Deployment**: Ready for Azure Container Apps with managed MySQL
+- **Cloud Deployment**: Ready for Azure Container Apps with managed CosmosDB
 
 ## 🚀 Quick Start
 
@@ -28,10 +28,10 @@ npm install
 ./script/dev-setup.fish sqlite
 ```
 
-#### MySQL (Production-like)
+#### CosmosDB (Production-like)
 ```bash
-# Install dependencies and start with MySQL
-./script/dev-setup.fish mysql
+# Install dependencies and start with CosmosDB
+./script/dev-setup.fish cosmos
 ```
 
 ### Manual Development Setup
@@ -58,7 +58,7 @@ npm start
 
 ## ☁️ Azure Cloud Deployment
 
-Deploy to Azure Container Apps with managed MySQL database:
+Deploy to Azure Container Apps with managed CosmosDB database:
 
 ```bash
 # Follow the complete setup guide
@@ -67,14 +67,14 @@ open AZURE_SETUP.md
 
 **Quick Azure Setup:**
 1. Create Azure service principal
-2. Add GitHub secrets (Azure credentials + MySQL password)
+2. Add GitHub secrets (Azure credentials + CosmosDB connection string)
 3. Push to main branch → automatic deployment!
 
 ## 🐳 Docker Container
 
-### Local MySQL Testing
+### Local CosmosDB Testing
 ```bash
-# Start with MySQL database
+# Start with CosmosDB database
 docker-compose up
 
 # Or SQLite only
@@ -83,9 +83,9 @@ docker-compose --profile sqlite up drinks-app-sqlite
 
 ### Production Container
 ```bash
-# Run with MySQL
+# Run with CosmosDB
 docker run -p 3000:3000 \
-  -e DATABASE_URL="mysql://user:pass@host:3306/db" \
+  -e DATABASE_URL="AccountEndpoint=https://your-cosmos.documents.azure.com:443/;AccountKey=your-key;" \
   ghcr.io/jasonetco/drinks:latest
 
 # Run with SQLite (development)
@@ -158,9 +158,10 @@ The server provides a REST API at `/api`:
 
 - **Frontend**: React 19, TypeScript, Tailwind CSS, Radix UI
 - **Backend**: Express.js, Node.js
-- **Database**: SQLite3
+- **Database**: SQLite3 (development), CosmosDB (production)
 - **Build**: Vite, TSX
 - **Container**: Docker, Multi-stage build
+- **Cloud**: Azure Container Apps, CosmosDB
 
 🐳 Docker Container
 

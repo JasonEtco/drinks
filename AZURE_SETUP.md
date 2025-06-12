@@ -11,7 +11,7 @@ After completing this setup:
 - ✅ **Auto-scaling** based on traffic
 - ✅ **Centralized logging** and monitoring
 - ✅ **Cost-optimized** scaling (preview environments can scale to zero)
-- ✅ **Managed MySQL database** for persistent data storage
+- ✅ **Managed CosmosDB database** for persistent data storage
 - ✅ **Automatic database provisioning** per environment
 
 ## 📋 Prerequisites
@@ -57,9 +57,6 @@ Add these **Repository secrets**:
 | `AZURE_TENANT_ID` | `tenantId` from Step 1 | Azure tenant ID |
 | `AZURE_SUBSCRIPTION_ID` | `subscriptionId` from Step 1 | Azure subscription ID |
 | `GITHUB_TOKEN_AI` | Your GitHub PAT | For AI features (optional) |
-| `MYSQL_ADMIN_PASSWORD` | Strong password | MySQL database password |
-
-> **Important**: Generate a strong password for `MYSQL_ADMIN_PASSWORD` (min 8 chars, mix of letters, numbers, symbols)
 
 ### Step 3: Deploy!
 

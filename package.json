@@ -37,7 +37,6 @@
         "@tailwindcss/typography": "^0.5.16",
         "@tailwindcss/vite": "^4.1.8",
         "@types/sqlite3": "^5.1.0",
-        "@azure/cosmos": "^4.2.1",
         "ai": "^4.3.16",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",

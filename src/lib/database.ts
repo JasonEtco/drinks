@@ -6,9 +6,19 @@ const DATABASE_URL = process.env.DATABASE_URL;
 function createDatabase(dbUrl?: string): DatabaseAdapter {
   // Choose adapter based on environment
   const connectionString = dbUrl || DATABASE_URL;
-  const adapter = connectionString 
-    ? new CosmosAdapter(connectionString)
-    : new SQLiteAdapter();
+  
+  let adapter: DatabaseAdapter;
+  
+  if (!connectionString) {
+    // Default to SQLite for local development
+    adapter = new SQLiteAdapter();
+  } else if (connectionString.includes('cosmos.azure.com') || connectionString.includes('AccountEndpoint=')) {
+    // CosmosDB connection string
+    adapter = new CosmosAdapter(connectionString);
+  } else {
+    // Default to CosmosDB for other connection strings
+    adapter = new CosmosAdapter(connectionString);
+  }
   
   // Initialize the adapter
   adapter.initialize().catch(error => {
