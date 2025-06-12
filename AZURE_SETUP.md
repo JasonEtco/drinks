@@ -171,6 +171,19 @@ az containerapp show \
 
 ## 🚨 Troubleshooting
 
+### Container Image Invalid Reference Error
+If you see an error like:
+```
+Field 'template.containers.drinks.image' is invalid with details: 'Invalid value: "ghcr.io/JasonEtco/drinks:pr-82": could not parse reference
+```
+
+This happens because Docker image names must be lowercase, but your GitHub username contains uppercase letters. The workflow has been updated to use a lowercase image name (`jasonetco/drinks` instead of `JasonEtco/drinks`).
+
+If you continue to see this error, it means the Docker image was built with the old uppercase name. To fix this:
+
+1. **Re-run the GitHub Actions workflow** - the latest version uses lowercase image names
+2. **Check that your `IMAGE_NAME` environment variable** in the workflow is set to lowercase
+
 ### "No matching federated identity record found" Error
 If you see an error mentioning `environment:pr-X` in the assertion subject:
 ```
