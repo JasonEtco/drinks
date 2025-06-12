@@ -95,7 +95,8 @@ Add these **Repository secrets**:
 | `AZURE_CLIENT_ID` | `clientId` from Step 1 | Service principal client ID |
 | `AZURE_TENANT_ID` | `tenantId` from Step 1 | Azure tenant ID |
 | `AZURE_SUBSCRIPTION_ID` | `subscriptionId` from Step 1 | Azure subscription ID |
-| `GH_TOKEN_AI` | Your GitHub PAT | For AI features (optional) |
+| `GH_CONTAINER_TOKEN` | Your GitHub PAT | **Required** - For container registry access |
+| `GH_TOKEN_AI` | Your GitHub PAT | For AI features |
 
 > **Note**: With federated identity credentials, you don't need to store the `clientSecret` in GitHub - the authentication is handled securely via OIDC tokens.
 
@@ -170,6 +171,28 @@ az containerapp show \
 ```
 
 ## 🚨 Troubleshooting
+
+### Container Registry Access Denied Error
+If you see an error like:
+```
+DENIED: requested access to the resource is denied
+```
+
+This means Azure Container Apps can't pull your private Docker image from GitHub Container Registry. This happens because:
+
+1. **Missing or incorrect GitHub token**: The `GH_TOKEN_AI` secret must have `read:packages` permission
+2. **Wrong username in registry config**: The Bicep template must use your exact GitHub username (`JasonEtco`, not `jasonetco`)
+
+**To fix this:**
+
+1. **Check your GitHub Personal Access Token**:
+   - Go to [GitHub Settings > Developer settings > Personal access tokens](https://github.com/settings/tokens)
+   - Ensure your token has `read:packages` permission
+   - Update the `GH_TOKEN_AI` secret in your repository
+
+2. **Verify the registry username in Bicep**:
+   - The `azure/container-app.bicep` file should have `username: 'JasonEtco'` (your exact GitHub username)
+   - If it's lowercase, update it to match your GitHub username exactly
 
 ### Container Image Invalid Reference Error
 If you see an error like:

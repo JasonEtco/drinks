@@ -96,6 +96,13 @@ jobs:
         with:
           azcliversion: latest
           inlineScript: |
+            # Check if registry token is available
+            if [ -z "${{ secrets.GH_TOKEN_AI }}" ]; then
+              echo "❌ Error: GH_CONTAINER_TOKEN secret is required for container registry access"
+              echo "Please add a GitHub Personal Access Token with 'read:packages' permission"
+              exit 1
+            fi
+            
             # Create resource group if it doesn't exist
             az group create \
               --name ${{ env.AZURE_RESOURCE_GROUP_PROD }} \
@@ -107,7 +114,7 @@ jobs:
               --template-file azure/container-app.bicep \
               --parameters azure/parameters.prod.json \
               --parameters containerImage='${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest' \
-              --parameters registryPassword='${{ secrets.GITHUB_TOKEN }}' \
+              --parameters registryPassword='${{ secrets.GH_CONTAINER_TOKEN }}' \
               $(if [ -n "${{ secrets.GH_TOKEN_AI }}" ]; then echo "--parameters githubToken='${{ secrets.GH_TOKEN_AI }}'"; fi) \
               --query 'properties.outputs' \
               --output json)
@@ -144,14 +151,19 @@ jobs:
         with:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
-          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
-
-      - name: Deploy PR Environment
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}      - name: Deploy PR Environment
         id: deploy
         uses: azure/cli@v1
         with:
           azcliversion: latest
           inlineScript: |
+            # Check if registry token is available
+            if [ -z "${{ secrets.GH_CONTAINER_TOKEN }}" ]; then
+              echo "❌ Error: GH_CONTAINER_TOKEN secret is required for container registry access"
+              echo "Please add a GitHub Personal Access Token with 'read:packages' permission"
+              exit 1
+            fi
+            
             # Extract the PR-specific tag from the built images
             # The image-tag output might contain multiple tags, so extract the one for this PR
             ALL_TAGS="${{ needs.build.outputs.image-tag }}"
@@ -180,7 +192,7 @@ jobs:
               --parameters logAnalyticsWorkspaceName="drinks-pr-${{ github.event.number }}-logs" \
               --parameters containerImage="$IMAGE_TAG" \
               --parameters environmentType='pr' \
-              --parameters registryPassword='${{ secrets.GITHUB_TOKEN }}' \
+              --parameters registryPassword='${{ secrets.GH_CONTAINER_TOKEN }}' \
               $(if [ -n "${{ secrets.GH_TOKEN_AI }}" ]; then echo "--parameters githubToken='${{ secrets.GH_TOKEN_AI }}'"; fi) \
               --parameters cosmosAccountName="drinks-pr-${{ github.event.number }}-cosmos" \
               --parameters minReplicas=0 \

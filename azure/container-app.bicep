@@ -144,7 +144,7 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
       registries: [
         {
           server: 'ghcr.io'
-          username: 'jasonetco'
+          username: 'JasonEtco'
           passwordSecretRef: 'registry-password'
         }
       ]
