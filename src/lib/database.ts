@@ -1,377 +1,56 @@
-import sqlite3 from "sqlite3";
-import { GlassType, Recipe } from "./types.js";
-import { generateId } from "./recipe-utils.js";
-import path from "path";
-import { fileURLToPath } from "url";
+import { DatabaseAdapter, SQLiteAdapter, CosmosAdapter } from "./database/index.js";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+// Database configuration
+const DATABASE_URL = process.env.DATABASE_URL;
 
-// Database path (configurable via environment variable for Docker)
-const DB_PATH =
-  process.env.DATABASE_PATH || path.join(__dirname, "../../recipes.db");
-
-class Database {
-  private db: sqlite3.Database;
-
-  constructor() {
-    // Enable verbose mode for debugging
-    sqlite3.verbose();
-
-    this.db = new sqlite3.Database(DB_PATH, (err) => {
-      if (err) {
-        console.error("Error opening database:", err.message);
-      } else {
-        console.log("Connected to SQLite database at:", DB_PATH);
-        this.initializeDatabase();
-      }
-    });
+function createDatabase(dbUrl?: string): DatabaseAdapter {
+  // Choose adapter based on environment
+  const connectionString = dbUrl || DATABASE_URL;
+  
+  let adapter: DatabaseAdapter;
+  
+  if (!connectionString) {
+    // Default to SQLite for local development
+    adapter = new SQLiteAdapter();
+  } else if (connectionString.includes('cosmos.azure.com') || connectionString.includes('AccountEndpoint=')) {
+    // CosmosDB connection string
+    adapter = new CosmosAdapter(connectionString);
+  } else {
+    // Default to CosmosDB for other connection strings
+    adapter = new CosmosAdapter(connectionString);
   }
+  
+  // Initialize the adapter
+  adapter.initialize().catch(error => {
+    console.error("Failed to initialize database:", error);
+  });
 
-  private initializeDatabase(): void {
-    const createTableSQL = `
-      CREATE TABLE IF NOT EXISTS recipes (
-        id TEXT PRIMARY KEY,
-        name TEXT NOT NULL,
-        description TEXT,
-        glass TEXT,
-        garnish TEXT,
-        instructions TEXT NOT NULL,
-        ingredients TEXT NOT NULL,
-        tags TEXT,
-        createdAt TEXT NOT NULL,
-        updatedAt TEXT NOT NULL
-      )
-    `;
-
-    this.db.run(createTableSQL, (err) => {
-      if (err) {
-        console.error("Error creating recipes table:", err.message);
-      } else {
-        console.log("Recipes table ready");
-        this.migrateDatabase();
-      }
-    });
-  }
-
-  private migrateDatabase(): void {
-    // Check if description column exists, if not add it
-    this.db.all("PRAGMA table_info(recipes)", (err, columns: any[]) => {
-      if (err) {
-        console.error("Error checking table info:", err.message);
-        return;
-      }
-
-      const hasDescription = columns.some(col => col.name === 'description');
-      if (!hasDescription) {
-        console.log("Adding description column to recipes table...");
-        this.db.run("ALTER TABLE recipes ADD COLUMN description TEXT", (err) => {
-          if (err) {
-            console.error("Error adding description column:", err.message);
-          } else {
-            console.log("Description column added successfully");
-          }
-        });
+  // Return a proxy that automatically waits for initialization
+  return new Proxy(adapter, {
+    get(target, prop, receiver) {
+      const value = Reflect.get(target, prop, receiver);
+      
+      // If it's a method and not waitForInit, wrap it to wait for initialization
+      if (typeof value === 'function' && prop !== 'waitForInit' && prop !== 'initialize') {
+        return async function(...args: any[]) {
+          await target.waitForInit();
+          return value.apply(target, args);
+        };
       }
       
-      this.seedDatabase();
-    });
-  }
-
-  private seedDatabase(): void {
-    // Check if we already have recipes
-    this.db.get("SELECT COUNT(*) as count FROM recipes", (err, row: any) => {
-      if (err) {
-        console.error("Error checking recipe count:", err.message);
-        return;
-      }
-
-      if (row.count === 0) {
-        console.log("Seeding database with initial recipes...");
-        const initialRecipes: Recipe[] = [
-          {
-            id: "1",
-            name: "Classic Margarita",
-            description: "A perfect balance of tequila, citrus, and orange liqueur with a salted rim",
-            glass: GlassType.COUPE,
-            garnish: "Lime wheel",
-            instructions:
-              "Shake all ingredients with ice and strain over fresh ice.",
-            ingredients: [
-              { name: "Tequila", amount: 2, unit: "oz" },
-              { name: "Cointreau", amount: 1, unit: "oz" },
-              {
-                name: "Fresh lime juice",
-                amount: 1,
-                unit: "oz",
-              },
-            ],
-            tags: ["classic", "citrus"],
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          },
-          {
-            id: "2",
-            name: "Old Fashioned",
-            description: "The quintessential whiskey cocktail - simple, strong, and timeless",
-            glass: GlassType.ROCKS,
-            garnish: "Orange peel",
-            instructions:
-              "Muddle sugar with bitters, add whiskey and ice, stir.",
-            ingredients: [
-              {
-                name: "Bourbon whiskey",
-                amount: 2,
-                unit: "oz",
-              },
-              {
-                name: "Simple syrup",
-                amount: 0.25,
-                unit: "oz",
-              },
-              {
-                name: "Angostura bitters",
-                amount: 2,
-                unit: "dashes",
-              },
-            ],
-            tags: ["classic", "whiskey"],
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          },
-        ];
-
-        initialRecipes.forEach((recipe) => {
-          this.createRecipe(recipe).catch(console.error);
-        });
-      }
-    });
-  }
-
-  // Convert Recipe object to database row
-  private recipeToRow(recipe: Recipe): any {
-    return {
-      id: recipe.id,
-      name: recipe.name,
-      description: recipe.description || null,
-      glass: recipe.glass || null,
-      garnish: recipe.garnish || null,
-      instructions: recipe.instructions,
-      ingredients: JSON.stringify(recipe.ingredients),
-      tags: JSON.stringify(recipe.tags || []),
-      createdAt: recipe.createdAt,
-      updatedAt: recipe.updatedAt,
-    };
-  }
-
-  // Convert database row to Recipe object
-  private rowToRecipe(row: any): Recipe {
-    return {
-      id: row.id,
-      name: row.name,
-      description: row.description,
-      glass: row.glass,
-      garnish: row.garnish,
-      instructions: row.instructions,
-      ingredients: JSON.parse(row.ingredients),
-      tags: JSON.parse(row.tags || "[]"),
-      createdAt: row.createdAt,
-      updatedAt: row.updatedAt,
-    };
-  }
-
-  // Get all recipes
-  async listRecipes(): Promise<Recipe[]> {
-    return new Promise((resolve, reject) => {
-      this.db.all(
-        "SELECT * FROM recipes ORDER BY createdAt DESC",
-        (err, rows) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(rows.map((row) => this.rowToRecipe(row)));
-          }
-        },
-      );
-    });
-  }
-
-  // Get recipe by ID
-  async getRecipeById(id: string): Promise<Recipe | null> {
-    return new Promise((resolve, reject) => {
-      this.db.get("SELECT * FROM recipes WHERE id = ?", [id], (err, row) => {
-        if (err) {
-          reject(err);
-        } else if (row) {
-          resolve(this.rowToRecipe(row));
-        } else {
-          resolve(null);
-        }
-      });
-    });
-  }
-
-  // Create new recipe
-  async createRecipe(
-    recipe: Omit<Recipe, "id" | "createdAt" | "updatedAt">,
-  ): Promise<Recipe> {
-    const newRecipe: Recipe = {
-      ...recipe,
-      id: Date.now().toString(),
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-
-    return new Promise((resolve, reject) => {
-      const row = this.recipeToRow(newRecipe);
-      const sql = `
-        INSERT INTO recipes (id, name, description, glass, garnish, instructions, ingredients, tags, createdAt, updatedAt)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `;
-
-      this.db.run(
-        sql,
-        [
-          row.id,
-          row.name,
-          row.description,
-          row.glass,
-          row.garnish,
-          row.instructions,
-          row.ingredients,
-          row.tags,
-          row.createdAt,
-          row.updatedAt,
-        ],
-        function (err) {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(newRecipe);
-          }
-        },
-      );
-    });
-  }
-
-  // Update recipe
-  async updateRecipe(
-    id: string,
-    updates: Partial<Recipe>,
-  ): Promise<Recipe | null> {
-    const existingRecipe = await this.getRecipeById(id);
-    if (!existingRecipe) {
-      return null;
+      return value;
     }
+  });
+}
 
-    const updatedRecipe: Recipe = {
-      ...existingRecipe,
-      ...updates,
-      id, // Ensure ID doesn't change
-      updatedAt: new Date().toISOString(),
-    };
-
-    return new Promise((resolve, reject) => {
-      const row = this.recipeToRow(updatedRecipe);
-      const sql = `
-        UPDATE recipes 
-        SET name = ?, description = ?, glass = ?, garnish = ?, instructions = ?, 
-            ingredients = ?, tags = ?, updatedAt = ?
-        WHERE id = ?
-      `;
-
-      this.db.run(
-        sql,
-        [
-          row.name,
-          row.description,
-          row.glass,
-          row.garnish,
-          row.instructions,
-          row.ingredients,
-          row.tags,
-          row.updatedAt,
-          id,
-        ],
-        function (err) {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(updatedRecipe);
-          }
-        },
-      );
-    });
-  }
-
-  // Delete recipe
-  async deleteRecipe(id: string): Promise<Recipe | null> {
-    const recipe = await this.getRecipeById(id);
-    if (!recipe) {
-      return null;
-    }
-
-    return new Promise((resolve, reject) => {
-      this.db.run("DELETE FROM recipes WHERE id = ?", [id], function (err) {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(recipe);
-        }
-      });
-    });
-  }
-
-  // Search recipes
-  async searchRecipes(query: string): Promise<Recipe[]> {
-    return new Promise((resolve, reject) => {
-      const searchTerm = `%${query.toLowerCase()}%`;
-      const sql = `
-        SELECT * FROM recipes 
-        WHERE LOWER(name) LIKE ? 
-           OR LOWER(ingredients) LIKE ? 
-           OR LOWER(tags) LIKE ?
-        ORDER BY createdAt DESC
-      `;
-
-      this.db.all(
-        sql,
-        [searchTerm, searchTerm, searchTerm],
-        (err, rows) => {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(rows.map((row) => this.rowToRecipe(row)));
-          }
-        },
-      );
-    });
-  }
-
-  // Get recipe count
-  async getRecipeCount(): Promise<number> {
-    return new Promise((resolve, reject) => {
-      this.db.get("SELECT COUNT(*) as count FROM recipes", (err, row: any) => {
-        if (err) {
-          reject(err);
-        } else {
-          resolve(row.count);
-        }
-      });
-    });
-  }
-
-  // Close database connection
-  close(): void {
-    this.db.close((err) => {
-      if (err) {
-        console.error("Error closing database:", err.message);
-      } else {
-        console.log("Database connection closed");
-      }
-    });
+export class Database {
+  static async create(dbUrl?: string): Promise<DatabaseAdapter> {
+    const db = createDatabase(dbUrl);
+    await db.waitForInit();
+    return db;
   }
 }
 
 // Export singleton instance
-export const database = new Database();
+export const database = createDatabase();
+

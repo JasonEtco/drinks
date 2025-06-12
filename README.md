@@ -1,6 +1,6 @@
 # 🍹 Drinks
 
-A full-stack cocktail recipe management application built with React, TypeScript, Express.js, and SQLite.
+A full-stack cocktail recipe management application built with React, TypeScript, Express.js, and database persistence.
 
 ## ✨ Features
 
@@ -8,13 +8,33 @@ A full-stack cocktail recipe management application built with React, TypeScript
 - **Batch Calculator**: Scale recipes for events and large parties  
 - **Clarification Tools**: Professional clarification calculations for crystal-clear cocktails
 - **Search & Filter**: Find recipes by name, ingredient, or glass type
-- **Persistent Storage**: SQLite database for reliable data persistence
+- **Persistent Storage**: SQLite (development) and CosmosDB (production) database support
 - **REST API**: Full backend API for recipe operations
 - **Mobile Sleep Prevention**: Toggle to keep mobile screens awake while viewing recipes
+- **Cloud Deployment**: Ready for Azure Container Apps with managed CosmosDB
 
 ## 🚀 Quick Start
 
-### Development
+### Local Development
+
+Choose your preferred database setup:
+
+#### SQLite (Lightweight)
+```bash
+# Install dependencies
+npm install
+
+# Start development with SQLite
+./script/dev-setup.fish sqlite
+```
+
+#### CosmosDB (Production-like)
+```bash
+# Install dependencies and start with CosmosDB
+./script/dev-setup.fish cosmos
+```
+
+### Manual Development Setup
 ```bash
 # Install dependencies
 npm install
@@ -36,19 +56,43 @@ npm run build
 npm start
 ```
 
-## 🐳 Docker Container
+## ☁️ Azure Cloud Deployment
 
-This application is containerized and automatically published to GitHub Container Registry.
+Deploy to Azure Container Apps with managed CosmosDB database:
 
-### Basic Usage
 ```bash
-# Run with ephemeral storage
-docker run -p 3000:3000 ghcr.io/jasonetco/drinks:latest
+# Follow the complete setup guide
+open AZURE_SETUP.md
 ```
 
-### With Persistent Database (Recommended)
+**Quick Azure Setup:**
+1. Create Azure service principal
+2. Add GitHub secrets (Azure credentials + CosmosDB connection string)
+3. Push to main branch → automatic deployment!
+
+## 🐳 Docker Container
+
+### Local CosmosDB Testing
 ```bash
-# Mount the recipes.db file directly
+# Start with CosmosDB database
+docker-compose up
+
+# Or SQLite only
+docker-compose --profile sqlite up drinks-app-sqlite
+```
+
+### Production Container
+```bash
+# Run with CosmosDB
+docker run -p 3000:3000 \
+  -e DATABASE_URL="AccountEndpoint=https://your-cosmos.documents.azure.com:443/;AccountKey=your-key;" \
+  ghcr.io/jasonetco/drinks:latest
+
+# Run with SQLite (development)
+docker run -p 3000:3000 \
+  -v ./recipes.db:/app/recipes.db \
+  ghcr.io/jasonetco/drinks:latest
+```
 docker run -p 3000:3000 \
   -v $(pwd)/recipes.db:/app/recipes.db \
   ghcr.io/jasonetco/drinks:latest
@@ -114,9 +158,10 @@ The server provides a REST API at `/api`:
 
 - **Frontend**: React 19, TypeScript, Tailwind CSS, Radix UI
 - **Backend**: Express.js, Node.js
-- **Database**: SQLite3
+- **Database**: SQLite3 (development), CosmosDB (production)
 - **Build**: Vite, TSX
 - **Container**: Docker, Multi-stage build
+- **Cloud**: Azure Container Apps, CosmosDB
 
 🐳 Docker Container
 
