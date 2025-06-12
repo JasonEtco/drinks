@@ -57,7 +57,7 @@ Configure the following secrets in your GitHub repository:
 - `AZURE_CLIENT_ID` - Service principal client ID
 - `AZURE_TENANT_ID` - Azure tenant ID  
 - `AZURE_SUBSCRIPTION_ID` - Azure subscription ID
-- `GITHUB_TOKEN_AI` - GitHub Personal Access Token for AI features (optional)
+- `GH_TOKEN_AI` - GitHub Personal Access Token for AI features (optional)
 
 #### Creating a Service Principal
 
@@ -109,7 +109,7 @@ az login
 set -x AZURE_SUBSCRIPTION_ID "your-subscription-id"
 
 # Set GitHub token for AI features (optional)
-set -x GITHUB_TOKEN_AI "your-github-token"
+set -x GH_TOKEN_AI "your-github-token"
 ```
 
 ## 🔍 Monitoring and Troubleshooting
@@ -213,7 +213,7 @@ Scaling is configured based on:
 - Check health endpoint: `curl https://<app-url>/api/health`
 
 #### 3. AI Features Not Working
-- Verify `GITHUB_TOKEN_AI` secret is set in GitHub
+- Verify `GH_TOKEN_AI` secret is set in GitHub
 - Check that the token has access to GitHub Models
 - Review application logs for AI-related errors
 

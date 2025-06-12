@@ -56,7 +56,7 @@ Add these **Repository secrets**:
 | `AZURE_CLIENT_ID` | `clientId` from Step 1 | Service principal client ID |
 | `AZURE_TENANT_ID` | `tenantId` from Step 1 | Azure tenant ID |
 | `AZURE_SUBSCRIPTION_ID` | `subscriptionId` from Step 1 | Azure subscription ID |
-| `GITHUB_TOKEN_AI` | Your GitHub PAT | For AI features (optional) |
+| `GH_TOKEN_AI` | Your GitHub PAT | For AI features (optional) |
 
 > **Note**: The `GITHUB_TOKEN` secret is automatically provided by GitHub Actions and is used for pulling the private container image from GitHub Container Registry.
 
@@ -75,7 +75,7 @@ That's it! Now:
 If you want the AI chat features to work in your deployed app:
 
 1. Create a [GitHub Personal Access Token](https://github.com/settings/tokens) with access to GitHub Models
-2. Add it as the `GITHUB_TOKEN_AI` secret in GitHub
+2. Add it as the `GH_TOKEN_AI` secret in GitHub
 
 ### Azure Resource Locations
 
@@ -143,7 +143,7 @@ az containerapp show \
 3. Test the health endpoint: `https://your-app-url/api/health`
 
 ### AI Features Not Working
-1. Verify `GITHUB_TOKEN_AI` secret is set
+1. Verify `GH_TOKEN_AI` secret is set
 2. Ensure the token has access to GitHub Models
 3. Check application logs for AI-related errors
 

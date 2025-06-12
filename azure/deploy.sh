@@ -112,7 +112,7 @@ if [ "$ENVIRONMENT" = "pr" ]; then
         --parameters logAnalyticsWorkspaceName="drinks-pr-${PR_NUMBER}-logs" \
         --parameters containerImage="$CONTAINER_IMAGE" \
         --parameters environmentType="pr" \
-        --parameters githubToken="${GITHUB_TOKEN_AI:-}" \
+        --parameters githubToken="${GH_TOKEN_AI:-}" \
         --parameters minReplicas=0 \
         --parameters maxReplicas=1 \
         --query 'properties.outputs' \
@@ -124,7 +124,7 @@ else
         --template-file azure/container-app.bicep \
         --parameters "$PARAMETERS_FILE" \
         --parameters containerImage="$CONTAINER_IMAGE" \
-        --parameters githubToken="${GITHUB_TOKEN_AI:-}" \
+        --parameters githubToken="${GH_TOKEN_AI:-}" \
         --query 'properties.outputs' \
         --output json)
     echo $DEPLOYMENT_OUTPUT

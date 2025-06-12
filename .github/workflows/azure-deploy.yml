@@ -103,7 +103,7 @@ jobs:
               --parameters azure/parameters.prod.json \
               --parameters containerImage='${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest' \
               --parameters registryPassword='${{ secrets.GITHUB_TOKEN }}' \
-              $(if [ -n "${{ secrets.GITHUB_TOKEN_AI }}" ]; then echo "--parameters githubToken='${{ secrets.GITHUB_TOKEN_AI }}'"; fi) \
+              $(if [ -n "${{ secrets.GH_TOKEN_AI }}" ]; then echo "--parameters githubToken='${{ secrets.GH_TOKEN_AI }}'"; fi) \
               --query 'properties.outputs' \
               --output json)
 
@@ -166,7 +166,7 @@ jobs:
               --parameters containerImage='${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:pr-${{ github.event.number }}' \
               --parameters environmentType='pr' \
               --parameters registryPassword='${{ secrets.GITHUB_TOKEN }}' \
-              $(if [ -n "${{ secrets.GITHUB_TOKEN_AI }}" ]; then echo "--parameters githubToken='${{ secrets.GITHUB_TOKEN_AI }}'"; fi) \
+              $(if [ -n "${{ secrets.GH_TOKEN_AI }}" ]; then echo "--parameters githubToken='${{ secrets.GH_TOKEN_AI }}'"; fi) \
               --parameters cosmosAccountName="drinks-pr-${{ github.event.number }}-cosmos" \
               --parameters minReplicas=0 \
               --parameters maxReplicas=1 \
