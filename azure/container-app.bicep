@@ -17,9 +17,13 @@ param containerImage string = 'ghcr.io/jasonetco/drinks:latest'
 @description('Environment type (production, staging, pr)')
 param environmentType string = 'production'
 
-@description('GitHub token for AI features')
+@description('GitHub token for AI features (optional)')
 @secure()
 param githubToken string = ''
+
+@description('GitHub token for container registry access')
+@secure()
+param registryPassword string
 
 @description('Chat model to use')
 param chatModel string = 'openai/gpt-4o-mini'
@@ -117,14 +121,31 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
           }
         ]
       }
-      secrets: [
+      secrets: union(
+        [
+          {
+            name: 'cosmos-connection-string'
+            value: cosmosAccount.listConnectionStrings().connectionStrings[0].connectionString
+          }
+          {
+            name: 'registry-password'
+            value: registryPassword
+          }
+        ],
+        githubToken != ''
+          ? [
+              {
+                name: 'github-token'
+                value: githubToken
+              }
+            ]
+          : []
+      )
+      registries: [
         {
-          name: 'github-token'
-          value: githubToken
-        }
-        {
-          name: 'cosmos-connection-string'
-          value: cosmosAccount.listConnectionStrings().connectionStrings[0].connectionString
+          server: 'ghcr.io'
+          username: 'jasonetco'
+          passwordSecretRef: 'registry-password'
         }
       ]
     }
@@ -133,32 +154,38 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
         {
           name: 'drinks'
           image: containerImage
-          env: [
-            {
-              name: 'NODE_ENV'
-              value: 'production'
-            }
-            {
-              name: 'PORT'
-              value: '3000'
-            }
-            {
-              name: 'GITHUB_TOKEN'
-              secretRef: 'github-token'
-            }
-            {
-              name: 'CHAT_MODEL'
-              value: chatModel
-            }
-            {
-              name: 'DATABASE_URL'
-              secretRef: 'cosmos-connection-string'
-            }
-            {
-              name: 'NODE_TLS_REJECT_UNAUTHORIZED'
-              value: '0'
-            }
-          ]
+          env: union(
+            [
+              {
+                name: 'NODE_ENV'
+                value: 'production'
+              }
+              {
+                name: 'PORT'
+                value: '3000'
+              }
+              {
+                name: 'CHAT_MODEL'
+                value: chatModel
+              }
+              {
+                name: 'DATABASE_URL'
+                secretRef: 'cosmos-connection-string'
+              }
+              {
+                name: 'NODE_TLS_REJECT_UNAUTHORIZED'
+                value: '0'
+              }
+            ],
+            githubToken != ''
+              ? [
+                  {
+                    name: 'GITHUB_TOKEN'
+                    secretRef: 'github-token'
+                  }
+                ]
+              : []
+          )
           resources: {
             cpu: json('0.25')
             memory: '0.5Gi'

@@ -17,9 +17,6 @@
     "environmentType": {
       "value": "staging"
     },
-    "githubToken": {
-      "value": ""
-    },
     "chatModel": {
       "value": "openai/gpt-4o-mini"
     },

@@ -104,8 +104,8 @@ jobs:
               --template-file azure/container-app.bicep \
               --parameters azure/parameters.prod.json \
               --parameters containerImage='${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest' \
-              --parameters githubToken='${{ secrets.GITHUB_TOKEN_AI }}' \
-              --parameters mysqlAdminPassword='${{ secrets.MYSQL_ADMIN_PASSWORD }}' \
+              --parameters registryPassword='${{ secrets.GITHUB_TOKEN }}' \
+              $(if [ -n "${{ secrets.GITHUB_TOKEN_AI }}" ]; then echo "--parameters githubToken='${{ secrets.GITHUB_TOKEN_AI }}'"; fi) \
               --query 'properties.outputs' \
               --output json)
 
@@ -167,9 +167,9 @@ jobs:
               --parameters logAnalyticsWorkspaceName="drinks-pr-${{ github.event.number }}-logs" \
               --parameters containerImage='${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:pr-${{ github.event.number }}' \
               --parameters environmentType='pr' \
-              --parameters githubToken='${{ secrets.GITHUB_TOKEN_AI }}' \
-              --parameters mysqlAdminPassword='${{ secrets.MYSQL_ADMIN_PASSWORD }}' \
-              --parameters mysqlDatabaseName="drinks_pr_${{ github.event.number }}_db" \
+              --parameters registryPassword='${{ secrets.GITHUB_TOKEN }}' \
+              $(if [ -n "${{ secrets.GITHUB_TOKEN_AI }}" ]; then echo "--parameters githubToken='${{ secrets.GITHUB_TOKEN_AI }}'"; fi) \
+              --parameters cosmosAccountName="drinks-pr-${{ github.event.number }}-cosmos" \
               --parameters minReplicas=0 \
               --parameters maxReplicas=1 \
               --query 'properties.outputs' \

@@ -17,9 +17,6 @@
     "environmentType": {
       "value": "production"
     },
-    "githubToken": {
-      "value": ""
-    },
     "chatModel": {
       "value": "openai/gpt-4o-mini"
     },

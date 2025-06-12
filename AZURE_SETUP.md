@@ -58,6 +58,8 @@ Add these **Repository secrets**:
 | `AZURE_SUBSCRIPTION_ID` | `subscriptionId` from Step 1 | Azure subscription ID |
 | `GITHUB_TOKEN_AI` | Your GitHub PAT | For AI features (optional) |
 
+> **Note**: The `GITHUB_TOKEN` secret is automatically provided by GitHub Actions and is used for pulling the private container image from GitHub Container Registry.
+
 ### Step 3: Deploy!
 
 That's it! Now:
