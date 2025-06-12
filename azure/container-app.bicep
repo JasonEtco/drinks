@@ -24,15 +24,11 @@ param githubToken string = ''
 @description('Chat model to use')
 param chatModel string = 'openai/gpt-4o-mini'
 
-@description('MySQL administrator login')
-param mysqlAdminLogin string = 'drinks_admin'
+@description('Cosmos DB account name')
+param cosmosAccountName string = '${containerAppName}-cosmos'
 
-@description('MySQL administrator password')
-@secure()
-param mysqlAdminPassword string
-
-@description('MySQL database name')
-param mysqlDatabaseName string = 'drinks_db'
+@description('Cosmos DB database name')
+param cosmosDatabaseName string = 'drinks'
 
 @description('Minimum replica count')
 param minReplicas int = environmentType == 'production' ? 1 : 0
@@ -52,55 +48,38 @@ resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2023-09
   }
 }
 
-// MySQL Flexible Server
-resource mysqlServer 'Microsoft.DBforMySQL/flexibleServers@2023-12-30' = {
-  name: '${containerAppName}-mysql'
+// Cosmos DB Account
+resource cosmosAccount 'Microsoft.DocumentDB/databaseAccounts@2024-05-15' = {
+  name: cosmosAccountName
   location: location
-  sku: {
-    name: environmentType == 'production' ? 'Standard_B2s' : 'Standard_B1ms'
-    tier: 'Burstable'
-  }
+  kind: 'GlobalDocumentDB'
   properties: {
-    administratorLogin: mysqlAdminLogin
-    administratorLoginPassword: mysqlAdminPassword
-    version: '8.0.21'
-    storage: {
-      storageSizeGB: environmentType == 'production' ? 20 : 10
-      iops: environmentType == 'production' ? 360 : 180
-      autoGrow: 'Enabled'
+    consistencyPolicy: {
+      defaultConsistencyLevel: 'Session'
     }
-    backup: {
-      backupRetentionDays: environmentType == 'production' ? 7 : 1
-      geoRedundantBackup: 'Disabled'
+    locations: [
+      {
+        locationName: location
+        failoverPriority: 0
+        isZoneRedundant: false
+      }
+    ]
+    databaseAccountOfferType: 'Standard'
+    enableAutomaticFailover: false
+    enableMultipleWriteLocations: false
+    capabilities: [
+      {
+        name: 'EnableServerless'
+      }
+    ]
+    backupPolicy: {
+      type: 'Periodic'
+      periodicModeProperties: {
+        backupIntervalInMinutes: environmentType == 'production' ? 240 : 1440
+        backupRetentionIntervalInHours: environmentType == 'production' ? 168 : 24
+        backupStorageRedundancy: 'Local'
+      }
     }
-    highAvailability: {
-      mode: 'Disabled'
-    }
-    network: {
-      delegatedSubnetResourceId: null
-      privateDnsZoneResourceId: null
-      publicNetworkAccess: 'Enabled'
-    }
-  }
-}
-
-// MySQL Database
-resource mysqlDatabase 'Microsoft.DBforMySQL/flexibleServers/databases@2023-12-30' = {
-  parent: mysqlServer
-  name: mysqlDatabaseName
-  properties: {
-    charset: 'utf8mb4'
-    collation: 'utf8mb4_unicode_ci'
-  }
-}
-
-// MySQL Firewall Rule to allow Azure services
-resource mysqlFirewallRule 'Microsoft.DBforMySQL/flexibleServers/firewallRules@2023-12-30' = {
-  parent: mysqlServer
-  name: 'AllowAzureServices'
-  properties: {
-    startIpAddress: '0.0.0.0'
-    endIpAddress: '0.0.0.0'
   }
 }
 
@@ -144,8 +123,8 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
           value: githubToken
         }
         {
-          name: 'mysql-connection-string'
-          value: 'mysql://${mysqlAdminLogin}:${mysqlAdminPassword}@${mysqlServer.properties.fullyQualifiedDomainName}:3306/${mysqlDatabaseName}?ssl=true&sslmode=require'
+          name: 'cosmos-connection-string'
+          value: cosmosAccount.listConnectionStrings().connectionStrings[0].connectionString
         }
       ]
     }
@@ -173,7 +152,7 @@ resource containerApp 'Microsoft.App/containerApps@2024-03-01' = {
             }
             {
               name: 'DATABASE_URL'
-              secretRef: 'mysql-connection-string'
+              secretRef: 'cosmos-connection-string'
             }
             {
               name: 'NODE_TLS_REJECT_UNAUTHORIZED'
@@ -236,6 +215,6 @@ output containerAppUrl string = 'https://${containerApp.properties.configuration
 output resourceGroupName string = resourceGroup().name
 output containerAppName string = containerApp.name
 output environmentName string = containerAppEnvironment.name
-output mysqlServerName string = mysqlServer.name
-output mysqlServerFQDN string = mysqlServer.properties.fullyQualifiedDomainName
-output mysqlDatabaseName string = mysqlDatabase.name
+output cosmosAccountName string = cosmosAccount.name
+output cosmosAccountEndpoint string = cosmosAccount.properties.documentEndpoint
+output cosmosDatabaseName string = cosmosDatabaseName

@@ -29,14 +29,11 @@
     "maxReplicas": {
       "value": 10
     },
-    "mysqlAdminLogin": {
-      "value": "drinks_admin"
+    "cosmosAccountName": {
+      "value": "drinks-prod-cosmos"
     },
-    "mysqlAdminPassword": {
-      "value": ""
-    },
-    "mysqlDatabaseName": {
-      "value": "drinks_db"
+    "cosmosDatabaseName": {
+      "value": "drinks"
     }
   }
 }

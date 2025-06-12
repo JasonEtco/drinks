@@ -127,6 +127,7 @@ else
         --parameters githubToken="${GITHUB_TOKEN_AI:-}" \
         --query 'properties.outputs' \
         --output json)
+    echo $DEPLOYMENT_OUTPUT
 fi
 
 # Extract deployment outputs

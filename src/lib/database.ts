@@ -1,4 +1,4 @@
-import { DatabaseAdapter, SQLiteAdapter, MySQLAdapter } from "./database/index.js";
+import { DatabaseAdapter, SQLiteAdapter, CosmosAdapter } from "./database/index.js";
 
 // Database configuration
 const DATABASE_URL = process.env.DATABASE_URL;
@@ -7,7 +7,7 @@ function createDatabase(dbUrl?: string): DatabaseAdapter {
   // Choose adapter based on environment
   const connectionString = dbUrl || DATABASE_URL;
   const adapter = connectionString 
-    ? new MySQLAdapter(connectionString)
+    ? new CosmosAdapter(connectionString)
     : new SQLiteAdapter();
   
   // Initialize the adapter
