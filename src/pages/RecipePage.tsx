@@ -65,14 +65,20 @@ function RecipePage() {
   useEffect(() => {
     if (!id) return;
     
-    // If we already have the recipe from context or direct load, no need to fetch
-    if (contextRecipe || directRecipe) {
+    // If we already have the recipe from context, no need to fetch
+    if (contextRecipe) {
       setRecipeNotFound(false);
+      setDirectRecipe(null);
       return;
     }
 
     // If context is still loading, wait for it
     if (contextLoading) {
+      return;
+    }
+
+    // If we already loaded the recipe directly, don't fetch again
+    if (directRecipe) {
       return;
     }
 
@@ -92,7 +98,7 @@ function RecipePage() {
     };
 
     loadRecipeDirectly();
-  }, [id, contextRecipe, directRecipe, contextLoading]);
+  }, [id, contextRecipe, contextLoading, directRecipe]);
 
   const fetchIngredientAlternatives = useCallback(
     async (ingredientName: string) => {
