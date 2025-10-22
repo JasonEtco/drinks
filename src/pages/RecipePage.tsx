@@ -1,6 +1,8 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useRecipes } from "../contexts/RecipeContext";
+import { ApiService } from "../lib/api";
+import { Recipe } from "../lib/types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -31,7 +33,7 @@ import { toast } from "sonner";
 
 function RecipePage() {
   const { id } = useParams<{ id: string }>();
-  const { getRecipe, removeRecipe } = useRecipes();
+  const { getRecipe, removeRecipe, isLoading: contextLoading } = useRecipes();
   const navigate = useNavigate();
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [showBatchCalculator, setShowBatchCalculator] = useState(false);
@@ -49,49 +51,53 @@ function RecipePage() {
     Record<string, boolean>
   >({});
 
-  const recipe = id ? getRecipe(id) : undefined;
+  // State for direct recipe loading
+  const [directRecipe, setDirectRecipe] = useState<Recipe | null>(null);
+  const [loadingDirectRecipe, setLoadingDirectRecipe] = useState(false);
+  const [recipeNotFound, setRecipeNotFound] = useState(false);
 
-  // If recipe doesn't exist, show error message
-  if (id && !recipe) {
-    return (
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-semibold">Recipe Not Found</h2>
-        </div>
+  // Get recipe from context or direct load
+  const contextRecipe = id ? getRecipe(id) : undefined;
+  const recipe = contextRecipe || directRecipe;
 
-        <div className="mt-4">
-          <p className="text-muted-foreground">
-            The recipe you're looking for doesn't exist.
-          </p>
-          <Button asChild className="mt-2" variant="link">
-            <Link to="/">Return to recipes</Link>
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
-  if (!recipe) {
-    return null;
-  }
-
-  const totalVolume = calculateTotalVolume(recipe);
-
-  const handleDeleteRecipe = async () => {
-    if (!recipe) return;
-
-    try {
-      removeRecipe(recipe.id);
-      toast.success("Recipe deleted successfully!");
-      navigate("/");
-    } catch (error) {
-      toast.error("Failed to delete recipe. Please try again.");
+  // If recipe is not in context and context is still loading, wait
+  // If context finished loading and recipe still not found, try direct API call
+  useEffect(() => {
+    if (!id) return;
+    
+    // If we already have the recipe from context or direct load, no need to fetch
+    if (contextRecipe || directRecipe) {
+      setRecipeNotFound(false);
+      return;
     }
-    setShowDeleteDialog(false);
-  };
+
+    // If context is still loading, wait for it
+    if (contextLoading) {
+      return;
+    }
+
+    // Context finished loading and recipe not found, try direct API call
+    const loadRecipeDirectly = async () => {
+      setLoadingDirectRecipe(true);
+      setRecipeNotFound(false);
+      try {
+        const loadedRecipe = await ApiService.getRecipe(id);
+        setDirectRecipe(loadedRecipe);
+      } catch (error) {
+        console.error("Error loading recipe:", error);
+        setRecipeNotFound(true);
+      } finally {
+        setLoadingDirectRecipe(false);
+      }
+    };
+
+    loadRecipeDirectly();
+  }, [id, contextRecipe, directRecipe, contextLoading]);
 
   const fetchIngredientAlternatives = useCallback(
     async (ingredientName: string) => {
+      if (!recipe) return;
+      
       if (
         ingredientAlternatives[ingredientName] ||
         loadingAlternatives[ingredientName]
@@ -136,22 +142,72 @@ function RecipePage() {
         }));
       }
     },
-    [ingredientAlternatives, loadingAlternatives]
+    [recipe, ingredientAlternatives, loadingAlternatives]
   );
 
-  const toggleIngredientExpansion = (ingredientName: string) => {
-    const isExpanded = expandedIngredients[ingredientName];
+  const toggleIngredientExpansion = useCallback((ingredientName: string) => {
+    setExpandedIngredients((prev) => {
+      const isExpanded = prev[ingredientName];
 
-    if (!isExpanded) {
-      // Fetch alternatives when expanding
-      fetchIngredientAlternatives(ingredientName);
+      if (!isExpanded) {
+        // Fetch alternatives when expanding
+        fetchIngredientAlternatives(ingredientName);
+      }
+
+      return {
+        ...prev,
+        [ingredientName]: !isExpanded,
+      };
+    });
+  }, [fetchIngredientAlternatives]);
+
+  const handleDeleteRecipe = useCallback(async () => {
+    if (!recipe) return;
+
+    try {
+      removeRecipe(recipe.id);
+      toast.success("Recipe deleted successfully!");
+      navigate("/");
+    } catch (error) {
+      toast.error("Failed to delete recipe. Please try again.");
     }
+    setShowDeleteDialog(false);
+  }, [recipe, removeRecipe, navigate]);
 
-    setExpandedIngredients((prev) => ({
-      ...prev,
-      [ingredientName]: !isExpanded,
-    }));
-  };
+  const totalVolume = recipe ? calculateTotalVolume(recipe) : 0;
+
+  // Show loading state
+  if (contextLoading || loadingDirectRecipe) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <SpinnerIcon className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  // If recipe doesn't exist, show error message
+  if (id && recipeNotFound) {
+    return (
+      <div className="space-y-6">
+        <div className="flex justify-between items-center">
+          <h2 className="text-2xl font-semibold">Recipe Not Found</h2>
+        </div>
+
+        <div className="mt-4">
+          <p className="text-muted-foreground">
+            The recipe you're looking for doesn't exist.
+          </p>
+          <Button asChild className="mt-2" variant="link">
+            <Link to="/">Return to recipes</Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!recipe) {
+    return null;
+  }
 
   return (
     <div className="container max-w-4xl">
