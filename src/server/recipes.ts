@@ -1,16 +1,33 @@
-import { Request, Response, Router } from "express";
+import { Request, Response, Router, NextFunction } from "express";
 import { database } from "../lib/database.js";
 import { CreateRecipeSchema, UpdateRecipeSchema } from "../lib/validation.js";
 import { Ingredient, Recipe } from "../lib/types.js";
 import { createGitHubModels, generateRecipeTags, generateRecipeFromLikes, generateIngredientAlternatives } from "./llm.js";
 import { generateObject } from "ai";
 import zod from "zod";
+import { authenticateUser, requireEditorAuth, AuthenticatedRequest } from "./auth.js";
+
+// Optional authentication middleware that doesn't block on missing auth
+function optionalAuth(req: AuthenticatedRequest, res: Response, next: NextFunction): void {
+  const authHeader = req.headers["cf_authorization"] as string;
+  
+  if (authHeader) {
+    // If header is present, try to authenticate but don't fail if invalid
+    authenticateUser(req, res, (err) => {
+      // Continue regardless of authentication result for read operations
+      next();
+    });
+  } else {
+    // No auth header, continue without user context
+    next();
+  }
+}
 
 export function recipesRouter(): Router {
   const router = Router()
 
   // Get all recipes
-  router.get("/", async (_: Request, res: Response) => {
+  router.get("/", optionalAuth, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const recipes = await database.listRecipes();
       res.json(recipes);
@@ -21,7 +38,7 @@ export function recipesRouter(): Router {
   });
 
   // Search recipes (must come before /:recipeId route)
-  router.get("/search", async (req: Request, res: Response) => {
+  router.get("/search", optionalAuth, async (req: AuthenticatedRequest, res: Response) => {
     try {
       if (!req.query.q) {
         res.status(400).json({ error: "Query parameter is required" });
@@ -38,7 +55,7 @@ export function recipesRouter(): Router {
   });
 
   // Generate recipe from likes (must come before /:recipeId route)
-  router.post("/generate-from-likes", async (req: Request, res: Response) => {
+  router.post("/generate-from-likes", requireEditorAuth, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { likedRecipeIds, passedRecipeIds = [] } = req.body;
 
@@ -119,7 +136,7 @@ export function recipesRouter(): Router {
   });
 
   // Create new recipe
-  router.post("/", async (req: Request, res: Response) => {
+  router.post("/", requireEditorAuth, async (req: AuthenticatedRequest, res: Response) => {
     try {
       // Validate input using Zod schema
       const validatedData = CreateRecipeSchema.parse(req.body);
@@ -154,7 +171,7 @@ export function recipesRouter(): Router {
   });
 
   // Get recipe by ID (must come after specific routes)
-  router.get("/:recipeId", async (req: Request, res: Response) => {
+  router.get("/:recipeId", optionalAuth, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const recipe = await database.getRecipeById(req.params.recipeId);
       if (!recipe) {
@@ -169,7 +186,7 @@ export function recipesRouter(): Router {
   });
 
   // Update recipe
-  router.put("/:recipeId", async (req: Request, res: Response) => {
+  router.put("/:recipeId", requireEditorAuth, async (req: AuthenticatedRequest, res: Response) => {
     try {
       // Validate input using Zod schema
       const validatedData = UpdateRecipeSchema.parse(req.body);
@@ -208,7 +225,7 @@ export function recipesRouter(): Router {
   });
 
   // Delete recipe
-  router.delete("/:recipeId", async (req: Request, res: Response) => {
+  router.delete("/:recipeId", requireEditorAuth, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const deletedRecipe = await database.deleteRecipe(req.params.recipeId);
       if (!deletedRecipe) {
