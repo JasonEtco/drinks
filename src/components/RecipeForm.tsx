@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { PlusIcon, XIcon, CheckIcon, SparkleIcon } from "@phosphor-icons/react";
+import { PlusIcon, XIcon, CheckIcon, SparkleIcon, PencilIcon } from "@phosphor-icons/react";
 import {
   Select,
   SelectContent,
@@ -55,6 +55,11 @@ const RecipeForm: React.FC<RecipeFormProps> = React.memo(
     const [newIngredientUnit, setNewIngredientUnit] = useState("oz");
     const [newTag, setNewTag] = useState("");
 
+    // State for ingredient editing
+    const [editingIngredient, setEditingIngredient] = useState<string | null>(null);
+    const [editAmount, setEditAmount] = useState("");
+    const [editUnit, setEditUnit] = useState("oz");
+
     // Memoize filtered ingredients to avoid recalculating on every render
     const filteredIngredients = useMemo(() => {
       if (!newIngredientName) return [];
@@ -93,6 +98,38 @@ const RecipeForm: React.FC<RecipeFormProps> = React.memo(
 
     const handleRemoveIngredient = useCallback((name: string) => {
       setIngredients((prev) => prev.filter((i) => i.name !== name));
+    }, []);
+
+    const handleEditIngredient = useCallback((ingredient: Ingredient) => {
+      setEditingIngredient(ingredient.name);
+      setEditAmount(ingredient.amount.toString());
+      setEditUnit(ingredient.unit);
+    }, []);
+
+    const handleUpdateIngredient = useCallback((originalName: string) => {
+      const amount = parseFloat(editAmount);
+      if (isNaN(amount) || amount <= 0) {
+        toast.error("Please enter a valid amount");
+        return;
+      }
+
+      setIngredients((prev) =>
+        prev.map((ingredient) =>
+          ingredient.name === originalName
+            ? { ...ingredient, amount, unit: editUnit }
+            : ingredient
+        )
+      );
+
+      setEditingIngredient(null);
+      setEditAmount("");
+      setEditUnit("oz");
+    }, [editAmount, editUnit]);
+
+    const handleCancelEdit = useCallback(() => {
+      setEditingIngredient(null);
+      setEditAmount("");
+      setEditUnit("oz");
     }, []);
 
     const handleSelectIngredient = useCallback((ingredient: string) => {
@@ -268,19 +305,84 @@ const RecipeForm: React.FC<RecipeFormProps> = React.memo(
             <div className="space-y-4">
               {ingredients.map((ingredient) => (
                 <div key={ingredient.name} className="flex items-center gap-2">
-                  <div className="flex-1 bg-muted p-3 rounded-md flex justify-between items-center">
-                    <span>
-                      {ingredient.amount} {ingredient.unit} {ingredient.name}
-                    </span>
-                    <Button
-                      type="button"
-                      size="icon"
-                      variant="ghost"
-                      onClick={() => handleRemoveIngredient(ingredient.name)}
-                    >
-                      <XIcon className="h-4 w-4" />
-                    </Button>
-                  </div>
+                  {editingIngredient === ingredient.name ? (
+                    // Edit mode
+                    <div className="flex-1 bg-muted p-3 rounded-md flex items-center gap-2">
+                      <span className="text-sm text-muted-foreground min-w-0 flex-shrink-0">
+                        {ingredient.name}:
+                      </span>
+                      <Input
+                        type="number"
+                        min="0"
+                        step="0.25"
+                        value={editAmount}
+                        onChange={(e) => setEditAmount(e.target.value)}
+                        className="w-20 h-8"
+                        autoFocus
+                      />
+                      <Select value={editUnit} onValueChange={setEditUnit}>
+                        <SelectTrigger className="w-20 h-8">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="oz">oz</SelectItem>
+                          <SelectItem value="ml">ml</SelectItem>
+                          <SelectItem value="dash">dash</SelectItem>
+                          <SelectItem value="barspoon">barspoon</SelectItem>
+                          <SelectItem value="teaspoon">teaspoon</SelectItem>
+                          <SelectItem value="each">each</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <Button
+                        type="button"
+                        size="sm"
+                        onClick={() => handleUpdateIngredient(ingredient.name)}
+                        className="h-8 px-2"
+                        data-testid={`save-ingredient-${ingredient.name}`}
+                      >
+                        <CheckIcon className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="ghost"
+                        onClick={handleCancelEdit}
+                        className="h-8 px-2"
+                        data-testid={`cancel-edit-ingredient-${ingredient.name}`}
+                      >
+                        <XIcon className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ) : (
+                    // View mode
+                    <div className="flex-1 bg-muted p-3 rounded-md flex justify-between items-center">
+                      <span>
+                        {ingredient.amount} {ingredient.unit} {ingredient.name}
+                      </span>
+                      <div className="flex items-center gap-1">
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleEditIngredient(ingredient)}
+                          className="h-8 px-2"
+                          data-testid={`edit-ingredient-${ingredient.name}`}
+                        >
+                          <PencilIcon className="h-3 w-3" />
+                        </Button>
+                        <Button
+                          type="button"
+                          size="sm"
+                          variant="ghost"
+                          onClick={() => handleRemoveIngredient(ingredient.name)}
+                          className="h-8 px-2"
+                          data-testid={`remove-ingredient-${ingredient.name}`}
+                        >
+                          <XIcon className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
