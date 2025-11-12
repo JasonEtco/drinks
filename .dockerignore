@@ -68,14 +68,11 @@ coverage
 # Documentation
 README.md
 SERVER_README.md
-AZURE_SETUP.md
 CHANGELOG.md
 LICENSE
 
 # Development tools
 .devcontainer
-.azcopy
-azure/
 script/
 
 # Package manager locks (keep package.json but ignore locks for Docker builds)
