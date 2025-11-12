@@ -46,7 +46,7 @@ RUN mkdir -p /app/data && chown -R drinks:nodejs /app/data
 # Switch to non-root user
 USER drinks
 
-# Expose port (Azure Container Apps expects this)
+# Expose port
 EXPOSE 3000
 
 # Health check - use the PORT environment variable or default to 3000
