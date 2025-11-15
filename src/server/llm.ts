@@ -86,7 +86,6 @@ Guidelines:
     model: githubModels(process.env.CHAT_MODEL || "openai/gpt-4.1-nano"),
     system: systemPrompt,
     prompt: userPrompt,
-    maxTokens: 150,
     temperature: 0.9, // Add some creativity
   });
 
@@ -176,7 +175,6 @@ Create a new recipe that would appeal to someone who liked these drinks.`;
       glass: GlassTypeSchema,
       garnish: z.string(),
     }),
-    maxTokens: 500,
     temperature: 0.8,
   });
 
@@ -246,7 +244,6 @@ Ingredients: ${recipe.ingredients
     schema: z.object({
       alternatives: z.array(z.string().min(1)).max(5, "Maximum 5 alternatives"),
     }),
-    maxTokens: 300,
     temperature: 0.7, // Some creativity but stay focused
   });
 

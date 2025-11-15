@@ -64,15 +64,7 @@ export const createRecipeTool = tool({
   - glass: Optional glass type (${Object.values(GlassType).join(", ")})
   - garnish: Optional garnish description
   - tags: Optional array of tags for categorization`,
-  parameters: createRecipeToolSchema,
-  experimental_toToolResultContent: (result: any) => {
-    return [{
-      type: "text",
-      text: result.success
-        ? `Recipe "${result.recipe.name}" created successfully with ID ${result.recipe.id}.`
-        : `Error creating recipe: ${result.error}`,
-    }]
-  },
+  inputSchema: createRecipeToolSchema,
   execute: async (params): Promise<RecipeToolCallResult> => {
     try {
       // Prepare the recipe data for creation
@@ -120,15 +112,7 @@ export const editRecipeTool = tool({
   - glass: New glass type (optional, ${Object.values(GlassType).join(", ")})
   - garnish: New garnish description (optional)
   - tags: New array of tags (optional)`,
-  parameters: editRecipeToolSchema,
-    experimental_toToolResultContent: (result: any) => {
-    return [{
-      type: "text",
-      text: result.success
-        ? `Recipe "${result.recipe.name}" updated successfully.`
-        : `Error updating recipe: ${result.error}`,
-    }]
-  },
+  inputSchema: editRecipeToolSchema,
   execute: async (params): Promise<RecipeToolCallResult> => {
     try {
       // Validate required ID parameter first

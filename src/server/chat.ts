@@ -1,6 +1,6 @@
 import { Request, Response, Router } from "express";
 import { database } from "../lib/database.js";
-import { streamText, ChatRequest } from "ai"
+import { streamText } from "ai"
 import { z } from "zod";
 import { mcpTools } from "../lib/mcp-tools.js";
 import { createGitHubModels, generateRecipeDescription } from "./llm.js";
@@ -83,16 +83,11 @@ When using tools, always inform the user about what you're doing (e.g., "I'll sa
       const result = streamText({
         model: githubModels(process.env.CHAT_MODEL || "openai/gpt-4.1"),
         system: systemPrompt,
-        messages: (req.body as ChatRequest).messages,
+        messages: req.body.messages,
         tools: mcpTools,
       });
 
-      result.pipeDataStreamToResponse(res, {
-        getErrorMessage: (error) => {
-          console.error("Error in chat stream:", error);
-          return "An error occurred while processing your request. Please try again later.";
-        },
-      });
+      result.pipeTextStreamToResponse(res);
     } catch (error) {
       console.error("Error processing chat request:", error);
       res.status(500).json({ error: "Failed to process chat request" });
@@ -109,7 +104,7 @@ When using tools, always inform the user about what you're doing (e.g., "I'll sa
       if (!validation.success) {
         res.status(400).json({ 
           error: "Invalid request", 
-          details: validation.error.errors 
+          details: validation.error.issues 
         });
         return;
       }
