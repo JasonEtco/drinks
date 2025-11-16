@@ -9,7 +9,7 @@ export const IngredientSchema = z.object({
 });
 
 // Zod schema for GlassType enum
-export const GlassTypeSchema = z.nativeEnum(GlassType);
+export const GlassTypeSchema = z.enum(GlassType);
 
 // Zod schema for Recipe creation (without id, createdAt, updatedAt)
 export const CreateRecipeSchema = z.object({

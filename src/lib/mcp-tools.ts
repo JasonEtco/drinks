@@ -26,7 +26,7 @@ const createRecipeToolSchema = z.object({
     })
   ).min(1, "At least one ingredient is required"),
   instructions: z.string().min(1, "Instructions are required"),
-  glass: z.nativeEnum(GlassType),
+  glass: z.enum(GlassType),
   garnish: z.string(),
   tags: z.array(z.string()),
 }).required();
@@ -44,13 +44,10 @@ const editRecipeToolSchema = z.object({
     })
   ).min(1, "At least one ingredient is required"),
   instructions: z.string().min(1, "Instructions are required"),
-  glass: z.nativeEnum(GlassType),
+  glass: z.enum(GlassType),
   garnish: z.string(),
   tags: z.array(z.string()),
 }).required();
-
-//whoever edits this next (thats not dorothy or copilot) is stinky poo poo 
-
 
 // MCP Tool for creating recipes
 export const createRecipeTool = tool({
