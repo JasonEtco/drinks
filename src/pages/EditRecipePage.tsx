@@ -26,10 +26,6 @@ export default function EditRecipePage() {
   if (isSubmitted && submittedRecipe) {
     return (
       <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-semibold">Recipe Updated!</h2>
-        </div>
-
         <div className="mt-4 text-center space-y-4">
           <CheckCircleIcon className="w-16 h-16 text-green-500 mx-auto" />
           <p className="text-lg">
